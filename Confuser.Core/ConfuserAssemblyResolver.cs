@@ -33,8 +33,43 @@ namespace Confuser.Core {
 			if (assembly is AssemblyDef assemblyDef)
 				return assemblyDef;
 
-			var resolvedAssemblyDef = InternalExactResolver.Resolve(assembly, sourceModule);
-			return resolvedAssemblyDef ?? InternalFuzzyResolver.Resolve(assembly, sourceModule);
+			var resolvedAssemblyDef =
+				InternalExactResolver.Resolve(assembly, sourceModule) ??
+				InternalFuzzyResolver.Resolve(assembly, sourceModule);
+
+			if (resolvedAssemblyDef?.Name == "netstandard" && 0 < resolvedAssemblyDef.ManifestModule.ExportedTypes.Count) {
+				//	Move types from AssemblyRef to here
+				var module = resolvedAssemblyDef.ManifestModule;
+				var newTypes = new List<TypeDef>();
+				var allAssemblyRefs = new List<AssemblyDef>();
+
+				module.ExportedTypes.Clear();
+
+				foreach (var assemblyRef in module.GetAssemblyRefs()) {
+					var subAss =
+						InternalExactResolver.Resolve(assemblyRef, module) ??
+						InternalFuzzyResolver.Resolve(assemblyRef, module);
+					allAssemblyRefs.Add(subAss);
+					foreach (var subModule in subAss?.Modules) {
+						foreach (var defType in subModule.Types) {
+							newTypes.Add(defType);
+						}
+						subModule.Types.Clear();
+						foreach (var defType in newTypes) {
+							module.Types.Add(defType);
+						}
+						newTypes.Clear();
+					}
+				}
+
+				//	Remove them because their types has been removed.
+				foreach (var subAss in allAssemblyRefs) {
+					InternalExactResolver.Remove(subAss);
+					InternalFuzzyResolver.Remove(subAss);
+				}
+			}
+
+			return resolvedAssemblyDef;
 		}
 
 		public void Clear() {
