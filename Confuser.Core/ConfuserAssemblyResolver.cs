@@ -37,6 +37,13 @@ namespace Confuser.Core {
 				InternalExactResolver.Resolve(assembly, sourceModule) ??
 				InternalFuzzyResolver.Resolve(assembly, sourceModule);
 
+			//	Remove AssemblyAttributes.PA_NoPlatform
+			if (null != resolvedAssemblyDef &&
+				(AssemblyAttributes.PA_Mask & resolvedAssemblyDef.Attributes) == AssemblyAttributes.PA_NoPlatform) {
+				resolvedAssemblyDef.Attributes =
+					resolvedAssemblyDef.Attributes & ~AssemblyAttributes.PA_FullMask;
+			}
+
 			if (resolvedAssemblyDef?.Name == "netstandard" && 0 < resolvedAssemblyDef.ManifestModule.ExportedTypes.Count) {
 				//	Move types from AssemblyRef to here
 				var module = resolvedAssemblyDef.ManifestModule;
