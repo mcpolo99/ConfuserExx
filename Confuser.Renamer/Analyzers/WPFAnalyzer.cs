@@ -60,8 +60,14 @@ namespace Confuser.Renamer.Analyzers {
 					var decodedName = HttpUtility.UrlDecode(doc.DocumentName);
 					var encodedName = doc.DocumentName;
 					if (bamlRefs.TryGetValue(decodedName, out var references)) {
-						var decodedDirectory = decodedName.Substring(0, decodedName.LastIndexOf('/') + 1);
-						var encodedDirectory = encodedName.Substring(0, encodedName.LastIndexOf('/') + 1);
+						var decodedLastSlash = decodedName.LastIndexOf('/') + 1;
+						var encodedLastSlash = encodedName.LastIndexOf("/") + 1;
+
+						var decodedDirectory = decodedName.Substring(0, decodedLastSlash);
+						var encodedDirectory = encodedName.Substring(0, encodedLastSlash);
+
+						var decodedFileName = decodedName.Substring(decodedLastSlash);
+						var encodedFileName = encodedName.Substring(encodedLastSlash);
 
 						var fileName = service.RandomName(renameMode).ToLowerInvariant();
 						if (decodedName.EndsWith(".BAML", StringComparison.OrdinalIgnoreCase))
@@ -78,8 +84,8 @@ namespace Confuser.Renamer.Analyzers {
 
 						if (renameOk) {
 							foreach (var bamlRef in references) {
-								bamlRef.Rename(module, decodedName, decodedNewName);
-								bamlRef.Rename(module, encodedName, encodedNewName);
+								bamlRef.Rename(module, decodedFileName, fileName);
+								bamlRef.Rename(module, encodedFileName, fileName);
 							}
 							doc.DocumentName = encodedNewName;
 						}
