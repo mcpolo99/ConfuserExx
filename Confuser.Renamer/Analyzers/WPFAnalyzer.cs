@@ -61,7 +61,7 @@ namespace Confuser.Renamer.Analyzers {
 					var encodedName = doc.DocumentName;
 					if (bamlRefs.TryGetValue(decodedName, out var references)) {
 						var decodedLastSlash = decodedName.LastIndexOf('/') + 1;
-						var encodedLastSlash = encodedName.LastIndexOf("/") + 1;
+						var encodedLastSlash = encodedName.LastIndexOf('/') + 1;
 
 						var decodedDirectory = decodedName.Substring(0, decodedLastSlash);
 						var encodedDirectory = encodedName.Substring(0, encodedLastSlash);
