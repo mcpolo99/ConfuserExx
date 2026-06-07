@@ -61,6 +61,21 @@ dotnet_diagnostic.CA2000.severity = suggestion    # Dispose objects before losin
 dotnet_diagnostic.CA2007.severity = none          # ConfigureAwait (not needed for desktop app)
 dotnet_diagnostic.CA2227.severity = none          # Collection properties should be read only
 
+# Roslynator severity overrides
+dotnet_diagnostic.RCS1018.severity = none          # Add accessibility modifiers (conflicts with existing style)
+dotnet_diagnostic.RCS1037.severity = none          # Remove trailing white-space
+dotnet_diagnostic.RCS1057.severity = none          # Add empty line between declarations
+dotnet_diagnostic.RCS1085.severity = none          # Use auto-implemented property
+dotnet_diagnostic.RCS1090.severity = none          # ConfigureAwait
+dotnet_diagnostic.RCS1118.severity = none          # Mark local variable as const
+dotnet_diagnostic.RCS1124.severity = none          # Inline local variable
+dotnet_diagnostic.RCS1138.severity = none          # Add summary to documentation comment
+dotnet_diagnostic.RCS1139.severity = none          # Add summary element to documentation comment
+dotnet_diagnostic.RCS1163.severity = none          # Unused parameter
+dotnet_diagnostic.RCS1194.severity = none          # Implement exception constructors
+dotnet_diagnostic.RCS1213.severity = none          # Remove unused member declaration (too aggressive)
+dotnet_diagnostic.RCS1228.severity = none          # Unused element in documentation comment
+
 csharp_indent_block_contents = true
 csharp_indent_braces = false
 csharp_indent_case_contents = true
