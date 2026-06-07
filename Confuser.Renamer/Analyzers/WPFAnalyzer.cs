@@ -60,6 +60,10 @@ namespace Confuser.Renamer.Analyzers {
 					var decodedName = HttpUtility.UrlDecode(doc.DocumentName);
 					var encodedName = doc.DocumentName;
 					if (bamlRefs.TryGetValue(decodedName, out var references)) {
+						// WPF theme resources must keep their conventional paths
+						if (decodedName.IndexOf("themes/generic", StringComparison.OrdinalIgnoreCase) >= 0)
+							continue;
+
 						var decodedLastSlash = decodedName.LastIndexOf('/') + 1;
 						var encodedLastSlash = encodedName.LastIndexOf('/') + 1;
 
