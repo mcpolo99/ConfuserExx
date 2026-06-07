@@ -36,8 +36,13 @@ namespace Confuser.Renamer {
 
 				if (def is MethodDef method) {
 					if ((canRename || method.IsConstructor) && parameters.GetParameter(context, method, "renameArgs", true)) {
-						foreach (var param in method.ParamDefs)
-							param.Name = null;
+						if (method.IsConstructor && method.DeclaringType.Name.String.Contains("AnonymousType")) {
+							// Anonymous type constructor args map to property names — renaming breaks JSON serialization
+						}
+						else {
+							foreach (var param in method.ParamDefs)
+								param.Name = null;
+						}
 					}
 
 					if (parameters.GetParameter(context, method, "renPdb", false) && method.HasBody) {
