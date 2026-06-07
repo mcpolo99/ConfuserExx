@@ -421,6 +421,8 @@ namespace Confuser.Core {
 
 		static void Debug(ConfuserContext context) {
 			context.Logger.Info("Finalizing...");
+			if (!context.Project.Debug)
+				return;
 			for (int i = 0; i < context.OutputModules.Count; i++) {
 				if (context.OutputSymbols[i] == null)
 					continue;
