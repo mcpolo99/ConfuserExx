@@ -60,7 +60,8 @@ namespace Confuser.Runtime {
 			AppDomain.CurrentDomain.AssemblyResolve += Resolve;
 
 			// For some reasons, reflection on Assembly would not discover the types unless GetTypes is called.
-			m.GetTypes();
+			try { m.GetTypes(); }
+			catch (ReflectionTypeLoadException) { }
 
 			MethodBase e = m.ResolveMethod(key[0] | (key[1] << 8) | (key[2] << 16) | (key[3] << 24));
 			var g = new object[e.GetParameters().Length];
