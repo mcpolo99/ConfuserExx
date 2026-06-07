@@ -175,7 +175,7 @@ namespace Confuser.Protections {
 			context.Logger.EndProgress();
 		}
 
-		void InjectData(ModuleDef stubModule, MethodDef method, byte[] data) {
+		void InjectData(ConfuserContext context, ModuleDef stubModule, MethodDef method, byte[] data) {
 			var dataType = new TypeDefUser("", "DataType", stubModule.CorLibTypes.GetTypeRef("System", "ValueType"));
 			dataType.Layout = TypeAttributes.ExplicitLayout;
 			dataType.Visibility = TypeAttributes.NestedPrivate;
@@ -197,7 +197,7 @@ namespace Confuser.Protections {
 				repl.Add(Instruction.Create(OpCodes.Dup));
 				repl.Add(Instruction.Create(OpCodes.Ldtoken, dataField));
 				repl.Add(Instruction.Create(OpCodes.Call, stubModule.Import(
-					typeof(RuntimeHelpers).GetMethod("InitializeArray"))));
+					context, typeof(RuntimeHelpers), "InitializeArray")));
 				return repl.ToArray();
 			});
 		}
@@ -254,7 +254,7 @@ namespace Confuser.Protections {
 			MutationHelper.InjectKeys(entryPoint,
 									  new[] { 0, 1 },
 									  new[] { encryptedModule.Length >> 2, (int)seed });
-			InjectData(stubModule, entryPoint, encryptedModule);
+			InjectData(context, stubModule, entryPoint, encryptedModule);
 
 			// Decrypt
 			MethodDef decrypter = defs.OfType<MethodDef>().Single(method => method.Name == "Decrypt");
