@@ -63,6 +63,7 @@ dotnet_diagnostic.CA2227.severity = none          # Collection properties should
 
 # Roslynator severity overrides
 dotnet_diagnostic.RCS1018.severity = none          # Add accessibility modifiers (conflicts with existing style)
+dotnet_diagnostic.RCS1102.severity = none          # Make class static (many are non-static for runtime injection)
 dotnet_diagnostic.RCS1037.severity = none          # Remove trailing white-space
 dotnet_diagnostic.RCS1057.severity = none          # Add empty line between declarations
 dotnet_diagnostic.RCS1085.severity = none          # Use auto-implemented property
