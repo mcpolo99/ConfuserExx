@@ -14,10 +14,12 @@ namespace Confuser.Protections.ReferenceProxy {
 			var target = (IMethod)invoke.Operand;
 
 			// Value type proxy is not supported in mild mode.
-			if (target.DeclaringType.ResolveTypeDefThrow().IsValueType)
+			var declaringTypeDef = target.DeclaringType.ResolveTypeDef();
+			if (declaringTypeDef == null || declaringTypeDef.IsValueType)
 				return;
 			// Skipping visibility is not supported in mild mode.
-			if (!target.ResolveThrow().IsPublic && !target.ResolveThrow().IsAssembly)
+			var targetMethodDef = (target as IMethodDefOrRef)?.ResolveMethodDef();
+			if (targetMethodDef == null || (!targetMethodDef.IsPublic && !targetMethodDef.IsAssembly))
 				return;
 
 			Tuple<Code, TypeDef, IMethod> key = Tuple.Create(invoke.OpCode.Code, ctx.Method.DeclaringType, target);
@@ -31,7 +33,7 @@ namespace Confuser.Protections.ReferenceProxy {
 				ctx.Method.DeclaringType.Methods.Add(proxy);
 
 				// Fix peverify --- Non-virtual call to virtual methods must be done on this pointer
-				if (invoke.OpCode.Code == Code.Call && target.ResolveThrow().IsVirtual) {
+				if (invoke.OpCode.Code == Code.Call && targetMethodDef != null && targetMethodDef.IsVirtual) {
 					proxy.IsStatic = false;
 					sig.HasThis = true;
 					sig.Params.RemoveAt(0);
@@ -65,9 +67,8 @@ namespace Confuser.Protections.ReferenceProxy {
 			else
 				invoke.Operand = proxy;
 
-			var targetDef = target.ResolveMethodDef();
-			if (targetDef != null)
-				ctx.Context.Annotations.Set(targetDef, ReferenceProxyProtection.Targeted, ReferenceProxyProtection.Targeted);
+			if (targetMethodDef != null)
+				ctx.Context.Annotations.Set(targetMethodDef, ReferenceProxyProtection.Targeted, ReferenceProxyProtection.Targeted);
 		}
 
 		public override void Finalize(RPContext ctx) { }
