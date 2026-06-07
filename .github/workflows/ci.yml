@@ -2,14 +2,14 @@ name: ci
 
 on:
   push:
-    branches: [master]
-    tags: ['v*']
+    branches: [master, feature/**, fix/**]
   pull_request:
     branches: [master]
 
 jobs:
   build:
     runs-on: windows-2022
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
         with:
@@ -46,7 +46,6 @@ jobs:
           $zip = 'ConfuserEx.zip'
           $tmp = 'combined'
           New-Item -ItemType Directory -Path $tmp -Force | Out-Null
-          # CLI first, then GUI on top (GUI adds WPF deps)
           Copy-Item 'Confuser.CLI/bin/Release/net461/*' $tmp -Exclude '*.pdb','*.xml' -Recurse
           Copy-Item 'ConfuserEx/bin/Release/net461/*' $tmp -Exclude '*.pdb','*.xml' -Recurse -Force
           Get-ChildItem $tmp | Compress-Archive -DestinationPath $zip
@@ -63,13 +62,46 @@ jobs:
             ConfuserEx.zip
             Confuser.MSBuild.Tasks/bin/Release/*.nupkg
 
+  # Release: only on PR merge to master
   release:
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: windows-2022
+    timeout-minutes: 5
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Compute version
+        id: version
+        shell: pwsh
+        run: |
+          $tag = git describe --tags --match "v*" --abbrev=0 2>$null
+          if ($tag) {
+            $clean = $tag -replace '^v', ''
+            $parts = $clean -split '\.'
+            $since = git rev-list "$tag..HEAD" --count
+            $ver = "$($parts[0]).$($parts[1]).$since"
+          } else {
+            $commits = git rev-list HEAD --count
+            $ver = "1.0.$commits"
+          }
+          echo "VERSION=$ver" >> $env:GITHUB_OUTPUT
+          Write-Host "Version: $ver"
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create release tag
+        run: |
+          git tag -a "v${{ steps.version.outputs.VERSION }}" -m "Release ${{ steps.version.outputs.VERSION }}"
+          git push origin "v${{ steps.version.outputs.VERSION }}"
+
       - name: Download artifacts
         uses: actions/download-artifact@v5
         with:
@@ -78,7 +110,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ github.ref_name }}
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: v${{ steps.version.outputs.VERSION }}
           files: |
             ConfuserEx-CLI.zip
             ConfuserEx-GUI.zip
