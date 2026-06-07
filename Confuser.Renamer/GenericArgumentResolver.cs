@@ -122,7 +122,8 @@ namespace Confuser.Renamer {
 					result = new PinnedSig(ResolveGenericArgs(typeSig.Next));
 					break;
 				case ElementType.FnPtr:
-					throw new NotSupportedException("FnPtr is not supported.");
+					result = typeSig;
+					break;
 
 				case ElementType.Array:
 					var arraySig = (ArraySig)typeSig;
