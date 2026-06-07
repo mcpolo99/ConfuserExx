@@ -626,7 +626,7 @@ namespace Confuser.Core.Project {
 		/// <exception cref="Confuser.Core.Project.ProjectValidationException">
 		///     The project XML contains schema errors.
 		/// </exception>
-		public void Load(XmlDocument doc) {
+		public void Load(XmlDocument doc, string baseDirRoot = null) {
 			doc.Schemas.Add(Schema);
 			var exceptions = new List<XmlSchemaException>();
 			doc.Validate((sender, e) => {
@@ -641,6 +641,10 @@ namespace Confuser.Core.Project {
 
 			OutputDirectory = docElem.Attributes["outputDir"].Value;
 			BaseDirectory = docElem.Attributes["baseDir"].Value;
+			if (!string.IsNullOrEmpty(baseDirRoot))
+			{
+				BaseDirectory = Path.Combine(baseDirRoot, BaseDirectory);
+			}
 
 			if (docElem.Attributes["seed"] != null)
 				Seed = docElem.Attributes["seed"].Value.NullIfEmpty();
@@ -674,11 +678,44 @@ namespace Confuser.Core.Project {
 					PluginPaths.Add(i.InnerText);
 				}
 				else {
-					var asm = new ProjectModule();
-					asm.Load(i);
-					Add(asm);
+					AddModule(i);
 				}
 			}
+		}
+
+		internal void AddModule(XmlElement elem) {
+			if (IsWildcard(elem.Attributes["path"].Value)) {
+				BatchLoadModules(elem);
+			}
+			else {
+				var asm = new ProjectModule();
+				asm.Load(elem);
+				Add(asm);
+			}
+		}
+
+		internal bool IsWildcard(string path) {
+			return !string.IsNullOrEmpty(path) && path.Contains(@"*");
+		}
+
+		internal bool BatchLoadModules(XmlElement elem) {
+			string wildCardPath = elem.Attributes["path"].Value;
+			string[] files = Directory.GetFiles(BaseDirectory, wildCardPath, SearchOption.TopDirectoryOnly);
+			if (files.Length <= 0)
+			{
+				return false;
+			}
+
+			var asmPrototype = new ProjectModule();
+			asmPrototype.Load(elem);
+
+			foreach (string fileName in files) {
+				var moduleEntry = asmPrototype.Clone();
+				moduleEntry.Path = fileName;
+				Add(moduleEntry);
+			}
+
+			return true;
 		}
 
 		/// <summary>
