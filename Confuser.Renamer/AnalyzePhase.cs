@@ -206,6 +206,10 @@ namespace Confuser.Renamer {
 			if (type.InheritsFrom("System.Configuration.SettingsBase")) {
 				service.SetCanRename(type, false);
 			}
+
+			if (type.HasAttribute("System.Runtime.Serialization.DataContractAttribute")) {
+				service.SetCanRename(type, false);
+			}
 		}
 
 		void Analyze(NameService service, ConfuserContext context, ProtectionParameters parameters, MethodDef method) {
@@ -248,6 +252,12 @@ namespace Confuser.Renamer {
 			else if (field.IsLiteral && field.DeclaringType.IsEnum &&
 				!parameters.GetParameter(context, field, "renEnum", false))
 				service.SetCanRename(field, false);
+
+			else if (field.HasAttribute("System.Runtime.Serialization.DataMemberAttribute"))
+				service.SetCanRename(field, false);
+
+			else if (field.HasAttribute("System.Runtime.Serialization.EnumMemberAttribute"))
+				service.SetCanRename(field, false);
 		}
 
 		void Analyze(NameService service, ConfuserContext context, ProtectionParameters parameters, PropertyDef property) {
@@ -266,6 +276,9 @@ namespace Confuser.Renamer {
 				service.SetCanRename(property, false);
 
 			else if (property.DeclaringType.Name.String.Contains("AnonymousType"))
+				service.SetCanRename(property, false);
+
+			else if (property.HasAttribute("System.Runtime.Serialization.DataMemberAttribute"))
 				service.SetCanRename(property, false);
 		}
 
