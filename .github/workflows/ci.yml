@@ -1,0 +1,86 @@
+name: ci
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore
+        run: msbuild Confuser2.sln -t:Restore -verbosity:minimal
+
+      - name: Build
+        run: msbuild Confuser2.sln -p:Configuration=Release -verbosity:minimal
+
+      - name: Package CLI
+        shell: pwsh
+        run: |
+          $src = 'Confuser.CLI/bin/Release/net461'
+          $zip = 'ConfuserEx-CLI.zip'
+          Get-ChildItem $src -Exclude '*.pdb','*.xml' | Compress-Archive -DestinationPath $zip
+          Write-Host "Created $zip ($([math]::Round((Get-Item $zip).Length / 1MB, 1)) MB)"
+
+      - name: Package GUI
+        shell: pwsh
+        run: |
+          $src = 'ConfuserEx/bin/Release/net461'
+          $zip = 'ConfuserEx-GUI.zip'
+          Get-ChildItem $src -Exclude '*.pdb','*.xml' | Compress-Archive -DestinationPath $zip
+          Write-Host "Created $zip ($([math]::Round((Get-Item $zip).Length / 1MB, 1)) MB)"
+
+      - name: Package combined
+        shell: pwsh
+        run: |
+          $zip = 'ConfuserEx.zip'
+          $tmp = 'combined'
+          New-Item -ItemType Directory -Path $tmp -Force | Out-Null
+          # CLI first, then GUI on top (GUI adds WPF deps)
+          Copy-Item 'Confuser.CLI/bin/Release/net461/*' $tmp -Exclude '*.pdb','*.xml' -Recurse
+          Copy-Item 'ConfuserEx/bin/Release/net461/*' $tmp -Exclude '*.pdb','*.xml' -Recurse -Force
+          Get-ChildItem $tmp | Compress-Archive -DestinationPath $zip
+          Remove-Item $tmp -Recurse -Force
+          Write-Host "Created $zip ($([math]::Round((Get-Item $zip).Length / 1MB, 1)) MB)"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: confuserex-packages
+          path: |
+            ConfuserEx-CLI.zip
+            ConfuserEx-GUI.zip
+            ConfuserEx.zip
+            Confuser.MSBuild.Tasks/bin/Release/*.nupkg
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: confuserex-packages
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          files: |
+            ConfuserEx-CLI.zip
+            ConfuserEx-GUI.zip
+            ConfuserEx.zip
+            *.nupkg
