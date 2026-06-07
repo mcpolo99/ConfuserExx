@@ -1,14 +1,9 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
-
 version: 2
 updates:
   - package-ecosystem: "nuget"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     target-branch: "master"
     ignore:
       - dependency-name: "Microsoft.Build.Tasks.Core"
@@ -16,4 +11,16 @@ updates:
     labels:
       - "dependencies"
     reviewers:
-      - "mkaring"
+      - "mcpolo99"
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "ci"
+    reviewers:
+      - "mcpolo99"
+    open-pull-requests-limit: 5
