@@ -97,7 +97,7 @@ namespace Confuser.Protections.Resources {
 			moduleCtx.DataField = new FieldDefUser(moduleCtx.Name.RandomName(), new FieldSig(dataType.ToTypeSig())) {
 				IsStatic = true,
 				HasFieldRVA = true,
-				InitialValue = new byte[0],
+				InitialValue = Array.Empty<byte>(),
 				Access = FieldAttributes.CompilerControlled
 			};
 			context.CurrentModule.GlobalType.Fields.Add(moduleCtx.DataField);

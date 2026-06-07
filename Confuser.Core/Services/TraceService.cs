@@ -204,7 +204,7 @@ namespace Confuser.Core.Services {
 		public int[] TraceArguments(Instruction instr) {
 			instr.CalculateStackUsage(Method.HasReturnType, out _, out int pop); // pop is number of arguments
 			if (pop == 0)
-				return new int[0];
+				return Array.Empty<int>();
 
 			int instrIndex = offset2index[instr.Offset];
 			int argCount = pop;
