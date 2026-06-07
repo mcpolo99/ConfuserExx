@@ -27,6 +27,17 @@ jobs:
           Start-Process -FilePath $installer -ArgumentList '/quiet','/norestart' -Wait
           Write-Host "Installed .NET 4.6.1 Developer Pack"
 
+      - name: Install nbgv
+        run: dotnet tool install -g nbgv
+
+      - name: Compute version
+        id: version
+        shell: pwsh
+        run: |
+          $ver = nbgv get-version -v NuGetPackageVersion
+          echo "VERSION=$ver" >> $env:GITHUB_OUTPUT
+          Write-Host "Version: $ver"
+
       - name: Restore
         run: msbuild Confuser2.sln -t:Restore -verbosity:minimal
 
@@ -84,20 +95,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install nbgv
+        run: dotnet tool install -g nbgv
+
       - name: Compute version
         id: version
         shell: pwsh
         run: |
-          $tag = git describe --tags --match "v*" --abbrev=0 2>$null
-          if ($tag) {
-            $clean = $tag -replace '^v', ''
-            $parts = $clean -split '\.'
-            $since = git rev-list "$tag..HEAD" --count
-            $ver = "$($parts[0]).$($parts[1]).$since"
-          } else {
-            $commits = git rev-list HEAD --count
-            $ver = "1.0.$commits"
-          }
+          $ver = nbgv get-version -v NuGetPackageVersion
           echo "VERSION=$ver" >> $env:GITHUB_OUTPUT
           Write-Host "Version: $ver"
 
