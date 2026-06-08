@@ -28,6 +28,17 @@ namespace Confuser.Core {
 		public IList<string> PostSearchPaths => new TeeList(InternalFuzzyResolver.PostSearchPaths, InternalExactResolver.PostSearchPaths);
 		public IList<string> PreSearchPaths => new TeeList(InternalFuzzyResolver.PreSearchPaths, InternalExactResolver.PreSearchPaths);
 
+		// Assemblies that are type-forwarded to mscorlib/System.Runtime on .NET Framework
+		static readonly HashSet<string> TypeForwardedAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+			"System.ValueTuple",
+			"System.Memory",
+			"System.Buffers",
+			"System.Numerics.Vectors",
+			"System.Runtime.CompilerServices.Unsafe",
+			"System.Threading.Tasks.Extensions",
+			"Microsoft.Bcl.AsyncInterfaces"
+		};
+
 		/// <inheritdoc />
 		public AssemblyDef Resolve(IAssembly assembly, ModuleDef sourceModule) {
 			if (assembly is AssemblyDef assemblyDef)
@@ -36,6 +47,16 @@ namespace Confuser.Core {
 			var resolvedAssemblyDef =
 				InternalExactResolver.Resolve(assembly, sourceModule) ??
 				InternalFuzzyResolver.Resolve(assembly, sourceModule);
+
+			// Fallback for type-forwarding NuGet packages: when the standalone assembly
+			// isn't on disk (e.g., System.ValueTuple referenced by netstandard but types
+			// live in mscorlib on .NET Framework), resolve to the source module's corlib.
+			if (resolvedAssemblyDef == null && TypeForwardedAssemblies.Contains(assembly.Name)) {
+				var corLibAsm = sourceModule.CorLibTypes.AssemblyRef;
+				resolvedAssemblyDef =
+					InternalExactResolver.Resolve(corLibAsm, sourceModule) ??
+					InternalFuzzyResolver.Resolve(corLibAsm, sourceModule);
+			}
 
 			//	Remove AssemblyAttributes.PA_NoPlatform
 			if (null != resolvedAssemblyDef &&
