@@ -263,13 +263,10 @@ namespace Confuser.Core {
 			context.Logger.Info("Resolving dependencies...");
 			foreach (var dependency in context.Modules
 											  .SelectMany(module => module.GetAssemblyRefs().Select(asmRef => Tuple.Create(asmRef, module)))) {
-				try {
-					context.Resolver.ResolveThrow(dependency.Item1, dependency.Item2);
-				}
-				catch (AssemblyResolveException ex) {
-					context.Logger.ErrorException("Failed to resolve dependency of '" + dependency.Item2.Name + "'.", ex);
-					throw new ConfuserException(ex);
-				}
+				var resolved = context.Resolver.Resolve(dependency.Item1, dependency.Item2);
+				if (resolved == null)
+					context.Logger.WarnFormat("Failed to resolve dependency '{0}' of '{1}'. Some protections may not work correctly.",
+						dependency.Item1.FullName, dependency.Item2.Name);
 			}
 
 			context.Logger.Debug("Checking Strong Name...");
