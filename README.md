@@ -1,17 +1,16 @@
-# ConfuserEx
+# ConfuserExx
 
-[![Build status][img_build]][build]
-[![Test status][img_test]][test]
-[![CodeFactor][img_codefactor]][codefactor]
-[![Gitter Chat][img_gitter]][gitter]
+[![CI][img_ci]][ci]
+[![CodeQL][img_codeql]][codeql]
 [![MIT License][img_license]][license]
 
-ConfuserEx is a open-source protector for .NET applications.
-It is the successor of [Confuser][confuser] project.
+An actively maintained fork of [ConfuserEx][upstream] — an open-source protector for .NET applications.
+
+> The original [mkaring/ConfuserEx][upstream] has been dormant since 2022. This fork includes bug fixes, new features, and modern .NET support.
 
 ## Features
 
-* Supports .NET Framework 2.0/3.0/3.5/4.0/4.5/4.6/4.7/4.8
+* Supports .NET Framework 2.0/3.5/4.x, .NET Standard 2.0, .NET Core, .NET 5+/6/7/8+
 * Symbol renaming (Support WPF/BAML)
 * Protection against debuggers/profilers
 * Protection against memory dumping
@@ -23,41 +22,74 @@ It is the successor of [Confuser][confuser] project.
 * Embedding dependency
 * Compressing output
 * Extensible plugin API
-* Many more are coming!
+* Roslyn code analysis integration
+* Auto-detection of .NET runtime paths for modern framework support
 
-# Usage
+## What's improved over upstream
 
-```Batchfile
+* Fixed WPF resource renaming, .NET Standard obfuscation, control flow protection
+* Serialization-aware renaming (DataContract, DataMember, JsonProperty)
+* Graceful handling of external/unresolvable assemblies (no more crashes)
+* Auto-detection of .NET Core/5+/6/7/8+ runtime assembly paths
+* CLI `--snkey` and `--snkeypass` options for CI/CD signing
+* Wildcard module loading in `.crproj` files
+* Roslyn analyzers (NetAnalyzers + Roslynator) for code quality
+* GitHub Actions CI/CD with automatic releases
+* Better error messages for .NET 6+ native host executables
+
+## Usage
+
+```bash
 Confuser.CLI.exe <path to project file>
 ```
 
 The project file is a ConfuserEx Project (`*.crproj`).
-The format of project file can be found in [docs\ProjectFormat.md][project_format]
+The format of project file can be found in [docs/ProjectFormat.md][project_format].
 
-# Bug Report
+### CLI Options
 
-See the [Issues Report][issues] section of website.
+```
+-n|noPause   : no pause after finishing protection
+-o|out       : specifies output directory
+-probe       : specifies probe directory
+-plugin      : specifies plugin path
+-debug       : specifies debug symbol generation
+-snkey       : specifies strong name key file path
+-snkeypass   : specifies strong name key password
+```
 
-# License
+## Bug Report
+
+See the [Issues][issues] section. Please check existing issues before filing a new one.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch from `pre-release`
+3. Make your changes and ensure CI passes
+4. Open a PR targeting `pre-release`
+
+## License
 
 Licensed under the MIT license. See [LICENSE.md][license] for details.
 
-# Credits
+## Credits
 
-**[0xd4d]** for his awesome work and extensive knowledge!
+**[0xd4d]** for [dnlib][dnlib] and extensive .NET metadata knowledge.
+**[Ki (yck1509)][ki]** for the original ConfuserEx.
+**[Martin Karing][mkaring]** for maintaining the project through v1.6.
 
 [0xd4d]: https://github.com/0xd4d
-[build]: https://ci.appveyor.com/project/mkaring/confuserex/branch/master
-[codefactor]: https://www.codefactor.io/repository/github/mkaring/confuserex/overview/master
-[confuser]: http://confuser.codeplex.com
-[issues]: https://github.com/mkaring/ConfuserEx/issues
-[gitter]: https://gitter.im/ConfuserEx/community
+[dnlib]: https://github.com/0xd4d/dnlib
+[ki]: https://github.com/yck1509
+[mkaring]: https://github.com/mkaring
+[upstream]: https://github.com/mkaring/ConfuserEx
+[ci]: https://github.com/mcpolo99/ConfuserExx/actions/workflows/ci.yml
+[codeql]: https://github.com/mcpolo99/ConfuserExx/actions/workflows/codeql-analysis.yml
+[issues]: https://github.com/mcpolo99/ConfuserExx/issues
 [license]: LICENSE.md
 [project_format]: docs/ProjectFormat.md
-[test]: https://ci.appveyor.com/project/mkaring/confuserex/branch/master/tests
 
-[img_build]: https://img.shields.io/appveyor/ci/mkaring/ConfuserEx/master.svg?style=flat
-[img_codefactor]: https://www.codefactor.io/repository/github/mkaring/confuserex/badge/master
-[img_gitter]: https://img.shields.io/gitter/room/mkaring/ConfuserEx.svg?style=flat
-[img_license]: https://img.shields.io/github/license/mkaring/ConfuserEx.svg?style=flat
-[img_test]: https://img.shields.io/appveyor/tests/mkaring/ConfuserEx/master.svg?style=flat&compact_message
+[img_ci]: https://github.com/mcpolo99/ConfuserExx/actions/workflows/ci.yml/badge.svg?branch=pre-release
+[img_codeql]: https://github.com/mcpolo99/ConfuserExx/actions/workflows/codeql-analysis.yml/badge.svg
+[img_license]: https://img.shields.io/github/license/mcpolo99/ConfuserExx.svg?style=flat
