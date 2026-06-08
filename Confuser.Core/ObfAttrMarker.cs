@@ -326,6 +326,14 @@ namespace Confuser.Core {
 				}
 				catch (BadImageFormatException ex) {
 					context.Logger.ErrorFormat("Failed to load \"{0}\" - Assembly does not appear to be a .NET assembly: \"{1}\".", module.Path, ex.Message);
+					if (module.Path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) {
+						var dllPath = Path.ChangeExtension(module.Path, ".dll");
+						var fullDllPath = Path.Combine(proj.BaseDirectory, dllPath);
+						if (File.Exists(fullDllPath))
+							context.Logger.ErrorFormat("Hint: .NET 6+ apps use a native host .exe — try obfuscating \"{0}\" instead.", dllPath);
+						else
+							context.Logger.Error("Hint: For .NET 6+ apps, obfuscate the .dll file, not the .exe (which is a native host stub).");
+					}
 					throw new ConfuserException(ex);
 				}
 			}
