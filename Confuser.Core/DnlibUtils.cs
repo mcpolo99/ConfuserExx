@@ -209,15 +209,12 @@ namespace Confuser.Core {
 		/// <param name="baseType">The full name of base type.</param>
 		/// <returns><c>true</c> if the specified type is inherited from a base type; otherwise, <c>false</c>.</returns>
 		public static bool InheritsFromCorlib(this TypeDef type, string baseType) {
-			if (type.BaseType == null)
-				return false;
-
-			TypeDef bas = type;
-			do {
-				bas = bas.BaseType.ResolveTypeDefThrow();
+			var bas = type.BaseType?.ResolveTypeDef();
+			while (bas != null && bas.DefinitionAssembly.IsCorLib()) {
 				if (bas.ReflectionFullName == baseType)
 					return true;
-			} while (bas.BaseType != null && bas.BaseType.DefinitionAssembly.IsCorLib());
+				bas = bas.BaseType?.ResolveTypeDef();
+			}
 			return false;
 		}
 
@@ -228,15 +225,12 @@ namespace Confuser.Core {
 		/// <param name="baseType">The full name of base type.</param>
 		/// <returns><c>true</c> if the specified type is inherited from a base type; otherwise, <c>false</c>.</returns>
 		public static bool InheritsFrom(this TypeDef type, string baseType) {
-			if (type.BaseType == null)
-				return false;
-
-			TypeDef bas = type;
-			do {
-				bas = bas.BaseType.ResolveTypeDefThrow();
+			var bas = type.BaseType?.ResolveTypeDef();
+			while (bas != null) {
 				if (bas.ReflectionFullName == baseType)
 					return true;
-			} while (bas.BaseType != null);
+				bas = bas.BaseType?.ResolveTypeDef();
+			}
 			return false;
 		}
 
@@ -247,18 +241,12 @@ namespace Confuser.Core {
 		/// <param name="fullName">The full name of the type of interface.</param>
 		/// <returns><c>true</c> if the specified type implements the interface; otherwise, <c>false</c>.</returns>
 		public static bool Implements(this TypeDef type, string fullName) {
-			do {
-				foreach (InterfaceImpl iface in type.Interfaces) {
-					if (iface.Interface.ReflectionFullName == fullName)
-						return true;
-				}
-
-				if (type.BaseType == null)
-					return false;
-
-				type = type.BaseType.ResolveTypeDefThrow();
-			} while (type != null);
-			throw new UnreachableException();
+			while (type != null) {
+				if (type.Interfaces.Any(iface => iface.Interface.ReflectionFullName == fullName))
+					return true;
+				type = type.BaseType?.ResolveTypeDef();
+			}
+			return false;
 		}
 
 		/// <summary>
@@ -451,8 +439,8 @@ namespace Confuser.Core {
 
 			if (method.IsPublic && method.IsNewSlot) {
 				foreach (var iFace in method.DeclaringType.Interfaces) {
-					var iFaceDef = iFace.Interface.ResolveTypeDefThrow();
-					if (iFaceDef.FindMethod(method.Name, (MethodSig)method.Signature) != null)
+					var iFaceDef = iFace.Interface.ResolveTypeDef();
+					if (iFaceDef != null && iFaceDef.FindMethod(method.Name, (MethodSig)method.Signature) != null)
 						return true;
 				}
 			}
