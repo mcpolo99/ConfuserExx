@@ -50,7 +50,7 @@ Licensed under the MIT license. See [LICENSE.md][license] for details.
 [build]: https://ci.appveyor.com/project/mkaring/confuserex/branch/master
 [codefactor]: https://www.codefactor.io/repository/github/mkaring/confuserex/overview/master
 [confuser]: http://confuser.codeplex.com
-[issues]: https://github.com/mkaring/ConfuserEx/issues
+[issues]: https://github.com/mcpolo99/ConfuserExx/issues
 [gitter]: https://gitter.im/ConfuserEx/community
 [license]: LICENSE.md
 [project_format]: docs/ProjectFormat.md
