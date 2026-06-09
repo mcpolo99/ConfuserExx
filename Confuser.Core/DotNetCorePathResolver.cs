@@ -16,14 +16,14 @@ namespace Confuser.Core {
 		public static IEnumerable<string> ResolveRuntimePaths(string modulePath) {
 			var paths = new List<string>();
 
-			// 1. Try runtimeconfig.json next to the module
+			// 1. Try runtimeconfig.json next to the module (target framework gets priority)
 			var runtimeConfig = FindRuntimeConfig(modulePath);
 			if (runtimeConfig != null)
 				paths.AddRange(GetPathsFromRuntimeConfig(runtimeConfig));
 
-			// 2. Fallback: probe standard dotnet locations
-			if (paths.Count == 0)
-				paths.AddRange(ProbeStandardPaths());
+			// 2. Always add ALL installed runtime versions to handle cross-version
+			//    dependencies (e.g., net10.0 app referencing a library compiled against net8.0)
+			paths.AddRange(ProbeAllInstalledRuntimes());
 
 			return paths.Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase);
 		}
@@ -117,7 +117,7 @@ namespace Confuser.Core {
 			return parts.Length >= 2 ? parts[0] + "." + parts[1] : version;
 		}
 
-		static IEnumerable<string> ProbeStandardPaths() {
+		static IEnumerable<string> ProbeAllInstalledRuntimes() {
 			var dotnetRoot = GetDotNetRoot();
 			if (dotnetRoot == null)
 				yield break;
@@ -126,12 +126,14 @@ namespace Confuser.Core {
 			if (!Directory.Exists(sharedDir))
 				yield break;
 
+			// Return ALL installed runtime versions (newest first) across all frameworks.
+			// This handles cross-version dependencies where e.g., a net10.0 app references
+			// a library compiled against net8.0 which needs System.Runtime 8.0.0.0.
 			foreach (var frameworkDir in Directory.GetDirectories(sharedDir)) {
-				var latest = Directory.GetDirectories(frameworkDir)
-					.OrderByDescending(d => d)
-					.FirstOrDefault();
-				if (latest != null)
-					yield return latest;
+				var versions = Directory.GetDirectories(frameworkDir)
+					.OrderByDescending(d => d);
+				foreach (var versionDir in versions)
+					yield return versionDir;
 			}
 		}
 
