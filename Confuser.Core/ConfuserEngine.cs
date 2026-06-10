@@ -480,31 +480,36 @@ namespace Confuser.Core {
 			using (RegistryKey ndpKey =
 				RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, "").
 							OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\")) {
+				if (ndpKey == null) yield break;
 				foreach (string versionKeyName in ndpKey.GetSubKeyNames()) {
 					if (!versionKeyName.StartsWith("v"))
 						continue;
 
-					RegistryKey versionKey = ndpKey.OpenSubKey(versionKeyName);
-					var name = (string)versionKey.GetValue("Version", "");
-					string sp = versionKey.GetValue("SP", "").ToString();
-					string install = versionKey.GetValue("Install", "").ToString();
-					if (install == "" || sp != "" && install == "1")
-						yield return versionKeyName + "  " + name;
-
-					if (name != "")
-						continue;
-
-					foreach (string subKeyName in versionKey.GetSubKeyNames()) {
-						RegistryKey subKey = versionKey.OpenSubKey(subKeyName);
-						name = (string)subKey.GetValue("Version", "");
-						if (name != "")
-							sp = subKey.GetValue("SP", "").ToString();
-						install = subKey.GetValue("Install", "").ToString();
-
-						if (install == "")
+					using (RegistryKey versionKey = ndpKey.OpenSubKey(versionKeyName)) {
+						if (versionKey == null) continue;
+						var name = (string)versionKey.GetValue("Version", "");
+						string sp = versionKey.GetValue("SP", "").ToString();
+						string install = versionKey.GetValue("Install", "").ToString();
+						if (install == "" || sp != "" && install == "1")
 							yield return versionKeyName + "  " + name;
-						else if (install == "1")
-							yield return "  " + subKeyName + "  " + name;
+
+						if (name != "")
+							continue;
+
+						foreach (string subKeyName in versionKey.GetSubKeyNames()) {
+							using (RegistryKey subKey = versionKey.OpenSubKey(subKeyName)) {
+								if (subKey == null) continue;
+								name = (string)subKey.GetValue("Version", "");
+								if (name != "")
+									sp = subKey.GetValue("SP", "").ToString();
+								install = subKey.GetValue("Install", "").ToString();
+
+								if (install == "")
+									yield return versionKeyName + "  " + name;
+								else if (install == "1")
+									yield return "  " + subKeyName + "  " + name;
+							}
+						}
 					}
 				}
 			}
