@@ -18,6 +18,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup .NET runtimes for cross-framework tests
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
