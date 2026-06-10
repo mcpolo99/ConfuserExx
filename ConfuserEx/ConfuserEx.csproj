@@ -33,6 +33,14 @@
     <Resource Include="Resources\FontAwesome.otf" />
   </ItemGroup>
 
+  <!-- Copy Confuser.Runtime.dll (net20) to output — needed by protection pipeline at runtime -->
+  <Target Name="CopyConfuserRuntime" AfterTargets="Build">
+    <Copy SourceFiles="..\Confuser.Runtime\bin\$(Configuration)\net20\Confuser.Runtime.dll"
+          DestinationFolder="$(OutputPath)"
+          SkipUnchangedFiles="true"
+          Condition="Exists('..\Confuser.Runtime\bin\$(Configuration)\net20\Confuser.Runtime.dll')" />
+  </Target>
+
   <Import Project="..\ConfuserEx.Common.targets" Condition="Exists('..\ConfuserEx.Common.targets')" />
 
 </Project>
