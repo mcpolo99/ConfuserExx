@@ -11,4 +11,10 @@
     </PackageReference>
   </ItemGroup>
 
+  <!-- Use shared runsettings to exclude test subjects from Coverlet instrumentation.
+       Test subjects get obfuscated at test time — Coverlet's RecordHit breaks after renaming. -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Test'))">
+    <RunSettingsFilePath>$(MSBuildThisFileDirectory)coverlet.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
+
 </Project>
