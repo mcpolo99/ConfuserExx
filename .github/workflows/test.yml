@@ -39,13 +39,11 @@ jobs:
         shell: pwsh
         run: |
           $coverageDir = 'coverage'
+          $trxDir = 'test-results'
           New-Item -ItemType Directory -Path $coverageDir -Force | Out-Null
+          New-Item -ItemType Directory -Path $trxDir -Force | Out-Null
 
           $testProjects = Get-ChildItem -Path Tests -Filter '*.Test.csproj' -Recurse | Select-Object -Unique
-          $results = @()
-          $totalPassed = 0
-          $totalFailed = 0
-          $totalSkipped = 0
           $anyFailed = $false
 
           foreach ($proj in $testProjects) {
@@ -54,91 +52,116 @@ jobs:
             Write-Host "Testing $name" -ForegroundColor Cyan
             Write-Host "========================================" -ForegroundColor Cyan
 
-            $output = dotnet test $proj.FullName -c Release --no-build --verbosity minimal `
+            dotnet test $proj.FullName -c Release --no-build --verbosity minimal `
               --collect:"XPlat Code Coverage" `
-              --results-directory "$coverageDir/$name" 2>&1 | Out-String
+              --results-directory "$coverageDir/$name" `
+              --logger "trx;LogFileName=$name.trx" `
+              --results-directory "$trxDir"
 
-            $exitCode = $LASTEXITCODE
-            Write-Host $output
-
-            # Parse results from output
-            $passed = 0; $failed = 0; $skipped = 0; $total = 0
-            if ($output -match 'Passed:\s+(\d+)') { $passed = [int]$Matches[1] }
-            if ($output -match 'Failed:\s+(\d+)') { $failed = [int]$Matches[1] }
-            if ($output -match 'Skipped:\s+(\d+)') { $skipped = [int]$Matches[1] }
-            if ($output -match 'Total:\s+(\d+)') { $total = [int]$Matches[1] }
-
-            # Extract individual test failures
-            $failedTests = @()
-            $failLines = [regex]::Matches($output, '\[FAIL\]\s*\n\s*(.+?)(?:\s+\[)')
-            foreach ($match in $failLines) { $failedTests += $match.Groups[1].Value.Trim() }
-            # Also try the "Failed <TestName>" format
-            $failLines2 = [regex]::Matches($output, '^\s+Failed\s+(.+?)\s+\[', [System.Text.RegularExpressions.RegexOptions]::Multiline)
-            foreach ($match in $failLines2) { $failedTests += $match.Groups[1].Value.Trim() }
-            $failedTests = $failedTests | Select-Object -Unique
-
-            $status = if ($exitCode -eq 0) { ':white_check_mark:' } else { ':x:'; $anyFailed = $true }
-
-            $results += [PSCustomObject]@{
-              Name = $name
-              Status = $status
-              Passed = $passed
-              Failed = $failed
-              Skipped = $skipped
-              Total = $total
-              FailedTests = ($failedTests -join ', ')
-            }
-
-            $totalPassed += $passed
-            $totalFailed += $failed
-            $totalSkipped += $skipped
+            if ($LASTEXITCODE -ne 0) { $anyFailed = $true }
           }
 
-          # Generate test results markdown
-          $md = @()
-          $md += "## Test Results"
-          $md += ""
-          if ($anyFailed) {
-            $md += "> :x: **$totalFailed test(s) failed** out of $($totalPassed + $totalFailed + $totalSkipped) total"
-          } else {
-            $md += "> :white_check_mark: **All $totalPassed tests passed**"
-          }
-          $md += ""
-          $md += "| Project | Status | Passed | Failed | Skipped | Total |"
-          $md += "|---------|--------|--------|--------|---------|-------|"
-          foreach ($r in $results) {
-            $md += "| $($r.Name) | $($r.Status) | $($r.Passed) | $($r.Failed) | $($r.Skipped) | $($r.Total) |"
-          }
+          # Parse all TRX files into a combined report
+          $allTests = @()
+          $trxFiles = Get-ChildItem -Path $trxDir -Filter '*.trx' -Recurse
 
-          # Add failed test details if any
-          $failedResults = $results | Where-Object { $_.Failed -gt 0 }
-          if ($failedResults) {
-            $md += ""
-            $md += "### Failed Tests"
-            $md += ""
-            foreach ($r in $failedResults) {
-              if ($r.FailedTests) {
-                $md += "**$($r.Name)**:"
-                foreach ($t in ($r.FailedTests -split ', ')) {
-                  $md += "- ``$t``"
-                }
-                $md += ""
+          foreach ($trx in $trxFiles) {
+            [xml]$xml = Get-Content $trx.FullName
+            $ns = @{ t = 'http://microsoft.com/schemas/VisualStudio/TeamTest/2010' }
+
+            $results = Select-Xml -Xml $xml -XPath '//t:UnitTestResult' -Namespace $ns
+            foreach ($r in $results) {
+              $node = $r.Node
+              $testName = $node.testName
+              $outcome = $node.outcome  # Passed, Failed, NotExecuted
+              $duration = $node.duration
+              $errorMsg = ''
+              if ($node.Output -and $node.Output.ErrorInfo) {
+                $errorMsg = $node.Output.ErrorInfo.Message
+              }
+              $allTests += [PSCustomObject]@{
+                Name = $testName
+                Outcome = $outcome
+                Duration = $duration
+                Error = $errorMsg
+                TrxFile = $trx.BaseName
               }
             }
           }
 
-          $md += ""
+          # Group by category for nice display
+          $passed = $allTests | Where-Object { $_.Outcome -eq 'Passed' }
+          $failed = $allTests | Where-Object { $_.Outcome -eq 'Failed' }
+          $skipped = $allTests | Where-Object { $_.Outcome -eq 'NotExecuted' }
 
-          # Write to file for later steps
+          # Build markdown report
+          $md = @()
+          $md += '## Test Results'
+          $md += ''
+          if ($failed.Count -gt 0) {
+            $md += "> :x: **$($failed.Count) test(s) failed** out of $($allTests.Count) total"
+          } else {
+            $md += "> :white_check_mark: **All $($passed.Count) tests passed**"
+          }
+          $md += ''
+
+          # Summary table grouped by project (TRX file)
+          $grouped = $allTests | Group-Object TrxFile
+          $md += '| Project | :white_check_mark: Passed | :x: Failed | :fast_forward: Skipped | Total |'
+          $md += '|---------|--------|--------|---------|-------|'
+          foreach ($g in $grouped | Sort-Object Name) {
+            $p = ($g.Group | Where-Object { $_.Outcome -eq 'Passed' }).Count
+            $f = ($g.Group | Where-Object { $_.Outcome -eq 'Failed' }).Count
+            $s = ($g.Group | Where-Object { $_.Outcome -eq 'NotExecuted' }).Count
+            $icon = if ($f -gt 0) { ':x:' } else { ':white_check_mark:' }
+            $md += "| $icon $($g.Name) | $p | $f | $s | $($g.Group.Count) |"
+          }
+
+          # Expand CrossFramework tests individually
+          $crossTests = $allTests | Where-Object { $_.Name -match 'CrossFramework|Console_Net|WinForms_Net|WPF_Net|Library_Net' }
+          if ($crossTests.Count -gt 0) {
+            $md += ''
+            $md += '<details><summary><strong>Cross-Framework Test Details (click to expand)</strong></summary>'
+            $md += ''
+            $md += '| Test | Framework | App Type | Result |'
+            $md += '|------|-----------|----------|--------|'
+            foreach ($t in $crossTests | Sort-Object Name) {
+              $icon = switch ($t.Outcome) { 'Passed' { ':white_check_mark:' } 'Failed' { ':x:' } default { ':fast_forward:' } }
+              # Parse TFM and app type from test name
+              $tfm = ''; $appType = ''
+              if ($t.Name -match '_Net(\w+)_') { $tfm = $Matches[1] }
+              if ($t.Name -match '(Console|WinForms|WPF|Library)_') { $appType = $Matches[1] }
+              $md += "| ``$($t.Name)`` | $tfm | $appType | $icon |"
+            }
+            $md += ''
+            $md += '</details>'
+          }
+
+          # List failed tests with error messages
+          if ($failed.Count -gt 0) {
+            $md += ''
+            $md += '### :x: Failed Tests'
+            $md += ''
+            foreach ($f in $failed) {
+              $md += "**``$($f.Name)``**"
+              if ($f.Error) {
+                $shortError = ($f.Error -split "`n")[0]
+                if ($shortError.Length -gt 200) { $shortError = $shortError.Substring(0, 200) + '...' }
+                $md += "> $shortError"
+              }
+              $md += ''
+            }
+          }
+
+          $md += ''
+
+          # Write results
           $md -join "`n" | Set-Content -Path 'test-results.md' -Encoding utf8
-
-          # Also write to step summary immediately
           $md -join "`n" >> $env:GITHUB_STEP_SUMMARY
 
-          # Set output for final status
           echo "any_failed=$anyFailed" >> $env:GITHUB_OUTPUT
-          echo "total_passed=$totalPassed" >> $env:GITHUB_OUTPUT
-          echo "total_failed=$totalFailed" >> $env:GITHUB_OUTPUT
+          echo "total_passed=$($passed.Count)" >> $env:GITHUB_OUTPUT
+          echo "total_failed=$($failed.Count)" >> $env:GITHUB_OUTPUT
 
       - name: Generate coverage report
         if: always()
@@ -159,19 +182,14 @@ jobs:
         shell: pwsh
         run: |
           $comment = @()
-
-          # Add test results
           if (Test-Path 'test-results.md') {
             $comment += Get-Content 'test-results.md' -Raw
           }
-
-          # Add coverage
           $coverageMd = 'coverage/report/SummaryGithub.md'
           if (Test-Path $coverageMd) {
             $comment += "`n---`n"
             $comment += Get-Content $coverageMd -Raw
           }
-
           $comment -join "`n" | Set-Content -Path 'pr-comment.md' -Encoding utf8
 
       - name: Coverage to job summary
@@ -190,6 +208,14 @@ jobs:
         with:
           header: test-coverage-report
           path: pr-comment.md
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: test-results
+          path: test-results/
+          if-no-files-found: ignore
 
       - name: Upload coverage report
         if: always()
