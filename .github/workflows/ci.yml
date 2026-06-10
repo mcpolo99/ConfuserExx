@@ -35,20 +35,47 @@ jobs:
       - name: Build
         run: msbuild Confuser2.sln -p:Configuration=Release -verbosity:minimal
 
-      - name: Test
+      - name: Test with coverage
         shell: pwsh
         run: |
-          # Run tests on all test projects — exclude the C++/CLI vcxproj which dotnet CLI cannot handle
-          $testProjects = Get-ChildItem -Path Tests -Filter '*.Test.csproj' -Recurse
-          $testProjects += Get-ChildItem -Path Tests -Filter 'Confuser.*.Test.csproj' -Recurse
-          $testProjects = $testProjects | Select-Object -Unique
+          $coverageDir = 'coverage'
+          New-Item -ItemType Directory -Path $coverageDir -Force | Out-Null
+
+          # Run tests on all test projects with Coverlet coverage collection
+          $testProjects = Get-ChildItem -Path Tests -Filter '*.Test.csproj' -Recurse | Select-Object -Unique
           $failed = $false
+          $index = 0
           foreach ($proj in $testProjects) {
+            $index++
             Write-Host "Testing $($proj.Name)..." -ForegroundColor Cyan
-            dotnet test $proj.FullName -c Release --no-build --verbosity minimal
+            dotnet test $proj.FullName -c Release --no-build --verbosity minimal `
+              --collect:"XPlat Code Coverage" `
+              --results-directory "$coverageDir/$($proj.BaseName)"
             if ($LASTEXITCODE -ne 0) { $failed = $true }
           }
           if ($failed) { exit 1 }
+
+      - name: Generate coverage report
+        if: always()
+        shell: pwsh
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          $reports = (Get-ChildItem -Path coverage -Filter 'coverage.cobertura.xml' -Recurse).FullName -join ';'
+          if ($reports) {
+            reportgenerator "-reports:$reports" "-targetdir:coverage/report" "-reporttypes:HtmlInline_AzurePipelines;Cobertura;TextSummary"
+            Write-Host "--- Coverage Summary ---"
+            Get-Content coverage/report/Summary.txt
+          } else {
+            Write-Host "No coverage files found — skipping report generation."
+          }
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage-report
+          path: coverage/report/
+          if-no-files-found: ignore
 
       - name: Package CLI
         shell: pwsh
