@@ -28,7 +28,7 @@ namespace Confuser.Core {
 		ProcessModule,
 
 		/// <summary>
-		///     Confuser engine optimizes opcodes of the method bodys.
+		///     Confuser engine optimizes opcodes of the method bodies.
 		///     This stage occurs once per module.
 		/// </summary>
 		OptimizeMethods,

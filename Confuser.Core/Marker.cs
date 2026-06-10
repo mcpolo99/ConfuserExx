@@ -56,11 +56,11 @@ namespace Confuser.Core {
 		protected Dictionary<string, Protection> protections;
 
 		/// <summary>
-		///     Initalizes the Marker with specified protections and packers.
+		///     Initializes the Marker with specified protections and packers.
 		/// </summary>
 		/// <param name="protections">The protections.</param>
 		/// <param name="packers">The packers.</param>
-		public virtual void Initalize(IList<Protection> protections, IList<Packer> packers) {
+		public virtual void Initialize(IList<Protection> protections, IList<Packer> packers) {
 			this.protections = protections.ToDictionary(prot => prot.Id, prot => prot, StringComparer.OrdinalIgnoreCase);
 			this.packers = packers.ToDictionary(packer => packer.Id, packer => packer, StringComparer.OrdinalIgnoreCase);
 		}

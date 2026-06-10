@@ -138,7 +138,7 @@ namespace Confuser.Core {
 
 				// 4. Load modules
 				context.Logger.Info("Loading input modules...");
-				marker.Initalize(prots, packers);
+				marker.Initialize(prots, packers);
 				MarkerResult markings = marker.MarkProject(context.Project, context);
 				context.Modules = new ModuleSorter(markings.Modules).Sort().ToList().AsReadOnly();
 				foreach (var module in context.Modules)
@@ -158,7 +158,7 @@ namespace Confuser.Core {
 						comp.Initialize(context);
 					}
 					catch (Exception ex) {
-						context.Logger.ErrorException("Error occured during initialization of '" + comp.Name + "'.", ex);
+						context.Logger.ErrorException("Error occurred during initialization of '" + comp.Name + "'.", ex);
 						throw new ConfuserException(ex);
 					}
 					context.CheckCancellation();
