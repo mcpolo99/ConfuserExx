@@ -193,7 +193,7 @@ namespace Confuser.CLI {
 			parameters.Logger = logger;
 
 			Console.Title = "ConfuserEx - Running...";
-			ConfuserEngine.Run(parameters).Wait();
+			ConfuserEngine.Run(parameters).GetAwaiter().GetResult();
 
 			return logger.ReturnValue;
 		}
