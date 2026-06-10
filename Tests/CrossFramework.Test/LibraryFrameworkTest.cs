@@ -53,5 +53,16 @@ namespace CrossFramework.Test {
 				new SettingItem<Protection>("rename"),
 				outputDirSuffix: "-lib-net8",
 				checkOutput: false);
+
+		[Fact]
+		[Trait("Category", "CrossFramework")]
+		[Trait("AppType", "Library")]
+		[Trait("TFM", "net10.0")]
+		public Task Library_Net10_RenameProtection() =>
+			Run("CrossFramework.Library.Net10.dll",
+				null,
+				new SettingItem<Protection>("rename"),
+				outputDirSuffix: "-lib-net10",
+				checkOutput: false);
 	}
 }

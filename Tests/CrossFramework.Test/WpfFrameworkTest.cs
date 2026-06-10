@@ -45,6 +45,28 @@ namespace CrossFramework.Test {
 		[Fact]
 		[Trait("Category", "CrossFramework")]
 		[Trait("AppType", "WPF")]
+		[Trait("TFM", "net6.0-windows")]
+		public Task WPF_Net6_RenameProtection() =>
+			Run("CrossFramework.WPF.Net6.dll",
+				null,
+				new SettingItem<Protection>("rename"),
+				outputDirSuffix: "-wpf-net6",
+				checkOutput: false);
+
+		[Fact]
+		[Trait("Category", "CrossFramework")]
+		[Trait("AppType", "WPF")]
+		[Trait("TFM", "net8.0-windows")]
+		public Task WPF_Net8_RenameProtection() =>
+			Run("CrossFramework.WPF.Net8.dll",
+				null,
+				new SettingItem<Protection>("rename"),
+				outputDirSuffix: "-wpf-net8",
+				checkOutput: false);
+
+		[Fact]
+		[Trait("Category", "CrossFramework")]
+		[Trait("AppType", "WPF")]
 		[Trait("TFM", "net10.0-windows")]
 		public Task WPF_Net10_RenameProtection() =>
 			Run("CrossFramework.WPF.Net10.dll",
