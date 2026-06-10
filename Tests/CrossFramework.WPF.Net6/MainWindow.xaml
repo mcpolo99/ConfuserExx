@@ -1,0 +1,9 @@
+<Window x:Class="CrossFramework.WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ConfuserEx WPF Test (Net6)" Height="200" Width="300">
+    <StackPanel Margin="20">
+        <TextBlock x:Name="statusText" Text="WPF is working" FontSize="16" />
+        <Button Content="Click Me" Click="OnButtonClick" Margin="0,10,0,0" />
+    </StackPanel>
+</Window>
