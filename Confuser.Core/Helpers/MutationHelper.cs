@@ -43,8 +43,8 @@ namespace Confuser.Core.Helpers {
 					var field = (IField)instr.Operand;
 					int _keyId;
 					if (field.DeclaringType.FullName == mutationType &&
-					    field2index.TryGetValue(field.Name, out _keyId) &&
-					    _keyId == keyId) {
+						field2index.TryGetValue(field.Name, out _keyId) &&
+						_keyId == keyId) {
 						instr.OpCode = OpCodes.Ldc_I4;
 						instr.Operand = key;
 					}
@@ -64,8 +64,8 @@ namespace Confuser.Core.Helpers {
 					var field = (IField)instr.Operand;
 					int _keyIndex;
 					if (field.DeclaringType.FullName == mutationType &&
-					    field2index.TryGetValue(field.Name, out _keyIndex) &&
-					    (_keyIndex = Array.IndexOf(keyIds, _keyIndex)) != -1) {
+						field2index.TryGetValue(field.Name, out _keyIndex) &&
+						(_keyIndex = Array.IndexOf(keyIds, _keyIndex)) != -1) {
 						instr.OpCode = OpCodes.Ldc_I4;
 						instr.Operand = keys[_keyIndex];
 					}
@@ -85,7 +85,7 @@ namespace Confuser.Core.Helpers {
 				if (instr.OpCode == OpCodes.Call) {
 					var operand = (IMethod)instr.Operand;
 					if (operand.DeclaringType.FullName == mutationType &&
-					    operand.Name == "Placeholder") {
+						operand.Name == "Placeholder") {
 						var initialLoadInstructions = new List<Instruction>();
 						var pendingInstructions = new Queue<Instruction>();
 						pendingInstructions.Enqueue(instr);

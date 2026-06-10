@@ -10,7 +10,7 @@ namespace Confuser.DynCipher.Transforms {
 				if (assign.Value is BinOpExpression) {
 					var exp = (BinOpExpression)assign.Value;
 					if ((exp.Left is BinOpExpression || exp.Right is BinOpExpression) &&
-					    exp.Left != assign.Target) {
+						exp.Left != assign.Target) {
 						block.Statements.Add(new AssignmentStatement {
 							Target = assign.Target,
 							Value = exp.Left

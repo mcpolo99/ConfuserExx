@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows;
-using ConfuserEx.ViewModel;
 using CommunityToolkit.Mvvm.Input;
+using ConfuserEx.ViewModel;
 using Ookii.Dialogs.Wpf;
 
 namespace ConfuserEx.Views {

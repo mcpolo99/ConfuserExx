@@ -217,7 +217,7 @@ namespace Confuser.Core.Project {
 				SNPubSigKeyPath = elem.Attributes["snPubSigKey"].Value.NullIfEmpty();
 			else
 				SNPubSigKeyPath = null;
-			
+
 			Rules.Clear();
 			foreach (XmlElement i in elem.ChildNodes.OfType<XmlElement>()) {
 				var rule = new Rule();
@@ -641,8 +641,7 @@ namespace Confuser.Core.Project {
 
 			OutputDirectory = docElem.Attributes["outputDir"].Value;
 			BaseDirectory = docElem.Attributes["baseDir"].Value;
-			if (!string.IsNullOrEmpty(baseDirRoot))
-			{
+			if (!string.IsNullOrEmpty(baseDirRoot)) {
 				BaseDirectory = Path.Combine(baseDirRoot, BaseDirectory);
 			}
 
@@ -701,8 +700,7 @@ namespace Confuser.Core.Project {
 		internal bool BatchLoadModules(XmlElement elem) {
 			string wildCardPath = elem.Attributes["path"].Value;
 			string[] files = Directory.GetFiles(BaseDirectory, wildCardPath, SearchOption.TopDirectoryOnly);
-			if (files.Length <= 0)
-			{
+			if (files.Length <= 0) {
 				return false;
 			}
 

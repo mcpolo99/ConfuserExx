@@ -19,7 +19,7 @@ namespace Confuser.Core {
 			var edges = new List<DependencyGraphEdge>();
 			var roots = new HashSet<ModuleDefMD>(modules);
 			var asmMap = modules.GroupBy(module => module.Assembly.ToAssemblyRef(), AssemblyNameComparer.CompareAll)
-			                    .ToDictionary(gp => gp.Key, gp => gp.ToList(), AssemblyNameComparer.CompareAll);
+								.ToDictionary(gp => gp.Key, gp => gp.ToList(), AssemblyNameComparer.CompareAll);
 
 			foreach (ModuleDefMD m in modules)
 				foreach (AssemblyRef nameRef in m.GetAssemblyRefs()) {

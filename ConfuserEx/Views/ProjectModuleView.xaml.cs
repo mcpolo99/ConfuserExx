@@ -18,10 +18,10 @@ namespace ConfuserEx.Views {
 			DialogResult = true;
 		}
 
-		void ChooseSNKey(object sender, RoutedEventArgs e) => 
+		void ChooseSNKey(object sender, RoutedEventArgs e) =>
 			module.SNKeyPath = ChooseKey();
 
-		void ChooseSNSigKey(object sender, RoutedEventArgs e) => 
+		void ChooseSNSigKey(object sender, RoutedEventArgs e) =>
 			module.SNSigKeyPath = ChooseKey();
 
 		void ChooseSNPublicKey(object sender, RoutedEventArgs e) =>

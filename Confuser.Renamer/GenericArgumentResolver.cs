@@ -98,10 +98,10 @@ namespace Confuser.Renamer {
 					result = new ByRefSig(ResolveGenericArgs(typeSig.Next));
 					break;
 				case ElementType.Var:
-					result = new GenericVar(((GenericVar) typeSig).Number);
+					result = new GenericVar(((GenericVar)typeSig).Number);
 					break;
 				case ElementType.ValueArray:
-					result = new ValueArraySig(ResolveGenericArgs(typeSig.Next), ((ValueArraySig) typeSig).Size);
+					result = new ValueArraySig(ResolveGenericArgs(typeSig.Next), ((ValueArraySig)typeSig).Size);
 					break;
 				case ElementType.SZArray:
 					result = new SZArraySig(ResolveGenericArgs(typeSig.Next));
@@ -136,7 +136,7 @@ namespace Confuser.Renamer {
 					var genArgs = new List<TypeSig>(gis.GenericArguments.Count);
 					foreach (var ga in gis.GenericArguments)
 						genArgs.Add(ResolveGenericArgs(ga));
-					
+
 					result = new GenericInstSig(ResolveGenericArgs(gis.GenericType) as ClassOrValueTypeSig, genArgs);
 					break;
 

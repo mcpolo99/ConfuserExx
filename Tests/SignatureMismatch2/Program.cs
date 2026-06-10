@@ -2,13 +2,11 @@ using System;
 using SignatureMismatch2Helper;
 
 namespace SignatureMismatch {
-	public interface IInterface
-	{
+	public interface IInterface {
 		void Method(External obj);
 	}
 
-	public class Class : IInterface
-	{
+	public class Class : IInterface {
 		public void Method(External obj) => Console.WriteLine(obj.Name);
 	}
 

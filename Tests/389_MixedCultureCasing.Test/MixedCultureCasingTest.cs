@@ -6,9 +6,8 @@ using Confuser.UnitTest;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace MixedCultureCasing.Test
-{
-    public class MixedCultureCasingTest : TestBase {
+namespace MixedCultureCasing.Test {
+	public class MixedCultureCasingTest : TestBase {
 		public MixedCultureCasingTest(ITestOutputHelper outputHelper) : base(outputHelper) { }
 
 		[Fact]
@@ -17,11 +16,11 @@ namespace MixedCultureCasing.Test
 		[Trait("Issue", "https://github.com/mkaring/ConfuserEx/issues/389")]
 		public async Task MixedCultureCasing() =>
 			await Run(
-				new [] {
+				new[] {
 					"389_MixedCultureCasing.exe",
 					@"de-DE\389_MixedCultureCasing.resources.dll"
 				},
-				new [] {
+				new[] {
 					"Test 1 (neutral)",
 					"Test 1 (deutsch)",
 					"Test 2 (neutral)",

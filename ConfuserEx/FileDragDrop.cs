@@ -6,8 +6,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ConfuserEx.ViewModel;
 using CommunityToolkit.Mvvm.Input;
+using ConfuserEx.ViewModel;
 
 namespace ConfuserEx {
 	public class FileDragDrop {

@@ -5,10 +5,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
 using Confuser.Core;
 using Confuser.Core.Project;
 using ConfuserEx.Views;
-using CommunityToolkit.Mvvm.Input;
 
 namespace ConfuserEx.ViewModel {
 	internal class SettingsTabVM : TabViewModel {
@@ -47,7 +47,7 @@ namespace ConfuserEx.ViewModel {
 
 		public ICommand Add {
 			get {
-				var cmd =  new RelayCommand(() => {
+				var cmd = new RelayCommand(() => {
 					Debug.Assert(SelectedList != null);
 
 					var rule = new ProjectRuleVM(App.Project, new Rule());

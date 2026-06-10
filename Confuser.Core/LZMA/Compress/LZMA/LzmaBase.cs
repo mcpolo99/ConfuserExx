@@ -48,7 +48,7 @@ namespace SevenZip.Compression.LZMA {
 		public const uint kNumMidLenSymbols = 1 << kNumMidLenBits;
 
 		public const uint kNumLenSymbols = kNumLowLenSymbols + kNumMidLenSymbols +
-		                                   (1 << kNumHighLenBits);
+										   (1 << kNumHighLenBits);
 
 		public const uint kMatchMaxLen = kMatchMinLen + kNumLenSymbols - 1;
 

@@ -5,9 +5,9 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using CommunityToolkit.Mvvm.Input;
 using Confuser.Core;
 using Confuser.Core.Project;
-using CommunityToolkit.Mvvm.Input;
 
 namespace ConfuserEx.ViewModel {
 	internal class ProtectTabVM : TabViewModel, ILogger {
@@ -58,12 +58,12 @@ namespace ConfuserEx.ViewModel {
 			App.NavigationDisabled = true;
 
 			ConfuserEngine.Run(parameters, cancelSrc.Token)
-			              .ContinueWith(_ =>
-			                            Application.Current.Dispatcher.BeginInvoke(new Action(() => {
-				                            Progress = 0;
-				                            App.NavigationDisabled = false;
-				                            CommandManager.InvalidateRequerySuggested();
-			                            })));
+						  .ContinueWith(_ =>
+										Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+											Progress = 0;
+											App.NavigationDisabled = false;
+											CommandManager.InvalidateRequerySuggested();
+										})));
 		}
 
 		void DoCancel() {

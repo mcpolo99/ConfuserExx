@@ -9,9 +9,9 @@ namespace Confuser.DynCipher.Transforms {
 				var binOpRight = binOp.Right as BinOpExpression;
 				//  a + (b + c) => (a + b) + c
 				if (binOpRight != null && binOpRight.Operation == binOp.Operation &&
-				    (binOp.Operation == BinOps.Add || binOp.Operation == BinOps.Mul ||
-				     binOp.Operation == BinOps.Or || binOp.Operation == BinOps.And ||
-				     binOp.Operation == BinOps.Xor)) {
+					(binOp.Operation == BinOps.Add || binOp.Operation == BinOps.Mul ||
+					 binOp.Operation == BinOps.Or || binOp.Operation == BinOps.And ||
+					 binOp.Operation == BinOps.Xor)) {
 					binOp.Left = new BinOpExpression {
 						Left = binOp.Left,
 						Operation = binOp.Operation,
@@ -24,7 +24,7 @@ namespace Confuser.DynCipher.Transforms {
 				binOp.Right = ProcessExpression(binOp.Right);
 
 				if (binOp.Right is LiteralExpression && ((LiteralExpression)binOp.Right).Value == 0 &&
-				    binOp.Operation == BinOps.Add) // x + 0 => x
+					binOp.Operation == BinOps.Add) // x + 0 => x
 					return binOp.Left;
 			}
 			else if (exp is ArrayIndexExpression) {

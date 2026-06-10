@@ -50,7 +50,7 @@ namespace Confuser.Renamer.Analyzers {
 							var arguments = trace.TraceArguments(instr);
 							if (arguments == null) {
 								logger.WarnFormat(Resources.ReflectionAnalyzer_Analyze_TracingArgumentsFailed, calledMethod.FullName, method.FullName);
-							} 
+							}
 							else if (arguments.Length >= 2) {
 								var types = GetReferencedTypes(method.Body.Instructions[arguments[0]], method, trace);
 								var names = GetReferencedNames(method.Body.Instructions[arguments[1]]);
@@ -61,7 +61,7 @@ namespace Confuser.Renamer.Analyzers {
 								foreach (var possibleMember in types.SelectMany(GetTypeAndBaseTypes).SelectMany(getMember).Where(m => names.Contains(m.Name))) {
 									nameService.SetCanRename(possibleMember, false);
 									if (!(possibleMember is IMethod) && !(possibleMember is PropertyDef) && !(possibleMember is EventDef)) continue;
-									
+
 									foreach (var reference in nameService.GetReferences(possibleMember).OfType<MemberOverrideReference>()) {
 										nameService.SetCanRename(reference.BaseMemberDef, false);
 									}

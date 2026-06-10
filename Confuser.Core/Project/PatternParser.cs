@@ -122,7 +122,7 @@ namespace Confuser.Core.Project {
 					if (parens.Type != TokenType.RParens)
 						throw MismatchParens(token.Position.Value);
 				}
-					break;
+				break;
 				case TokenType.Identifier:
 					if (IsOperator(token)) {
 						// unary operator

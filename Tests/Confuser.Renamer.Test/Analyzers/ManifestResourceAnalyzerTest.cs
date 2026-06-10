@@ -43,7 +43,8 @@ namespace Confuser.Renamer.Test.Analyzers {
 				if (instruction1.Operand is IMethodDefOrRef methodRef1) {
 					var methodRef2 = Assert.IsAssignableFrom<IMethodDefOrRef>(instruction2.Operand);
 					Assert.Equal(methodRef1.FullName, methodRef2.FullName);
-				} else {
+				}
+				else {
 					Assert.Equal(instruction1.Operand, instruction2.Operand);
 				}
 			}

@@ -55,8 +55,8 @@ namespace Confuser.DynCipher.Generation {
 
 		x86Register Normalize(x86Instruction instr) {
 			if (instr.Operands.Length == 2 &&
-			    instr.Operands[0] is x86ImmediateOperand &&
-			    instr.Operands[1] is x86ImmediateOperand) {
+				instr.Operands[0] is x86ImmediateOperand &&
+				instr.Operands[1] is x86ImmediateOperand) {
 				/*
                  * op imm1, imm2
                  * ==>
@@ -72,7 +72,7 @@ namespace Confuser.DynCipher.Generation {
 			}
 
 			if (instr.Operands.Length == 1 &&
-			    instr.Operands[0] is x86ImmediateOperand) {
+				instr.Operands[0] is x86ImmediateOperand) {
 				/*
                  * op imm
                  * ==>
@@ -88,8 +88,8 @@ namespace Confuser.DynCipher.Generation {
 			}
 
 			if (instr.OpCode == x86OpCode.SUB &&
-			    instr.Operands[0] is x86ImmediateOperand &&
-			    instr.Operands[1] is x86RegisterOperand) {
+				instr.Operands[0] is x86ImmediateOperand &&
+				instr.Operands[1] is x86RegisterOperand) {
 				/*
                  * sub imm, reg
                  * ==>
@@ -108,8 +108,8 @@ namespace Confuser.DynCipher.Generation {
 			}
 
 			if (instr.Operands.Length == 2 &&
-			    instr.Operands[0] is x86ImmediateOperand &&
-			    instr.Operands[1] is x86RegisterOperand) {
+				instr.Operands[0] is x86ImmediateOperand &&
+				instr.Operands[1] is x86RegisterOperand) {
 				/*
                  * op imm, reg
                  * ==>
@@ -264,7 +264,7 @@ namespace Confuser.DynCipher.Generation {
 				case x86OpCode.MOV: {
 					if (Operands.Length != 2) throw new InvalidOperationException();
 					if (Operands[0] is x86RegisterOperand &&
-					    Operands[1] is x86RegisterOperand) {
+						Operands[1] is x86RegisterOperand) {
 						var ret = new byte[2];
 						ret[0] = 0x89;
 						ret[1] = 0xc0;
@@ -273,7 +273,7 @@ namespace Confuser.DynCipher.Generation {
 						return ret;
 					}
 					if (Operands[0] is x86RegisterOperand &&
-					    Operands[1] is x86ImmediateOperand) {
+						Operands[1] is x86ImmediateOperand) {
 						var ret = new byte[5];
 						ret[0] = 0xb8;
 						ret[0] |= (byte)((int)(Operands[0] as x86RegisterOperand).Register << 0);
@@ -286,7 +286,7 @@ namespace Confuser.DynCipher.Generation {
 				case x86OpCode.ADD: {
 					if (Operands.Length != 2) throw new InvalidOperationException();
 					if (Operands[0] is x86RegisterOperand &&
-					    Operands[1] is x86RegisterOperand) {
+						Operands[1] is x86RegisterOperand) {
 						var ret = new byte[2];
 						ret[0] = 0x01;
 						ret[1] = 0xc0;
@@ -295,7 +295,7 @@ namespace Confuser.DynCipher.Generation {
 						return ret;
 					}
 					if (Operands[0] is x86RegisterOperand &&
-					    Operands[1] is x86ImmediateOperand) {
+						Operands[1] is x86ImmediateOperand) {
 						var ret = new byte[6];
 						ret[0] = 0x81;
 						ret[1] = 0xc0;
@@ -309,7 +309,7 @@ namespace Confuser.DynCipher.Generation {
 				case x86OpCode.SUB: {
 					if (Operands.Length != 2) throw new InvalidOperationException();
 					if (Operands[0] is x86RegisterOperand &&
-					    Operands[1] is x86RegisterOperand) {
+						Operands[1] is x86RegisterOperand) {
 						var ret = new byte[2];
 						ret[0] = 0x29;
 						ret[1] = 0xc0;
@@ -318,7 +318,7 @@ namespace Confuser.DynCipher.Generation {
 						return ret;
 					}
 					if (Operands[0] is x86RegisterOperand &&
-					    Operands[1] is x86ImmediateOperand) {
+						Operands[1] is x86ImmediateOperand) {
 						var ret = new byte[6];
 						ret[0] = 0x81;
 						ret[1] = 0xe8;
@@ -356,7 +356,7 @@ namespace Confuser.DynCipher.Generation {
 				case x86OpCode.XOR: {
 					if (Operands.Length != 2) throw new InvalidOperationException();
 					if (Operands[0] is x86RegisterOperand &&
-					    Operands[1] is x86RegisterOperand) {
+						Operands[1] is x86RegisterOperand) {
 						var ret = new byte[2];
 						ret[0] = 0x31;
 						ret[1] = 0xc0;
@@ -365,7 +365,7 @@ namespace Confuser.DynCipher.Generation {
 						return ret;
 					}
 					if (Operands[0] is x86RegisterOperand &&
-					    Operands[1] is x86ImmediateOperand) {
+						Operands[1] is x86ImmediateOperand) {
 						var ret = new byte[6];
 						ret[0] = 0x81;
 						ret[1] = 0xf0;
@@ -390,7 +390,7 @@ namespace Confuser.DynCipher.Generation {
 				case x86OpCode.IMUL: {
 					if (Operands.Length != 2) throw new InvalidOperationException();
 					if (Operands[0] is x86RegisterOperand &&
-					    Operands[1] is x86RegisterOperand) {
+						Operands[1] is x86RegisterOperand) {
 						var ret = new byte[3];
 						ret[0] = 0x0f;
 						ret[1] = 0xaf;
@@ -400,7 +400,7 @@ namespace Confuser.DynCipher.Generation {
 						return ret;
 					}
 					if (Operands[0] is x86RegisterOperand &&
-					    Operands[1] is x86ImmediateOperand) {
+						Operands[1] is x86ImmediateOperand) {
 						var ret = new byte[6];
 						ret[0] = 0x69;
 						ret[1] = 0xc0;

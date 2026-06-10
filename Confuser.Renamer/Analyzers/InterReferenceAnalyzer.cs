@@ -15,7 +15,7 @@ namespace Confuser.Renamer.Analyzers {
 
 			// MemberRef/MethodSpec
 			var methods = module.GetTypes().SelectMany(type => type.Methods);
-			foreach(var methodDef in methods) {
+			foreach (var methodDef in methods) {
 				foreach (var ov in methodDef.Overrides) {
 					ProcessMemberRef(context, service, module, ov.MethodBody);
 					ProcessMemberRef(context, service, module, ov.MethodDeclaration);

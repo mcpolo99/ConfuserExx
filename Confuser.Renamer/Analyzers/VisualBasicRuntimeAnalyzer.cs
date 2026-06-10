@@ -17,7 +17,8 @@ namespace Confuser.Renamer.Analyzers {
 				def.BaseType != null &&
 				def.BaseType.FullName.Equals("System.Attribute", StringComparison.Ordinal)) {
 				service.SetCanRename(def, false);
-			} else if (def.HasCustomAttributes && def.CustomAttributes.Any(a => IsEmbeddedAttribute(a.AttributeType))) {
+			}
+			else if (def.HasCustomAttributes && def.CustomAttributes.Any(a => IsEmbeddedAttribute(a.AttributeType))) {
 				service.SetCanRename(def, false);
 			}
 		}
@@ -26,8 +27,8 @@ namespace Confuser.Renamer.Analyzers {
 			if (defOrRef.FullName.Equals("Microsoft.VisualBasic.Embedded", StringComparison.Ordinal)) {
 				var typeDef = (defOrRef as TypeDef);
 				if (typeDef != null) {
-					return typeDef.IsNotPublic && 
-						typeDef.BaseType != null && 
+					return typeDef.IsNotPublic &&
+						typeDef.BaseType != null &&
 						typeDef.BaseType.FullName.Equals("System.Attribute", StringComparison.Ordinal);
 				}
 			}

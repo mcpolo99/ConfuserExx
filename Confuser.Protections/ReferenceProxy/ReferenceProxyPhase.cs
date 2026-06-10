@@ -35,11 +35,11 @@ namespace Confuser.Protections.ReferenceProxy {
 			ret.Body = method.Body;
 			ret.BranchTargets = new HashSet<Instruction>(
 				method.Body.Instructions
-				      .Select(instr => instr.Operand as Instruction)
-				      .Concat(method.Body.Instructions
-				                    .Where(instr => instr.Operand is Instruction[])
-				                    .SelectMany(instr => (Instruction[])instr.Operand))
-				      .Where(target => target != null));
+					  .Select(instr => instr.Operand as Instruction)
+					  .Concat(method.Body.Instructions
+									.Where(instr => instr.Operand is Instruction[])
+									.SelectMany(instr => (Instruction[])instr.Operand))
+					  .Where(target => target != null));
 
 			ret.Protection = (ReferenceProxyProtection)Parent;
 			ret.Random = store.random;

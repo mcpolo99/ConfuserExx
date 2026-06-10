@@ -145,8 +145,8 @@ namespace Confuser.Protections.ControlFlow {
 				}
 				requiredInstr.Remove(instr);
 				if ((instr.OpCode.OpCodeType != OpCodeType.Prefix && trace.AfterStack[instr.Offset] == 0 &&
-				     requiredInstr.Count == 0) &&
-				    (shouldSpilt || ctx.Intensity > ctx.Random.NextDouble())) {
+					 requiredInstr.Count == 0) &&
+					(shouldSpilt || ctx.Intensity > ctx.Random.NextDouble())) {
 					statements.AddLast(currentStatement.ToArray());
 					currentStatement.Clear();
 				}
@@ -257,7 +257,7 @@ namespace Confuser.Protections.ControlFlow {
 
 						// Not within current instruction block / targeted in first statement
 						if (srcs.Any(src => src.Offset <= statements.First.Value.Last().Offset ||
-						                    src.Offset >= block.Instructions.Last().Offset))
+											src.Offset >= block.Instructions.Last().Offset))
 							return true;
 
 						// Not targeted by the last of statements
@@ -304,7 +304,7 @@ namespace Confuser.Protections.ControlFlow {
 							var target = (Instruction)newStatement.Last().Operand;
 							int brKey;
 							if (!trace.IsBranchTarget(newStatement.Last().Offset) &&
-							    statementKeys.TryGetValue(target, out brKey)) {
+								statementKeys.TryGetValue(target, out brKey)) {
 								var targetKey = predicate != null ? predicate.GetSwitchKey(brKey) : brKey;
 								var unkSrc = hasUnknownSource(newStatement);
 
@@ -335,7 +335,7 @@ namespace Confuser.Protections.ControlFlow {
 							var target = (Instruction)newStatement.Last().Operand;
 							int brKey;
 							if (!trace.IsBranchTarget(newStatement.Last().Offset) &&
-							    statementKeys.TryGetValue(target, out brKey)) {
+								statementKeys.TryGetValue(target, out brKey)) {
 								bool unkSrc = hasUnknownSource(newStatement);
 								int nextKey = key[i + 1];
 								OpCode condBr = newStatement.Last().OpCode;

@@ -3,10 +3,10 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
+using CommunityToolkit.Mvvm.Input;
 using Confuser.Core;
 using Confuser.Core.Project;
 using ConfuserEx.ViewModel;
-using CommunityToolkit.Mvvm.Input;
 
 namespace ConfuserEx.Views {
 	public partial class ProjectRuleView : Window {

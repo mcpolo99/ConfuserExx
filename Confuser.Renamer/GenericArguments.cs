@@ -70,7 +70,7 @@ namespace Confuser.Renamer {
 
 			return sig;
 		}
-		
+
 		private ref struct GenericArgumentsStack {
 			private List<IList<TypeSig>> _argsStack;
 

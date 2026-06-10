@@ -100,8 +100,7 @@ namespace Confuser.Protections.AntiTamper {
 		}
 
 		void WriterEvent(object sender, ModuleWriterEventArgs e) {
-			switch (e.Event)
-			{
+			switch (e.Event) {
 				case ModuleWriterEvent.MDEndCreateTables:
 					CreateSections(e.Writer);
 					break;

@@ -33,7 +33,7 @@ namespace Confuser.Renamer {
 		///		<paramref name="service" /> is <see langword="null" />
 		/// </exception>
 		bool UpdateNameReference(ConfuserContext context, INameService service);
-		
+
 		/// <summary>
 		///		Get a description of this reference, containing the original
 		///		names of the referenced objects.

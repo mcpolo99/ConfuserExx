@@ -42,11 +42,9 @@ namespace Confuser.Core {
 
 		readonly Marker marker;
 		readonly ConfuserContext _context;
-
 		/// <summary>
 		///     Initializes a new instance of the <see cref="CoreComponent" /> class.
 		/// </summary>
-		/// <param name="parameters">The parameters.</param>
 		/// <param name="marker">The marker.</param>
 		internal CoreComponent(ConfuserContext context, Marker marker) {
 			_context = context;

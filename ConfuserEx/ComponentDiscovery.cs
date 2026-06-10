@@ -63,10 +63,10 @@ namespace ConfuserEx {
 			protected override Assembly Load(AssemblyName assemblyName) {
 				// Defer to the default context for Confuser.Core types to maintain type identity
 				if (assemblyName.Name == "Confuser.Core" ||
-				    assemblyName.Name == "Confuser.Protections" ||
-				    assemblyName.Name == "Confuser.Renamer" ||
-				    assemblyName.Name == "Confuser.DynCipher" ||
-				    assemblyName.Name == "dnlib")
+					assemblyName.Name == "Confuser.Protections" ||
+					assemblyName.Name == "Confuser.Renamer" ||
+					assemblyName.Name == "Confuser.DynCipher" ||
+					assemblyName.Name == "dnlib")
 					return null;
 
 				string assemblyPath = resolver.ResolveAssemblyToPath(assemblyName);

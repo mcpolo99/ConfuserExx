@@ -120,13 +120,13 @@ namespace Confuser.Core.Helpers {
 							foreach (var eh in graph.Body.ExceptionHandlers) {
 								if (eh.FilterStart != null && block.Footer.OpCode.Code == Code.Endfilter) {
 									if (footerIndex >= graph.IndexOf(eh.FilterStart) &&
-									    footerIndex < graph.IndexOf(eh.HandlerStart))
+										footerIndex < graph.IndexOf(eh.HandlerStart))
 										ehs.Add(eh);
 								}
 								else if (eh.HandlerType == ExceptionHandlerType.Finally ||
-								         eh.HandlerType == ExceptionHandlerType.Fault) {
+										 eh.HandlerType == ExceptionHandlerType.Fault) {
 									if (footerIndex >= graph.IndexOf(eh.HandlerStart) &&
-									    (eh.HandlerEnd == null || footerIndex < graph.IndexOf(eh.HandlerEnd)))
+										(eh.HandlerEnd == null || footerIndex < graph.IndexOf(eh.HandlerEnd)))
 										ehs.Add(eh);
 								}
 							}
@@ -158,7 +158,7 @@ namespace Confuser.Core.Helpers {
 							int footerIndex = graph.IndexOf(block.Footer);
 							foreach (var eh in graph.Body.ExceptionHandlers) {
 								if (footerIndex >= graph.IndexOf(eh.TryStart) &&
-								    (eh.TryEnd == null || footerIndex < graph.IndexOf(eh.TryEnd)))
+									(eh.TryEnd == null || footerIndex < graph.IndexOf(eh.TryEnd)))
 									ehs.Add(eh);
 							}
 							ehMap[block] = ehs;

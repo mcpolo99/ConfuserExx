@@ -24,7 +24,7 @@ namespace Confuser.Renamer.References {
 		/// <inheritdoc />
 		public bool DelayRenaming(INameService service, IDnlibDef currentDef) => false;
 
-		public BAMLPathTypeReference(BAMLAnalyzer.XmlNsContext xmlnsCtx, TypeSig sig, PropertyPathIndexUpdater indexerInfo) : this(xmlnsCtx, sig) => 
+		public BAMLPathTypeReference(BAMLAnalyzer.XmlNsContext xmlnsCtx, TypeSig sig, PropertyPathIndexUpdater indexerInfo) : this(xmlnsCtx, sig) =>
 			IndexerInfo = indexerInfo;
 
 		public BAMLPathTypeReference(BAMLAnalyzer.XmlNsContext xmlnsCtx, TypeSig sig, PropertyDef property, PropertyPathPartUpdater propertyInfo) : this(xmlnsCtx, sig) {

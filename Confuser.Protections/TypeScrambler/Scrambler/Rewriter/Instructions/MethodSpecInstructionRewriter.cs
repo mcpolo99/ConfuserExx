@@ -20,7 +20,8 @@ namespace Confuser.Protections.TypeScrambler.Scrambler.Rewriter.Instructions {
 				if (operandScanned?.IsScambled == true) {
 					operand.GenericInstMethodSig = operandScanned.CreateGenericMethodSig(current, service, operand.GenericInstMethodSig);
 				}
-			} else if (current?.IsScambled == true) {
+			}
+			else if (current?.IsScambled == true) {
 				var generics = operand.GenericInstMethodSig.GenericArguments.Select(x => current.ConvertToGenericIfAvalible(x));
 				operand.GenericInstMethodSig = new GenericInstMethodSig(generics.ToArray());
 			}

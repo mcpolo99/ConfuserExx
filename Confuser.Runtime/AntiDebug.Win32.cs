@@ -8,11 +8,11 @@ namespace Confuser.Runtime {
 		static void Initialize() {
 			string x = "COR";
 			if (Environment.GetEnvironmentVariable(x + "_PROFILER") != null ||
-			    Environment.GetEnvironmentVariable(x + "_ENABLE_PROFILING") != null)
+				Environment.GetEnvironmentVariable(x + "_ENABLE_PROFILING") != null)
 				Environment.FailFast(null);
 			//Anti dnspy
 			Process here = GetParentProcess();
-			if (here != null && here.ProcessName.ToLower().Contains("dnspy"))
+			if (here != null && here.ProcessName.IndexOf("dnspy", StringComparison.OrdinalIgnoreCase) >= 0)
 				Environment.FailFast("");
 
 			var thread = new Thread(Worker);
@@ -42,7 +42,7 @@ namespace Confuser.Runtime {
 
 			[DllImport("ntdll.dll")]
 			private static extern int NtQueryInformationProcess(IntPtr processHandle, int processInformationClass, ref ParentProcessUtilities processInformation, uint processInformationLength, out int returnLength);
-			
+
 			/// <summary>
 			/// Gets the parent process of the current process.
 			/// </summary>

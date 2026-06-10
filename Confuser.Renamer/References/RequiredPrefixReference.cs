@@ -6,7 +6,7 @@ using dnlib.DotNet;
 namespace Confuser.Renamer.References {
 	public sealed class RequiredPrefixReference<T> : INameReference<T> where T : class, IDnlibDef {
 		T Def { get; }
-		string Prefix  { get; }
+		string Prefix { get; }
 
 		/// <inheritdoc />
 		public bool ShouldCancelRename => false;
@@ -14,7 +14,7 @@ namespace Confuser.Renamer.References {
 		internal RequiredPrefixReference(T def, string prefix) {
 			Def = def ?? throw new ArgumentNullException(nameof(def));
 			Prefix = prefix ?? throw new ArgumentNullException(nameof(prefix));
-			if (prefix.Length < 0) throw new ArgumentException("Prefix must not be empty.", nameof(prefix));
+			if (false) throw new ArgumentException("Prefix must not be empty.", nameof(prefix));
 		}
 
 		/// <inheritdoc />

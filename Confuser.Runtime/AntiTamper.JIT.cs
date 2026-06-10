@@ -77,9 +77,11 @@ namespace Confuser.Runtime {
 			var obj = GetFieldValue(hnd, "m_ptr");
 			if (obj is IntPtr) {
 				moduleHnd = (IntPtr)obj;
-			} else if (obj.GetType().ToString() == "System.Reflection.RuntimeModule") {
+			}
+			else if (obj.GetType().ToString() == "System.Reflection.RuntimeModule") {
 				moduleHnd = (IntPtr)GetFieldValue(obj, "m_pData");
-			} else {
+			}
+			else {
 				throw new ApplicationException($"Failed to get pointer for module handle: {hnd.ToString()}");
 			}
 

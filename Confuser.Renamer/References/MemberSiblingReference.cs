@@ -27,9 +27,9 @@ namespace Confuser.Renamer.References {
 		public bool ShouldCancelRename => ThisMemberDef.Module != OldestSiblingDef.Module;
 
 		/// <inheritdoc />
-		public bool DelayRenaming(INameService service, IDnlibDef currentDef) => 
-			currentDef != OldestSiblingDef 
-			&& !ShouldCancelRename 
+		public bool DelayRenaming(INameService service, IDnlibDef currentDef) =>
+			currentDef != OldestSiblingDef
+			&& !ShouldCancelRename
 			&& !service.IsRenamed(OldestSiblingDef);
 
 		/// <inheritdoc />
@@ -40,7 +40,7 @@ namespace Confuser.Renamer.References {
 		}
 
 		public override string ToString() => ToString(null);
-		
+
 		/// <inheritdoc />
 		public string ToString(INameService nameService) {
 			var builder = new StringBuilder();

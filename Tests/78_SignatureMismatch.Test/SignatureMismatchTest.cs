@@ -16,7 +16,7 @@ namespace SignatureMismatch.Test {
 		public async Task SignatureMismatch() =>
 			await Run(
 				"78_SignatureMismatch.exe",
-				new [] {
+				new[] {
 					"Dictionary created",
 					"Dictionary count: 1",
 					"[Test1] = Test2"

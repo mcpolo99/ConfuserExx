@@ -119,7 +119,7 @@ namespace Confuser.Runtime {
 			}
 
 			public static uint ReverseDecode(BitDecoder[] Models, UInt32 startIndex,
-			                                 Decoder rangeDecoder, int NumBitLevels) {
+											 Decoder rangeDecoder, int NumBitLevels) {
 				uint m = 1;
 				uint symbol = 0;
 				for (int bitIndex = 0; bitIndex < NumBitLevels; bitIndex++) {
@@ -268,7 +268,7 @@ namespace Confuser.Runtime {
 			}
 
 			public void Code(Stream inStream, Stream outStream,
-			                 Int64 inSize, Int64 outSize) {
+							 Int64 inSize, Int64 outSize) {
 				Init(inStream, outStream);
 
 				var state = new State();
@@ -294,7 +294,7 @@ namespace Confuser.Runtime {
 							byte prevByte = m_OutWindow.GetByte(0);
 							if (!state.IsCharState())
 								b = m_LiteralDecoder.DecodeWithMatchByte(m_RangeDecoder,
-								                                         (uint)nowPos64, prevByte, m_OutWindow.GetByte(rep0));
+																		 (uint)nowPos64, prevByte, m_OutWindow.GetByte(rep0));
 							else
 								b = m_LiteralDecoder.DecodeNormal(m_RangeDecoder, (uint)nowPos64, prevByte);
 							m_OutWindow.PutByte(b);
@@ -344,7 +344,7 @@ namespace Confuser.Runtime {
 									rep0 = ((2 | (posSlot & 1)) << numDirectBits);
 									if (posSlot < kEndPosModelIndex)
 										rep0 += BitTreeDecoder.ReverseDecode(m_PosDecoders,
-										                                     rep0 - posSlot - 1, m_RangeDecoder, numDirectBits);
+																			 rep0 - posSlot - 1, m_RangeDecoder, numDirectBits);
 									else {
 										rep0 += (m_RangeDecoder.DecodeDirectBits(
 											numDirectBits - kNumAlignBits) << kNumAlignBits);
@@ -436,7 +436,7 @@ namespace Confuser.Runtime {
 
 				public void Create(int numPosBits, int numPrevBits) {
 					if (m_Coders != null && m_NumPrevBits == numPrevBits &&
-					    m_NumPosBits == numPosBits)
+						m_NumPosBits == numPosBits)
 						return;
 					m_NumPosBits = numPosBits;
 					m_PosMask = ((uint)1 << numPosBits) - 1;

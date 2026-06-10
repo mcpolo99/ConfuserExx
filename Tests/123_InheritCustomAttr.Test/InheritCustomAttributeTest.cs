@@ -21,14 +21,14 @@ namespace _123_InheritCustomAttr.Test {
 		public async Task InheritCustomAttribute(string renameMode, bool flatten) =>
 			await Run(
 				"123_InheritCustomAttr.exe",
-				new[] {"Monday", "43", "1"},
-				new SettingItem<Protection>("rename") {{"mode", renameMode}, {"flatten", flatten ? "True" : "False"}},
+				new[] { "Monday", "43", "1" },
+				new SettingItem<Protection>("rename") { { "mode", renameMode }, { "flatten", flatten ? "True" : "False" } },
 				$"_{renameMode}_{flatten}",
 				l => Assert.False(l.StartsWith("[WARN]"), "Logged line may not start with [WARN]\r\n" + l));
 
 		public static IEnumerable<object[]> InheritCustomAttributeData() {
-			foreach (var renameMode in new [] { nameof(RenameMode.Unicode), nameof(RenameMode.ASCII), nameof(RenameMode.Letters), nameof(RenameMode.Debug), nameof(RenameMode.Retain) })
-				foreach (var flatten in new [] { true, false })
+			foreach (var renameMode in new[] { nameof(RenameMode.Unicode), nameof(RenameMode.ASCII), nameof(RenameMode.Letters), nameof(RenameMode.Debug), nameof(RenameMode.Retain) })
+				foreach (var flatten in new[] { true, false })
 					yield return new object[] { renameMode, flatten };
 		}
 	}

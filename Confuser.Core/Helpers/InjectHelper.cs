@@ -99,7 +99,7 @@ namespace Confuser.Core.Helpers {
 
 			newMethodDef.Signature = ctx.Importer.Import(methodDef.Signature);
 			newMethodDef.Parameters.UpdateParameterTypes();
-			
+
 			foreach (var paramDef in methodDef.ParamDefs)
 				newMethodDef.ParamDefs.Add(new ParamDefUser(paramDef.Name, paramDef.Sequence, paramDef.Attributes));
 
@@ -112,16 +112,14 @@ namespace Confuser.Core.Helpers {
 			if (methodDef.HasBody)
 				CopyMethodBody(methodDef, ctx, newMethodDef);
 		}
-		
-		static void CopyMethodBody(MethodDef methodDef, InjectContext ctx, MethodDef newMethodDef)
-		{
+
+		static void CopyMethodBody(MethodDef methodDef, InjectContext ctx, MethodDef newMethodDef) {
 			newMethodDef.Body = new CilBody(methodDef.Body.InitLocals, new List<Instruction>(),
-				new List<ExceptionHandler>(), new List<Local>()) {MaxStack = methodDef.Body.MaxStack};
+				new List<ExceptionHandler>(), new List<Local>()) { MaxStack = methodDef.Body.MaxStack };
 
 			var bodyMap = new Dictionary<object, object>();
 
-			foreach (Local local in methodDef.Body.Variables)
-			{
+			foreach (Local local in methodDef.Body.Variables) {
 				var newLocal = new Local(ctx.Importer.Import(local.Type));
 				newMethodDef.Body.Variables.Add(newLocal);
 				newLocal.Name = local.Name;
@@ -129,15 +127,12 @@ namespace Confuser.Core.Helpers {
 				bodyMap[local] = newLocal;
 			}
 
-			foreach (Instruction instr in methodDef.Body.Instructions)
-			{
-				var newInstr = new Instruction(instr.OpCode, instr.Operand)
-				{
+			foreach (Instruction instr in methodDef.Body.Instructions) {
+				var newInstr = new Instruction(instr.OpCode, instr.Operand) {
 					SequencePoint = instr.SequencePoint
 				};
 
-				switch (newInstr.Operand)
-				{
+				switch (newInstr.Operand) {
 					case IType type:
 						newInstr.Operand = ctx.Importer.Import(type);
 						break;
@@ -153,23 +148,21 @@ namespace Confuser.Core.Helpers {
 				bodyMap[instr] = newInstr;
 			}
 
-			foreach (Instruction instr in newMethodDef.Body.Instructions)
-			{
+			foreach (Instruction instr in newMethodDef.Body.Instructions) {
 				if (instr.Operand != null && bodyMap.ContainsKey(instr.Operand))
 					instr.Operand = bodyMap[instr.Operand];
 				else if (instr.Operand is Instruction[] instructions)
-					instr.Operand = instructions.Select(target => (Instruction) bodyMap[target]).ToArray();
+					instr.Operand = instructions.Select(target => (Instruction)bodyMap[target]).ToArray();
 			}
 
 			foreach (ExceptionHandler eh in methodDef.Body.ExceptionHandlers)
-				newMethodDef.Body.ExceptionHandlers.Add(new ExceptionHandler(eh.HandlerType)
-				{
+				newMethodDef.Body.ExceptionHandlers.Add(new ExceptionHandler(eh.HandlerType) {
 					CatchType = eh.CatchType == null ? null : ctx.Importer.Import(eh.CatchType),
-					TryStart = (Instruction) bodyMap[eh.TryStart],
-					TryEnd = (Instruction) bodyMap[eh.TryEnd],
-					HandlerStart = (Instruction) bodyMap[eh.HandlerStart],
-					HandlerEnd = (Instruction) bodyMap[eh.HandlerEnd],
-					FilterStart = eh.FilterStart == null ? null : (Instruction) bodyMap[eh.FilterStart]
+					TryStart = (Instruction)bodyMap[eh.TryStart],
+					TryEnd = (Instruction)bodyMap[eh.TryEnd],
+					HandlerStart = (Instruction)bodyMap[eh.HandlerStart],
+					HandlerEnd = (Instruction)bodyMap[eh.HandlerEnd],
+					FilterStart = eh.FilterStart == null ? null : (Instruction)bodyMap[eh.FilterStart]
 				});
 
 			newMethodDef.Body.SimplifyMacros(newMethodDef.Parameters);
@@ -288,7 +281,7 @@ namespace Confuser.Core.Helpers {
 			public override ITypeDefOrRef Map(ITypeDefOrRef source) {
 				if (DefMap.TryGetValue(source, out var mappedRef))
 					return mappedRef as ITypeDefOrRef;
-				
+
 				// check if the assembly reference needs to be fixed.
 				if (source is TypeRef sourceRef) {
 					var targetAssemblyRef = TargetModule.GetAssemblyRef(sourceRef.DefinitionAssembly.Name);

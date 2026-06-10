@@ -211,14 +211,14 @@ namespace Confuser.Protections {
 			IEnumerable<IDnlibDef> defs = InjectHelper.Inject(rtType, stubModule.GlobalType, stubModule);
 
 			switch (parameters.GetParameter(context, context.CurrentModule, "key", Mode.Normal)) {
-			case Mode.Normal:
-				compCtx.Deriver = new NormalDeriver();
-				break;
-			case Mode.Dynamic:
-				compCtx.Deriver = new DynamicDeriver();
-				break;
-			default:
-				throw new UnreachableException();
+				case Mode.Normal:
+					compCtx.Deriver = new NormalDeriver();
+					break;
+				case Mode.Dynamic:
+					compCtx.Deriver = new DynamicDeriver();
+					break;
+				default:
+					throw new UnreachableException();
 			}
 			compCtx.Deriver.Init(context, random);
 

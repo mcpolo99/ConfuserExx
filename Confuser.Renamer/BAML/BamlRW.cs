@@ -37,8 +37,8 @@ namespace Confuser.Renamer.BAML {
 			ret.UpdaterVersion = new BamlDocument.BamlVersion { Major = reader.ReadUInt16(), Minor = reader.ReadUInt16() };
 			ret.WriterVersion = new BamlDocument.BamlVersion { Major = reader.ReadUInt16(), Minor = reader.ReadUInt16() };
 			if (ret.ReaderVersion.Major != 0 || ret.ReaderVersion.Minor != 0x60 ||
-			    ret.UpdaterVersion.Major != 0 || ret.UpdaterVersion.Minor != 0x60 ||
-			    ret.WriterVersion.Major != 0 || ret.WriterVersion.Minor != 0x60)
+				ret.UpdaterVersion.Major != 0 || ret.UpdaterVersion.Minor != 0x60 ||
+				ret.WriterVersion.Major != 0 || ret.WriterVersion.Minor != 0x60)
 				throw new NotSupportedException();
 
 			var recs = new Dictionary<long, BamlRecord>();

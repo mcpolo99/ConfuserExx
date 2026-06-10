@@ -125,20 +125,20 @@ namespace Confuser.Protections.Constants {
 			void InjectNativeCode(object sender, ModuleWriterEventArgs e) {
 				var writer = e.Writer;
 				switch (e.Event) {
-				case ModuleWriterEvent.MDEndWriteMethodBodies:
-					codeChunk = writer.MethodBodies.Add(new MethodBody(code));
-					break;
-				case ModuleWriterEvent.EndCalculateRvasAndFileOffsets:
-					uint rid = writer.Metadata.GetRid(native);
-					var methodRow = writer.Metadata.TablesHeap.MethodTable[rid];
-					writer.Metadata.TablesHeap.MethodTable[rid] = new RawMethodRow(
-					  (uint)codeChunk.RVA,
-					  methodRow.ImplFlags,
-					  methodRow.Flags,
-					  methodRow.Name,
-					  methodRow.Signature,
-					  methodRow.ParamList);
-					break;
+					case ModuleWriterEvent.MDEndWriteMethodBodies:
+						codeChunk = writer.MethodBodies.Add(new MethodBody(code));
+						break;
+					case ModuleWriterEvent.EndCalculateRvasAndFileOffsets:
+						uint rid = writer.Metadata.GetRid(native);
+						var methodRow = writer.Metadata.TablesHeap.MethodTable[rid];
+						writer.Metadata.TablesHeap.MethodTable[rid] = new RawMethodRow(
+						  (uint)codeChunk.RVA,
+						  methodRow.ImplFlags,
+						  methodRow.Flags,
+						  methodRow.Name,
+						  methodRow.Signature,
+						  methodRow.ParamList);
+						break;
 				}
 			}
 		}

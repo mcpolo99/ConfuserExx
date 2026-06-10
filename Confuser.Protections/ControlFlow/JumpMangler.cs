@@ -26,13 +26,13 @@ namespace Confuser.Protections.ControlFlow {
 				if (block.Instructions[i].OpCode.OpCodeType == OpCodeType.Prefix) {
 					skipCount = 1;
 				}
-				else if (HasInstructionSeq(block.Instructions, i,Code.Dup, Code.Ldvirtftn, Code.Newobj)) {
+				else if (HasInstructionSeq(block.Instructions, i, Code.Dup, Code.Ldvirtftn, Code.Newobj)) {
 					skipCount = 2;
 				}
-				else if (HasInstructionSeq(block.Instructions, i,Code.Ldc_I4, Code.Newarr, Code.Dup, Code.Ldtoken, Code.Call)) { // Array initializer
+				else if (HasInstructionSeq(block.Instructions, i, Code.Ldc_I4, Code.Newarr, Code.Dup, Code.Ldtoken, Code.Call)) { // Array initializer
 					skipCount = 4;
 				}
-				else if (HasInstructionSeq(block.Instructions, i,Code.Ldftn, Code.Newobj)) { // Create delegate to function
+				else if (HasInstructionSeq(block.Instructions, i, Code.Ldftn, Code.Newobj)) { // Create delegate to function
 					skipCount = 1;
 				}
 				currentFragment.Add(block.Instructions[i]);
