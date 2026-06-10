@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using GalaSoft.MvvmLight.CommandWpf;
+using CommunityToolkit.Mvvm.Input;
 
 namespace ConfuserEx.ViewModel {
 	internal class AboutTabVM : TabViewModel {
@@ -15,7 +15,7 @@ namespace ConfuserEx.ViewModel {
 		}
 
 		public ICommand LaunchBrowser {
-			get { return new RelayCommand<string>(site => Process.Start(site)); }
+			get { return new RelayCommand<string>(site => Process.Start(new ProcessStartInfo(site) { UseShellExecute = true })); }
 		}
 
 		public BitmapSource Icon { get; private set; }

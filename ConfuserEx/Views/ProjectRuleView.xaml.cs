@@ -6,7 +6,7 @@ using System.Windows.Media;
 using Confuser.Core;
 using Confuser.Core.Project;
 using ConfuserEx.ViewModel;
-using GalaSoft.MvvmLight.CommandWpf;
+using CommunityToolkit.Mvvm.Input;
 
 namespace ConfuserEx.Views {
 	public partial class ProjectRuleView : Window {
@@ -43,7 +43,7 @@ namespace ConfuserEx.Views {
 				prots.SelectedIndex = selIndex >= rule.Protections.Count ? rule.Protections.Count - 1 : selIndex;
 			}, () => prots.SelectedIndex != -1);
 
-			prots.SelectionChanged += (sender, args) => (RemoveBtn.Command as RelayCommand)?.RaiseCanExecuteChanged();
+			prots.SelectionChanged += (sender, args) => (RemoveBtn.Command as RelayCommand)?.NotifyCanExecuteChanged();
 		}
 
 		public void Cleanup() {

@@ -1,38 +1,34 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
+using System.Runtime.Loader;
 using Confuser.Core;
 
 namespace ConfuserEx {
 	internal class ComponentDiscovery {
-		static void CrossDomainLoadComponents() {
-			var ctx = (CrossDomainContext)AppDomain.CurrentDomain.GetData("ctx");
-			// Initialize the version resolver callback
-			ConfuserEngine.Version.ToString();
-
-			Assembly assembly = Assembly.LoadFile(ctx.PluginPath);
-			foreach (var module in assembly.GetLoadedModules())
-				foreach (var i in module.GetTypes()) {
-					if (i.IsAbstract || !PluginDiscovery.HasAccessibleDefConstructor(i))
-						continue;
-
-					if (typeof(Protection).IsAssignableFrom(i)) {
-						var prot = (Protection)Activator.CreateInstance(i);
-						ctx.AddProtection(Info.FromComponent(prot, ctx.PluginPath));
-					}
-					else if (typeof(Packer).IsAssignableFrom(i)) {
-						var packer = (Packer)Activator.CreateInstance(i);
-						ctx.AddPacker(Info.FromComponent(packer, ctx.PluginPath));
-					}
-				}
-		}
-
 		public static void LoadComponents(IList<ConfuserComponent> protections, IList<ConfuserComponent> packers, string pluginPath) {
-			var ctx = new CrossDomainContext(protections, packers, pluginPath);
-			AppDomain appDomain = AppDomain.CreateDomain("");
-			appDomain.SetData("ctx", ctx);
-			appDomain.DoCallBack(CrossDomainLoadComponents);
-			AppDomain.Unload(appDomain);
+			var alc = new PluginLoadContext(pluginPath);
+			try {
+				Assembly assembly = alc.LoadFromAssemblyPath(pluginPath);
+				foreach (var module in assembly.GetLoadedModules())
+					foreach (var i in module.GetTypes()) {
+						if (i.IsAbstract || !PluginDiscovery.HasAccessibleDefConstructor(i))
+							continue;
+
+						if (typeof(Protection).IsAssignableFrom(i)) {
+							var prot = (Protection)Activator.CreateInstance(i);
+							AddProtection(protections, Info.FromComponent(prot, pluginPath));
+						}
+						else if (typeof(Packer).IsAssignableFrom(i)) {
+							var packer = (Packer)Activator.CreateInstance(i);
+							AddPacker(packers, Info.FromComponent(packer, pluginPath));
+						}
+					}
+			}
+			finally {
+				alc.Unload();
+			}
 		}
 
 		public static void RemoveComponents(IList<ConfuserComponent> protections, IList<ConfuserComponent> packers, string pluginPath) {
@@ -40,39 +36,55 @@ namespace ConfuserEx {
 			packers.RemoveWhere(comp => comp is InfoComponent && ((InfoComponent)comp).info.path == pluginPath);
 		}
 
-		class CrossDomainContext : MarshalByRefObject {
-			readonly IList<ConfuserComponent> packers;
-			readonly string pluginPath;
-			readonly IList<ConfuserComponent> protections;
+		static void AddProtection(IList<ConfuserComponent> protections, Info info) {
+			foreach (var comp in protections) {
+				if (comp.Id == info.id)
+					return;
+			}
+			protections.Add(new InfoComponent(info));
+		}
 
-			public CrossDomainContext(IList<ConfuserComponent> protections, IList<ConfuserComponent> packers, string pluginPath) {
-				this.protections = protections;
-				this.packers = packers;
-				this.pluginPath = pluginPath;
+		static void AddPacker(IList<ConfuserComponent> packers, Info info) {
+			foreach (var comp in packers) {
+				if (comp.Id == info.id)
+					return;
+			}
+			packers.Add(new InfoComponent(info));
+		}
+
+		sealed class PluginLoadContext : AssemblyLoadContext {
+			readonly AssemblyDependencyResolver resolver;
+
+			public PluginLoadContext(string pluginPath)
+				: base(isCollectible: true) {
+				resolver = new AssemblyDependencyResolver(pluginPath);
 			}
 
-			public string PluginPath {
-				get { return pluginPath; }
+			protected override Assembly Load(AssemblyName assemblyName) {
+				// Defer to the default context for Confuser.Core types to maintain type identity
+				if (assemblyName.Name == "Confuser.Core" ||
+				    assemblyName.Name == "Confuser.Protections" ||
+				    assemblyName.Name == "Confuser.Renamer" ||
+				    assemblyName.Name == "Confuser.DynCipher" ||
+				    assemblyName.Name == "dnlib")
+					return null;
+
+				string assemblyPath = resolver.ResolveAssemblyToPath(assemblyName);
+				if (assemblyPath != null)
+					return LoadFromAssemblyPath(assemblyPath);
+
+				return null;
 			}
 
-			public void AddProtection(Info info) {
-				foreach (var comp in protections) {
-					if (comp.Id == info.id)
-						return;
-				}
-				protections.Add(new InfoComponent(info));
-			}
+			protected override IntPtr LoadUnmanagedDll(string unmanagedDllName) {
+				string libraryPath = resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+				if (libraryPath != null)
+					return LoadUnmanagedDllFromPath(libraryPath);
 
-			public void AddPacker(Info info) {
-				foreach (var comp in packers) {
-					if (comp.Id == info.id)
-						return;
-				}
-				packers.Add(new InfoComponent(info));
+				return IntPtr.Zero;
 			}
 		}
 
-		[Serializable]
 		class Info {
 			public string desc;
 			public string fullId;

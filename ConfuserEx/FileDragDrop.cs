@@ -7,14 +7,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using ConfuserEx.ViewModel;
-using GalaSoft.MvvmLight.CommandWpf;
+using CommunityToolkit.Mvvm.Input;
 
 namespace ConfuserEx {
 	public class FileDragDrop {
 		public static readonly DependencyProperty CommandProperty =
 			DependencyProperty.RegisterAttached("Command", typeof(ICommand), typeof(FileDragDrop), new UIPropertyMetadata(null, OnCommandChanged));
 
-		public static ICommand FileCmd = new DragDropCommand(
+		public static ICommand FileCmd = new RelayCommand<Tuple<UIElement, IDataObject>>(
 			data => {
 				Debug.Assert(data.Item2.GetDataPresent(DataFormats.FileDrop));
 				if (data.Item1 is TextBox) {
@@ -38,7 +38,7 @@ namespace ConfuserEx {
 			});
 
 
-		public static ICommand DirectoryCmd = new DragDropCommand(
+		public static ICommand DirectoryCmd = new RelayCommand<Tuple<UIElement, IDataObject>>(
 			data => {
 				Debug.Assert(data.Item2.GetDataPresent(DataFormats.FileDrop));
 				if (data.Item1 is TextBox) {
@@ -86,7 +86,7 @@ namespace ConfuserEx {
 		static void OnDragOver(object sender, DragEventArgs e) {
 			ICommand cmd = GetCommand((DependencyObject)sender);
 			e.Effects = DragDropEffects.None;
-			if (cmd is DragDropCommand) {
+			if (cmd is RelayCommand<Tuple<UIElement, IDataObject>>) {
 				if (cmd.CanExecute(Tuple.Create((UIElement)sender, e.Data)))
 					e.Effects = DragDropEffects.Link;
 			}
@@ -99,7 +99,7 @@ namespace ConfuserEx {
 
 		static void OnDrop(object sender, DragEventArgs e) {
 			ICommand cmd = GetCommand((DependencyObject)sender);
-			if (cmd is DragDropCommand) {
+			if (cmd is RelayCommand<Tuple<UIElement, IDataObject>>) {
 				if (cmd.CanExecute(Tuple.Create((UIElement)sender, e.Data)))
 					cmd.Execute(Tuple.Create((UIElement)sender, e.Data));
 			}
@@ -111,9 +111,5 @@ namespace ConfuserEx {
 		}
 
 
-		class DragDropCommand : RelayCommand<Tuple<UIElement, IDataObject>> {
-			public DragDropCommand(Action<Tuple<UIElement, IDataObject>> execute, Func<Tuple<UIElement, IDataObject>, bool> canExecute)
-				: base(execute, canExecute) { }
-		}
 	}
 }

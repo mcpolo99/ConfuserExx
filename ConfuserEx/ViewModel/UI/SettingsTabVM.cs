@@ -8,7 +8,7 @@ using System.Windows.Input;
 using Confuser.Core;
 using Confuser.Core.Project;
 using ConfuserEx.Views;
-using GalaSoft.MvvmLight.CommandWpf;
+using CommunityToolkit.Mvvm.Input;
 
 namespace ConfuserEx.ViewModel {
 	internal class SettingsTabVM : TabViewModel {
