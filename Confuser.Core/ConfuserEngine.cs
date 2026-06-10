@@ -103,7 +103,7 @@ namespace Confuser.Core {
 				var firstModule = context.Project.FirstOrDefault(m => !m.IsExternal);
 				if (firstModule != null) {
 					var modulePath = Path.Combine(context.BaseDirectory, firstModule.Path);
-					foreach (var runtimePath in DotNetCorePathResolver.ResolveRuntimePaths(modulePath)) {
+					foreach (var runtimePath in DotNetCorePathResolver.ResolveRuntimePaths(modulePath, context.Logger)) {
 						asmResolver.PostSearchPaths.Add(runtimePath);
 						context.Logger.DebugFormat("Auto-detected .NET runtime path: {0}", runtimePath);
 					}

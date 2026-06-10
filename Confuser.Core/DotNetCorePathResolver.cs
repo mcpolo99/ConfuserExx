@@ -13,19 +13,19 @@ namespace Confuser.Core {
 		///     Resolves runtime assembly paths for a given module by parsing its runtimeconfig.json
 		///     or probing standard dotnet installation directories.
 		/// </summary>
-		public static IEnumerable<string> ResolveRuntimePaths(string modulePath) {
-			var paths = new List<string>();
-
+		public static IEnumerable<string> ResolveRuntimePaths(string modulePath, ILogger logger) {
 			// 1. Try runtimeconfig.json next to the module (target framework gets priority)
+			var runtimeConfigPaths = Enumerable.Empty<string>();
 			var runtimeConfig = FindRuntimeConfig(modulePath);
 			if (runtimeConfig != null)
-				paths.AddRange(GetPathsFromRuntimeConfig(runtimeConfig));
+				runtimeConfigPaths = GetPathsFromRuntimeConfig(runtimeConfig, logger);
 
 			// 2. Always add ALL installed runtime versions to handle cross-version
 			//    dependencies (e.g., net10.0 app referencing a library compiled against net8.0)
-			paths.AddRange(ProbeAllInstalledRuntimes());
-
-			return paths.Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase);
+			return runtimeConfigPaths
+				.Concat(ProbeAllInstalledRuntimes(logger))
+				.Where(Directory.Exists)
+				.Distinct(StringComparer.OrdinalIgnoreCase);
 		}
 
 		static string FindRuntimeConfig(string modulePath) {
@@ -39,20 +39,38 @@ namespace Confuser.Core {
 			return File.Exists(configPath) ? configPath : null;
 		}
 
-		static IEnumerable<string> GetPathsFromRuntimeConfig(string configPath) {
+		static IEnumerable<string> GetPathsFromRuntimeConfig(string configPath, ILogger logger) {
 			string content;
-			try { content = File.ReadAllText(configPath); }
-			catch { yield break; }
+			try {
+				content = File.ReadAllText(configPath);
+			}
+			catch (IOException ex) {
+				logger.WarnFormat("Failed to read runtime config '{0}': {1}", configPath, ex.Message);
+				yield break;
+			}
+			catch (UnauthorizedAccessException ex) {
+				logger.WarnFormat("Access denied reading runtime config '{0}': {1}", configPath, ex.Message);
+				yield break;
+			}
 
 			var frameworks = ParseFrameworks(content);
-			var dotnetRoot = GetDotNetRoot();
-			if (dotnetRoot == null)
+			if (frameworks.Count == 0) {
+				logger.DebugFormat("No framework references found in '{0}'.", configPath);
 				yield break;
+			}
+
+			var dotnetRoot = GetDotNetRoot();
+			if (dotnetRoot == null) {
+				logger.Warn("Could not locate .NET installation directory. Set DOTNET_ROOT environment variable if installed in a non-standard location.");
+				yield break;
+			}
 
 			foreach (var fw in frameworks) {
 				var sharedDir = Path.Combine(dotnetRoot, "shared", fw.Name);
-				if (!Directory.Exists(sharedDir))
+				if (!Directory.Exists(sharedDir)) {
+					logger.DebugFormat("Framework directory not found: {0}", sharedDir);
 					continue;
+				}
 
 				// Try exact version first
 				var exactPath = Path.Combine(sharedDir, fw.Version);
@@ -63,12 +81,14 @@ namespace Confuser.Core {
 
 				// Try latest matching major.minor
 				var majorMinor = GetMajorMinor(fw.Version);
-				var best = Directory.GetDirectories(sharedDir)
+				var best = Directory.EnumerateDirectories(sharedDir)
 					.Where(d => Path.GetFileName(d).StartsWith(majorMinor, StringComparison.Ordinal))
 					.OrderByDescending(d => d)
 					.FirstOrDefault();
 				if (best != null)
 					yield return best;
+				else
+					logger.WarnFormat("No installed runtime found matching {0} {1} in {2}", fw.Name, fw.Version, sharedDir);
 			}
 		}
 
@@ -117,22 +137,24 @@ namespace Confuser.Core {
 			return parts.Length >= 2 ? parts[0] + "." + parts[1] : version;
 		}
 
-		static IEnumerable<string> ProbeAllInstalledRuntimes() {
+		static IEnumerable<string> ProbeAllInstalledRuntimes(ILogger logger) {
 			var dotnetRoot = GetDotNetRoot();
-			if (dotnetRoot == null)
+			if (dotnetRoot == null) {
+				logger.Warn("Could not locate .NET installation directory for runtime probing.");
 				yield break;
+			}
 
 			var sharedDir = Path.Combine(dotnetRoot, "shared");
-			if (!Directory.Exists(sharedDir))
+			if (!Directory.Exists(sharedDir)) {
+				logger.WarnFormat("Shared framework directory not found: {0}", sharedDir);
 				yield break;
+			}
 
 			// Return ALL installed runtime versions (newest first) across all frameworks.
 			// This handles cross-version dependencies where e.g., a net10.0 app references
 			// a library compiled against net8.0 which needs System.Runtime 8.0.0.0.
-			foreach (var frameworkDir in Directory.GetDirectories(sharedDir)) {
-				var versions = Directory.GetDirectories(frameworkDir)
-					.OrderByDescending(d => d);
-				foreach (var versionDir in versions)
+			foreach (var frameworkDir in Directory.EnumerateDirectories(sharedDir)) {
+				foreach (var versionDir in Directory.EnumerateDirectories(frameworkDir).OrderByDescending(d => d))
 					yield return versionDir;
 			}
 		}
