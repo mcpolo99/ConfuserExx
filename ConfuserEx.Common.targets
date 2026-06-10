@@ -7,5 +7,12 @@
     <PackageReference Include="Roslynator.Analyzers" Version="4.*" PrivateAssets="all"
 					  Condition="'$(EnableNETAnalyzers)' != 'false'" />
   </ItemGroup>
+
+  <!-- Custom ConfuserEx analyzers (CX001-CX004) -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Confuser.Analyzers'">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)Confuser.Analyzers\Confuser.Analyzers.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
   
 </Project>

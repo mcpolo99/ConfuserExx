@@ -354,7 +354,7 @@ namespace Confuser.Renamer.Analyzers {
 
 			var targetDeclTypeDef = targetMethod.DeclaringType.ResolveTypeDef();
 			var overrideDeclTypeDef = methodOverride.MethodDeclaration.DeclaringType.ResolveTypeDef();
-			if (!comparer.Equals(targetDeclTypeDef, overrideDeclTypeDef))
+			if (targetDeclTypeDef == null || overrideDeclTypeDef == null || !comparer.Equals(targetDeclTypeDef, overrideDeclTypeDef))
 				return false;
 
 			var targetMethodSig = targetMethod.MethodSig;

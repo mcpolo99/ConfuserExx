@@ -11,8 +11,11 @@ namespace ConfuserEx {
 			ConfuserEngine.Version.ToString();
 
 			Assembly assembly = Assembly.LoadFile(ctx.PluginPath);
-			foreach (var module in assembly.GetLoadedModules())
-				foreach (var i in module.GetTypes()) {
+			foreach (var module in assembly.GetLoadedModules()) {
+				Type[] types;
+				try { types = module.GetTypes(); }
+				catch (ReflectionTypeLoadException ex) { types = Array.FindAll(ex.Types, t => t != null); }
+				foreach (var i in types) {
 					if (i.IsAbstract || !PluginDiscovery.HasAccessibleDefConstructor(i))
 						continue;
 
@@ -24,6 +27,7 @@ namespace ConfuserEx {
 						var packer = (Packer)Activator.CreateInstance(i);
 						ctx.AddPacker(Info.FromComponent(packer, ctx.PluginPath));
 					}
+				}
 				}
 		}
 

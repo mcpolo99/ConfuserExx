@@ -54,8 +54,11 @@ namespace Confuser.Core {
 		protected static void AddPlugins(
 			ConfuserContext context, IList<Protection> protections, IList<Packer> packers,
 			IList<ConfuserComponent> components, Assembly asm) {
-			foreach(var module in asm.GetLoadedModules())
-				foreach (var i in module.GetTypes()) {
+			foreach (var module in asm.GetLoadedModules()) {
+				Type[] types;
+				try { types = module.GetTypes(); }
+				catch (System.Reflection.ReflectionTypeLoadException ex) { types = ex.Types.Where(t => t != null).ToArray(); }
+				foreach (var i in types) {
 					if (i.IsAbstract || !HasAccessibleDefConstructor(i))
 						continue;
 
@@ -83,6 +86,7 @@ namespace Confuser.Core {
 							context.Logger.ErrorException("Failed to instantiate component '" + i.Name + "'.", ex);
 						}
 					}
+				}
 				}
 			context.CheckCancellation();
 		}
