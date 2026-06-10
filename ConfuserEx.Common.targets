@@ -13,6 +13,7 @@
     <ProjectReference Include="$(MSBuildThisFileDirectory)Confuser.Analyzers\Confuser.Analyzers.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false"
+                      SetTargetFramework="TargetFramework=netstandard2.0"
                       SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>
   
