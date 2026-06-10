@@ -10,6 +10,9 @@ jobs:
   build:
     runs-on: windows-2025
     timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v5
         with:
@@ -62,12 +65,28 @@ jobs:
           dotnet tool install -g dotnet-reportgenerator-globaltool
           $reports = (Get-ChildItem -Path coverage -Filter 'coverage.cobertura.xml' -Recurse).FullName -join ';'
           if ($reports) {
-            reportgenerator "-reports:$reports" "-targetdir:coverage/report" "-reporttypes:HtmlInline_AzurePipelines;Cobertura;TextSummary"
+            reportgenerator "-reports:$reports" "-targetdir:coverage/report" "-reporttypes:HtmlInline_AzurePipelines;Cobertura;TextSummary;MarkdownSummaryGithub"
             Write-Host "--- Coverage Summary ---"
             Get-Content coverage/report/Summary.txt
           } else {
             Write-Host "No coverage files found — skipping report generation."
           }
+
+      - name: Coverage to job summary
+        if: always()
+        shell: pwsh
+        run: |
+          $mdFile = 'coverage/report/SummaryGithub.md'
+          if (Test-Path $mdFile) {
+            Get-Content $mdFile >> $env:GITHUB_STEP_SUMMARY
+          }
+
+      - name: Coverage PR comment
+        if: always() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: coverage-report
+          path: coverage/report/SummaryGithub.md
 
       - name: Upload coverage report
         if: always()
