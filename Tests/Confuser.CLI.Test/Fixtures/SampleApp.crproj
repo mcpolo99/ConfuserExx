@@ -1,0 +1,6 @@
+<project outputDir=".\obfuscated" baseDir="." xmlns="http://confuser.codeplex.com">
+  <rule pattern="true" preset="minimum" inherit="false">
+    <protection id="rename" />
+  </rule>
+  <module path="SampleApp.exe" />
+</project>
