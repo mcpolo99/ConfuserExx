@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     runs-on: windows-2025
-    timeout-minutes: 15
+    timeout-minutes: 20
     permissions:
       contents: read
       pull-requests: write
@@ -35,21 +35,110 @@ jobs:
         run: msbuild Confuser2.sln -p:Configuration=Release -verbosity:minimal
 
       - name: Run tests with coverage
+        id: tests
         shell: pwsh
         run: |
           $coverageDir = 'coverage'
           New-Item -ItemType Directory -Path $coverageDir -Force | Out-Null
 
           $testProjects = Get-ChildItem -Path Tests -Filter '*.Test.csproj' -Recurse | Select-Object -Unique
-          $failed = $false
+          $results = @()
+          $totalPassed = 0
+          $totalFailed = 0
+          $totalSkipped = 0
+          $anyFailed = $false
+
           foreach ($proj in $testProjects) {
-            Write-Host "Testing $($proj.Name)..." -ForegroundColor Cyan
-            dotnet test $proj.FullName -c Release --no-build --verbosity minimal `
+            $name = $proj.BaseName
+            Write-Host "`n========================================" -ForegroundColor Cyan
+            Write-Host "Testing $name" -ForegroundColor Cyan
+            Write-Host "========================================" -ForegroundColor Cyan
+
+            $output = dotnet test $proj.FullName -c Release --no-build --verbosity minimal `
               --collect:"XPlat Code Coverage" `
-              --results-directory "$coverageDir/$($proj.BaseName)"
-            if ($LASTEXITCODE -ne 0) { $failed = $true }
+              --results-directory "$coverageDir/$name" 2>&1 | Out-String
+
+            $exitCode = $LASTEXITCODE
+            Write-Host $output
+
+            # Parse results from output
+            $passed = 0; $failed = 0; $skipped = 0; $total = 0
+            if ($output -match 'Passed:\s+(\d+)') { $passed = [int]$Matches[1] }
+            if ($output -match 'Failed:\s+(\d+)') { $failed = [int]$Matches[1] }
+            if ($output -match 'Skipped:\s+(\d+)') { $skipped = [int]$Matches[1] }
+            if ($output -match 'Total:\s+(\d+)') { $total = [int]$Matches[1] }
+
+            # Extract individual test failures
+            $failedTests = @()
+            $failLines = [regex]::Matches($output, '\[FAIL\]\s*\n\s*(.+?)(?:\s+\[)')
+            foreach ($match in $failLines) { $failedTests += $match.Groups[1].Value.Trim() }
+            # Also try the "Failed <TestName>" format
+            $failLines2 = [regex]::Matches($output, '^\s+Failed\s+(.+?)\s+\[', [System.Text.RegularExpressions.RegexOptions]::Multiline)
+            foreach ($match in $failLines2) { $failedTests += $match.Groups[1].Value.Trim() }
+            $failedTests = $failedTests | Select-Object -Unique
+
+            $status = if ($exitCode -eq 0) { ':white_check_mark:' } else { ':x:'; $anyFailed = $true }
+
+            $results += [PSCustomObject]@{
+              Name = $name
+              Status = $status
+              Passed = $passed
+              Failed = $failed
+              Skipped = $skipped
+              Total = $total
+              FailedTests = ($failedTests -join ', ')
+            }
+
+            $totalPassed += $passed
+            $totalFailed += $failed
+            $totalSkipped += $skipped
           }
-          if ($failed) { exit 1 }
+
+          # Generate test results markdown
+          $md = @()
+          $md += "## Test Results"
+          $md += ""
+          if ($anyFailed) {
+            $md += "> :x: **$totalFailed test(s) failed** out of $($totalPassed + $totalFailed + $totalSkipped) total"
+          } else {
+            $md += "> :white_check_mark: **All $totalPassed tests passed**"
+          }
+          $md += ""
+          $md += "| Project | Status | Passed | Failed | Skipped | Total |"
+          $md += "|---------|--------|--------|--------|---------|-------|"
+          foreach ($r in $results) {
+            $md += "| $($r.Name) | $($r.Status) | $($r.Passed) | $($r.Failed) | $($r.Skipped) | $($r.Total) |"
+          }
+
+          # Add failed test details if any
+          $failedResults = $results | Where-Object { $_.Failed -gt 0 }
+          if ($failedResults) {
+            $md += ""
+            $md += "### Failed Tests"
+            $md += ""
+            foreach ($r in $failedResults) {
+              if ($r.FailedTests) {
+                $md += "**$($r.Name)**:"
+                foreach ($t in ($r.FailedTests -split ', ')) {
+                  $md += "- ``$t``"
+                }
+                $md += ""
+              }
+            }
+          }
+
+          $md += ""
+
+          # Write to file for later steps
+          $md -join "`n" | Set-Content -Path 'test-results.md' -Encoding utf8
+
+          # Also write to step summary immediately
+          $md -join "`n" >> $env:GITHUB_STEP_SUMMARY
+
+          # Set output for final status
+          echo "any_failed=$anyFailed" >> $env:GITHUB_OUTPUT
+          echo "total_passed=$totalPassed" >> $env:GITHUB_OUTPUT
+          echo "total_failed=$totalFailed" >> $env:GITHUB_OUTPUT
 
       - name: Generate coverage report
         if: always()
@@ -65,21 +154,42 @@ jobs:
             Write-Host "No coverage files found."
           }
 
+      - name: Build PR comment
+        if: always() && github.event_name == 'pull_request'
+        shell: pwsh
+        run: |
+          $comment = @()
+
+          # Add test results
+          if (Test-Path 'test-results.md') {
+            $comment += Get-Content 'test-results.md' -Raw
+          }
+
+          # Add coverage
+          $coverageMd = 'coverage/report/SummaryGithub.md'
+          if (Test-Path $coverageMd) {
+            $comment += "`n---`n"
+            $comment += Get-Content $coverageMd -Raw
+          }
+
+          $comment -join "`n" | Set-Content -Path 'pr-comment.md' -Encoding utf8
+
       - name: Coverage to job summary
         if: always()
         shell: pwsh
         run: |
           $mdFile = 'coverage/report/SummaryGithub.md'
           if (Test-Path $mdFile) {
+            "`n---`n" >> $env:GITHUB_STEP_SUMMARY
             Get-Content $mdFile >> $env:GITHUB_STEP_SUMMARY
           }
 
-      - name: Coverage PR comment
+      - name: Post PR comment
         if: always() && github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          header: coverage-report
-          path: coverage/report/SummaryGithub.md
+          header: test-coverage-report
+          path: pr-comment.md
 
       - name: Upload coverage report
         if: always()
@@ -88,3 +198,10 @@ jobs:
           name: coverage-report
           path: coverage/report/
           if-no-files-found: ignore
+
+      - name: Fail if tests failed
+        if: always() && steps.tests.outputs.any_failed == 'True'
+        run: |
+          Write-Host "::error::Tests failed. See the test results above for details."
+          exit 1
+        shell: pwsh
