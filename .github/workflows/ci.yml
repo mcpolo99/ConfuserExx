@@ -8,17 +8,15 @@ on:
 
 jobs:
   build:
-    runs-on: windows-2022
+    runs-on: windows-2025
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Setup .NET 10 SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
 
       - name: Install nbgv
         run: dotnet tool install -g nbgv
@@ -32,10 +30,10 @@ jobs:
           Write-Host "Version: $ver"
 
       - name: Restore
-        run: dotnet restore Confuser2.sln
+        run: msbuild Confuser2.sln -t:Restore -verbosity:minimal
 
       - name: Build
-        run: dotnet build Confuser2.sln -c Release --no-restore
+        run: msbuild Confuser2.sln -p:Configuration=Release -verbosity:minimal
 
       - name: Test
         run: dotnet test Confuser2.sln -c Release --no-build --verbosity minimal
@@ -83,7 +81,7 @@ jobs:
   pre-release:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/pre-release'
-    runs-on: windows-2022
+    runs-on: windows-2025
     timeout-minutes: 5
     permissions:
       contents: write
@@ -133,7 +131,7 @@ jobs:
   release:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: windows-2022
+    runs-on: windows-2025
     timeout-minutes: 5
     permissions:
       contents: write
