@@ -45,6 +45,28 @@ namespace CrossFramework.Test {
 		[Fact]
 		[Trait("Category", "CrossFramework")]
 		[Trait("AppType", "WinForms")]
+		[Trait("TFM", "net6.0-windows")]
+		public Task WinForms_Net6_RenameProtection() =>
+			Run("CrossFramework.WinForms.Net6.dll",
+				null,
+				new SettingItem<Protection>("rename"),
+				outputDirSuffix: "-winforms-net6",
+				checkOutput: false);
+
+		[Fact]
+		[Trait("Category", "CrossFramework")]
+		[Trait("AppType", "WinForms")]
+		[Trait("TFM", "net8.0-windows")]
+		public Task WinForms_Net8_RenameProtection() =>
+			Run("CrossFramework.WinForms.Net8.dll",
+				null,
+				new SettingItem<Protection>("rename"),
+				outputDirSuffix: "-winforms-net8",
+				checkOutput: false);
+
+		[Fact]
+		[Trait("Category", "CrossFramework")]
+		[Trait("AppType", "WinForms")]
 		[Trait("TFM", "net10.0-windows")]
 		public Task WinForms_Net10_RenameProtection() =>
 			Run("CrossFramework.WinForms.Net10.dll",
