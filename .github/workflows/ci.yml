@@ -9,10 +9,7 @@ on:
 jobs:
   build:
     runs-on: windows-2025
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      pull-requests: write
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
         with:
@@ -37,64 +34,6 @@ jobs:
 
       - name: Build
         run: msbuild Confuser2.sln -p:Configuration=Release -verbosity:minimal
-
-      - name: Test with coverage
-        shell: pwsh
-        run: |
-          $coverageDir = 'coverage'
-          New-Item -ItemType Directory -Path $coverageDir -Force | Out-Null
-
-          # Run tests on all test projects with Coverlet coverage collection
-          $testProjects = Get-ChildItem -Path Tests -Filter '*.Test.csproj' -Recurse | Select-Object -Unique
-          $failed = $false
-          $index = 0
-          foreach ($proj in $testProjects) {
-            $index++
-            Write-Host "Testing $($proj.Name)..." -ForegroundColor Cyan
-            dotnet test $proj.FullName -c Release --no-build --verbosity minimal `
-              --collect:"XPlat Code Coverage" `
-              --results-directory "$coverageDir/$($proj.BaseName)"
-            if ($LASTEXITCODE -ne 0) { $failed = $true }
-          }
-          if ($failed) { exit 1 }
-
-      - name: Generate coverage report
-        if: always()
-        shell: pwsh
-        run: |
-          dotnet tool install -g dotnet-reportgenerator-globaltool
-          $reports = (Get-ChildItem -Path coverage -Filter 'coverage.cobertura.xml' -Recurse).FullName -join ';'
-          if ($reports) {
-            reportgenerator "-reports:$reports" "-targetdir:coverage/report" "-reporttypes:HtmlInline_AzurePipelines;Cobertura;TextSummary;MarkdownSummaryGithub"
-            Write-Host "--- Coverage Summary ---"
-            Get-Content coverage/report/Summary.txt
-          } else {
-            Write-Host "No coverage files found — skipping report generation."
-          }
-
-      - name: Coverage to job summary
-        if: always()
-        shell: pwsh
-        run: |
-          $mdFile = 'coverage/report/SummaryGithub.md'
-          if (Test-Path $mdFile) {
-            Get-Content $mdFile >> $env:GITHUB_STEP_SUMMARY
-          }
-
-      - name: Coverage PR comment
-        if: always() && github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: coverage-report
-          path: coverage/report/SummaryGithub.md
-
-      - name: Upload coverage report
-        if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: coverage-report
-          path: coverage/report/
-          if-no-files-found: ignore
 
       - name: Package CLI
         shell: pwsh
