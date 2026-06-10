@@ -134,7 +134,7 @@ namespace Confuser.Protections.AntiTamper {
 				jitBody.LocalVars = SignatureWriter.Write(metadata, local);
 			}
 			else
-				jitBody.LocalVars = new byte[0];
+				jitBody.LocalVars = Array.Empty<byte>();
 
       {
         var newCode = new byte[codeSize];

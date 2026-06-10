@@ -23,7 +23,8 @@
   </PropertyGroup> 
   
   <PropertyGroup Label="Code Analysis">
-	<EnableCodeAnalysis>false</EnableCodeAnalysis>
+	<EnableNETAnalyzers>true</EnableNETAnalyzers>
+	<AnalysisLevel>latest</AnalysisLevel>
   </PropertyGroup>
   
 </Project>

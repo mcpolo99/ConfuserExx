@@ -39,6 +39,44 @@ dotnet_style_qualification_for_property = false:suggestion
 dotnet_style_require_accessibility_modifiers = never:info
 
 [*.cs]
+# .NET Analyzer severity overrides
+dotnet_diagnostic.CA1002.severity = none          # Do not expose generic lists (too restrictive for internal code)
+dotnet_diagnostic.CA1031.severity = none          # Do not catch general exceptions (too many existing catch blocks)
+dotnet_diagnostic.CA1032.severity = none          # Implement standard exception constructors
+dotnet_diagnostic.CA1034.severity = none          # Nested types should not be visible
+dotnet_diagnostic.CA1062.severity = none          # Validate arguments of public methods (too noisy initially)
+dotnet_diagnostic.CA1303.severity = none          # Do not pass literals as localized parameters
+dotnet_diagnostic.CA1304.severity = none          # Specify CultureInfo
+dotnet_diagnostic.CA1305.severity = none          # Specify IFormatProvider
+dotnet_diagnostic.CA1307.severity = none          # Specify StringComparison for clarity
+dotnet_diagnostic.CA1310.severity = none          # Specify StringComparison for correctness
+dotnet_diagnostic.CA1707.severity = none          # Identifiers should not contain underscores (test naming)
+dotnet_diagnostic.CA1710.severity = none          # Identifiers should have correct suffix
+dotnet_diagnostic.CA1711.severity = none          # Identifiers should not have incorrect suffix
+dotnet_diagnostic.CA1720.severity = none          # Identifiers should not contain type names
+dotnet_diagnostic.CA1822.severity = suggestion    # Mark members as static (informational only)
+dotnet_diagnostic.CA1825.severity = warning       # Avoid zero-length array allocations
+dotnet_diagnostic.CA1859.severity = suggestion    # Use concrete types for improved performance
+dotnet_diagnostic.CA2000.severity = suggestion    # Dispose objects before losing scope
+dotnet_diagnostic.CA2007.severity = none          # ConfigureAwait (not needed for desktop app)
+dotnet_diagnostic.CA2227.severity = none          # Collection properties should be read only
+
+# Roslynator severity overrides
+dotnet_diagnostic.RCS1018.severity = none          # Add accessibility modifiers (conflicts with existing style)
+dotnet_diagnostic.RCS1102.severity = none          # Make class static (many are non-static for runtime injection)
+dotnet_diagnostic.RCS1037.severity = none          # Remove trailing white-space
+dotnet_diagnostic.RCS1057.severity = none          # Add empty line between declarations
+dotnet_diagnostic.RCS1085.severity = none          # Use auto-implemented property
+dotnet_diagnostic.RCS1090.severity = none          # ConfigureAwait
+dotnet_diagnostic.RCS1118.severity = none          # Mark local variable as const
+dotnet_diagnostic.RCS1124.severity = none          # Inline local variable
+dotnet_diagnostic.RCS1138.severity = none          # Add summary to documentation comment
+dotnet_diagnostic.RCS1139.severity = none          # Add summary element to documentation comment
+dotnet_diagnostic.RCS1163.severity = none          # Unused parameter
+dotnet_diagnostic.RCS1194.severity = none          # Implement exception constructors
+dotnet_diagnostic.RCS1213.severity = none          # Remove unused member declaration (too aggressive)
+dotnet_diagnostic.RCS1228.severity = none          # Unused element in documentation comment
+
 csharp_indent_block_contents = true
 csharp_indent_braces = false
 csharp_indent_case_contents = true

@@ -97,7 +97,7 @@ namespace Confuser.Protections.Resources {
 			moduleCtx.DataField = new FieldDefUser(moduleCtx.Name.RandomName(), new FieldSig(dataType.ToTypeSig())) {
 				IsStatic = true,
 				HasFieldRVA = true,
-				InitialValue = new byte[0],
+				InitialValue = Array.Empty<byte>(),
 				Access = FieldAttributes.CompilerControlled
 			};
 			context.CurrentModule.GlobalType.Fields.Add(moduleCtx.DataField);
@@ -137,7 +137,7 @@ namespace Confuser.Protections.Resources {
 				repl.Add(Instruction.Create(OpCodes.Dup));
 				repl.Add(Instruction.Create(OpCodes.Ldtoken, moduleCtx.DataField));
 				repl.Add(Instruction.Create(OpCodes.Call, moduleCtx.Module.Import(
-					typeof(RuntimeHelpers).GetMethod("InitializeArray"))));
+					moduleCtx.Context, typeof(RuntimeHelpers), "InitializeArray")));
 				return repl.ToArray();
 			});
 			moduleCtx.Context.Registry.GetService<IConstantService>().ExcludeMethod(moduleCtx.Context, moduleCtx.InitMethod);

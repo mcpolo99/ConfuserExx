@@ -101,6 +101,16 @@ namespace Confuser.Core {
 				foreach (string probePath in context.Project.ProbePaths)
 					asmResolver.PostSearchPaths.Insert(0, Path.Combine(context.BaseDirectory, probePath));
 
+				// Auto-detect .NET Core/5+/6/7/8+ runtime paths from first module
+				var firstModule = context.Project.FirstOrDefault(m => !m.IsExternal);
+				if (firstModule != null) {
+					var modulePath = Path.Combine(context.BaseDirectory, firstModule.Path);
+					foreach (var runtimePath in DotNetCorePathResolver.ResolveRuntimePaths(modulePath, context.Logger)) {
+						asmResolver.PostSearchPaths.Add(runtimePath);
+						context.Logger.DebugFormat("Auto-detected .NET runtime path: {0}", runtimePath);
+					}
+				}
+
 				context.CheckCancellation();
 
 				Marker marker = parameters.GetMarker();
@@ -265,13 +275,10 @@ namespace Confuser.Core {
 			context.Logger.Info("Resolving dependencies...");
 			foreach (var dependency in context.Modules
 											  .SelectMany(module => module.GetAssemblyRefs().Select(asmRef => Tuple.Create(asmRef, module)))) {
-				try {
-					context.Resolver.ResolveThrow(dependency.Item1, dependency.Item2);
-				}
-				catch (AssemblyResolveException ex) {
-					context.Logger.ErrorException("Failed to resolve dependency of '" + dependency.Item2.Name + "'.", ex);
-					throw new ConfuserException(ex);
-				}
+				var resolved = context.Resolver.Resolve(dependency.Item1, dependency.Item2);
+				if (resolved == null)
+					context.Logger.WarnFormat("Failed to resolve dependency '{0}' of '{1}'. Some protections may not work correctly.",
+						dependency.Item1.FullName, dependency.Item2.Name);
 			}
 
 			context.Logger.Debug("Checking Strong Name...");
@@ -423,6 +430,8 @@ namespace Confuser.Core {
 
 		static void Debug(ConfuserContext context) {
 			context.Logger.Info("Finalizing...");
+			if (!context.Project.Debug)
+				return;
 			for (int i = 0; i < context.OutputModules.Count; i++) {
 				if (context.OutputSymbols[i] == null)
 					continue;

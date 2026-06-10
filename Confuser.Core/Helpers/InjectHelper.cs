@@ -292,7 +292,16 @@ namespace Confuser.Core.Helpers {
 				// check if the assembly reference needs to be fixed.
 				if (source is TypeRef sourceRef) {
 					var targetAssemblyRef = TargetModule.GetAssemblyRef(sourceRef.DefinitionAssembly.Name);
-					if (!(targetAssemblyRef is null) && !string.Equals(targetAssemblyRef.FullName, source.DefinitionAssembly.FullName, StringComparison.Ordinal)) {
+					if (targetAssemblyRef is null) {
+						//	Handle assemblies referenced by netstandard
+						var corLibAssemblyRef = TargetModule.CorLibTypes.AssemblyRef;
+						var corLibAssembly = TargetModule.Context.AssemblyResolver.Resolve(corLibAssemblyRef, TargetModule);
+						if (null != corLibAssembly?.ManifestModule.GetAssemblyRef(sourceRef.DefinitionAssembly.Name)) {
+							var fixedTypeRef = new TypeRefUser(sourceRef.Module, sourceRef.Namespace, sourceRef.Name, corLibAssemblyRef);
+							return Importer.Import(fixedTypeRef);
+						}
+					}
+					else if (!string.Equals(targetAssemblyRef.FullName, source.DefinitionAssembly.FullName, StringComparison.Ordinal)) {
 						// We got a matching assembly by the simple name, but not by the full name.
 						// This means the injected code uses a different assembly version than the target assembly.
 						// We'll fix the assembly reference, to avoid breaking anything.

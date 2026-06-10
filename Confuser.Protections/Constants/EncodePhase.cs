@@ -122,7 +122,7 @@ namespace Confuser.Protections.Constants {
 				repl.Add(Instruction.Create(OpCodes.Dup));
 				repl.Add(Instruction.Create(OpCodes.Ldtoken, moduleCtx.DataField));
 				repl.Add(Instruction.Create(OpCodes.Call, moduleCtx.Module.Import(
-					typeof(RuntimeHelpers).GetMethod("InitializeArray"))));
+					context, typeof(RuntimeHelpers), "InitializeArray")));
 				return repl.ToArray();
 			});
 		}

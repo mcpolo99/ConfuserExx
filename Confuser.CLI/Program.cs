@@ -19,6 +19,8 @@ namespace Confuser.CLI {
 				bool noPause = false;
 				bool debug = false;
 				string outDir = null;
+				string snKeyPath = null;
+				string snKeyPass = null;
 				List<string> probePaths = new List<string>();
 				List<string> plugins = new List<string>();
 				var p = new OptionSet {
@@ -37,6 +39,12 @@ namespace Confuser.CLI {
 					}, {
 						"debug", "specifies debug symbol generation.",
 						value => { debug = (value != null); }
+					}, {
+						"snkey=", "specifies strong name key file path.",
+						value => { snKeyPath = value; }
+					}, {
+						"snkeypass=", "specifies strong name key password.",
+						value => { snKeyPass = value; }
 					}
 				};
 
@@ -60,10 +68,8 @@ namespace Confuser.CLI {
 					try {
 						var xmlDoc = new XmlDocument();
 						xmlDoc.Load(files[0]);
-						proj.Load(xmlDoc);
-						string crprojDir = Path.GetDirectoryName(Path.GetFullPath(files[0]));
-						proj.BaseDirectory = Path.GetFullPath(Path.Combine(crprojDir, proj.BaseDirectory));
-						proj.OutputDirectory = Path.GetFullPath(Path.Combine(crprojDir, proj.OutputDirectory));
+						proj.Load(xmlDoc, Path.GetDirectoryName(Path.GetFullPath(files[0])));
+						proj.OutputDirectory = Path.GetFullPath(Path.Combine(proj.BaseDirectory, proj.OutputDirectory));
 					}
 					catch (Exception ex) {
 						WriteLineWithColor(ConsoleColor.Red, "Failed to load project:");
@@ -103,10 +109,13 @@ namespace Confuser.CLI {
 							modulePath = modulePath.Substring(proj.BaseDirectory.Length + 1);
 						}
 
-						if (TryMatchTemplateProject(templateModules, proj.BaseDirectory, modulePath, out var matchedModule))
+						if (TryMatchTemplateProject(templateModules, proj.BaseDirectory, modulePath, out var matchedModule)) {
+							if (snKeyPath != null) matchedModule.SNKeyPath = snKeyPath;
+							if (snKeyPass != null) matchedModule.SNKeyPassword = snKeyPass;
 							proj.Add(matchedModule);
+						}
 						else
-							proj.Add(new ProjectModule { Path = modulePath });
+							proj.Add(new ProjectModule { Path = modulePath, SNKeyPath = snKeyPath, SNKeyPassword = snKeyPass });
 					}
 
 					proj.OutputDirectory = outDir;
@@ -202,6 +211,8 @@ namespace Confuser.CLI {
 			WriteLine("    -probe     : specifies probe directory.");
 			WriteLine("    -plugin    : specifies plugin path.");
 			WriteLine("    -debug     : specifies debug symbol generation.");
+			WriteLine("    -snkey     : specifies strong name key file path.");
+			WriteLine("    -snkeypass : specifies strong name key password.");
 		}
 
 		static void WriteLineWithColor(ConsoleColor color, string txt) {

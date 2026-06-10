@@ -2,9 +2,9 @@ name: ci
 
 on:
   push:
-    branches: [master, feature/**, fix/**]
+    branches: [master, pre-release, feature/**, fix/**]
   pull_request:
-    branches: [master]
+    branches: [master, pre-release]
 
 jobs:
   build:
@@ -81,6 +81,56 @@ jobs:
             ConfuserEx-GUI.zip
             ConfuserEx.zip
             Confuser.MSBuild.Tasks/bin/Release/*.nupkg
+
+  # Pre-release: on push to pre-release branch
+  pre-release:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/pre-release'
+    runs-on: windows-2022
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install nbgv
+        run: dotnet tool install -g nbgv
+
+      - name: Compute version
+        id: version
+        shell: pwsh
+        run: |
+          $ver = nbgv get-version -v NuGetPackageVersion
+          echo "VERSION=$ver" >> $env:GITHUB_OUTPUT
+          Write-Host "Pre-release version: $ver"
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: confuserex-packages
+
+      - name: Create or update pre-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: pre-release
+          name: "Pre-release v${{ steps.version.outputs.VERSION }}"
+          prerelease: true
+          make_latest: false
+          body: |
+            **Pre-release build** — for testing only, not production use.
+
+            Version: `${{ steps.version.outputs.VERSION }}`
+            Branch: `pre-release`
+            Commit: ${{ github.sha }}
+
+            Download the binaries below to test recent fixes and features before they are included in a stable release.
+          files: |
+            ConfuserEx-CLI.zip
+            ConfuserEx-GUI.zip
+            ConfuserEx.zip
+            *.nupkg
 
   # Release: only on PR merge to master
   release:

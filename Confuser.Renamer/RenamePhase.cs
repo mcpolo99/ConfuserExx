@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Confuser.Core;
@@ -14,8 +15,12 @@ namespace Confuser.Renamer {
 
 		public override string Name => "Renaming";
 
+		// Tracks overload confusion name assignments: TypeDef -> list of assigned names
+		readonly Dictionary<TypeDef, List<string>> _overloadNames = new Dictionary<TypeDef, List<string>>();
+
 		protected override void Execute(ConfuserContext context, ProtectionParameters parameters) {
 			var service = (NameService)context.Registry.GetService<INameService>();
+			bool overloadConfusion = parameters.GetParameter(context, context.CurrentModule, "overload", false);
 
 			context.Logger.Debug("Renaming...");
 			foreach (var renamer in service.Renamers) {
@@ -36,8 +41,13 @@ namespace Confuser.Renamer {
 
 				if (def is MethodDef method) {
 					if ((canRename || method.IsConstructor) && parameters.GetParameter(context, method, "renameArgs", true)) {
-						foreach (var param in method.ParamDefs)
-							param.Name = null;
+						if (method.IsConstructor && method.DeclaringType.Name.String.Contains("AnonymousType")) {
+							// Anonymous type constructor args map to property names — renaming breaks JSON serialization
+						}
+						else {
+							foreach (var param in method.ParamDefs)
+								param.Name = null;
+						}
 					}
 
 					if (parameters.GetParameter(context, method, "renPdb", false) && method.HasBody) {
@@ -79,7 +89,12 @@ namespace Confuser.Renamer {
 					RenameGenericParameters(typeDef.GenericParameters);
 				}
 				else if (def is MethodDef methodDef) {
-					methodDef.Name = service.ObfuscateName(methodDef, mode);
+					if (overloadConfusion && CanApplyOverloadConfusion(methodDef, service)) {
+						methodDef.Name = GetOverloadName(methodDef, service, mode);
+					}
+					else {
+						methodDef.Name = service.ObfuscateName(methodDef, mode);
+					}
 					RenameGenericParameters(methodDef.GenericParameters);
 				}
 				else
@@ -112,6 +127,48 @@ namespace Confuser.Renamer {
 		{
 			foreach (var param in genericParams)
 				param.Name = ((char) (param.Number + 1)).ToString();
+		}
+
+		/// <summary>
+		///     Determines whether overload confusion can safely be applied to the method.
+		///     Only applies to non-virtual, non-interface, non-special methods.
+		/// </summary>
+		static bool CanApplyOverloadConfusion(MethodDef method, INameService service) {
+			if (method.IsVirtual || method.IsAbstract || method.IsConstructor)
+				return false;
+			if (method.IsSpecialName || method.IsRuntimeSpecialName)
+				return false;
+			// Skip if method has override/sibling references (VTable constrained)
+			var refs = service.GetReferences(method);
+			if (refs.Any(r => r.ShouldCancelRename || r.DelayRenaming(service, method)))
+				return false;
+			return true;
+		}
+
+		/// <summary>
+		///     Gets a shared overload name for the method's declaring type.
+		///     Methods with different signatures in the same type get the same name.
+		/// </summary>
+		string GetOverloadName(MethodDef method, NameService service, RenameMode mode) {
+			var declType = method.DeclaringType;
+			if (!_overloadNames.TryGetValue(declType, out var names)) {
+				names = new List<string>();
+				_overloadNames[declType] = names;
+			}
+
+			// Check if any existing name can be reused (different signature = safe to share)
+			foreach (var existingName in names) {
+				bool signatureConflict = declType.Methods.Any(m =>
+					m.Name == existingName &&
+					new SigComparer().Equals(m.MethodSig, method.MethodSig));
+				if (!signatureConflict)
+					return existingName;
+			}
+
+			// No reusable name — generate a new one
+			var newName = service.ObfuscateName(method, mode);
+			names.Add(newName);
+			return newName;
 		}
 
 		static IEnumerable<IDnlibDef> GetTargetsWithDelay(IList<IDnlibDef> definitions, ConfuserContext context, INameService service) {

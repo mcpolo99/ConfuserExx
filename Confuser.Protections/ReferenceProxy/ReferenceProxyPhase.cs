@@ -147,7 +147,9 @@ namespace Confuser.Protections.ReferenceProxy {
 					if (operand.MethodSig.ParamsAfterSentinel != null &&
 						operand.MethodSig.ParamsAfterSentinel.Count > 0)
 						continue;
-					TypeDef declType = operand.DeclaringType.ResolveTypeDefThrow();
+					TypeDef declType = operand.DeclaringType.ResolveTypeDef();
+					if (declType == null)
+						continue;
 					// No delegates
 					if (declType.IsDelegate())
 						continue;

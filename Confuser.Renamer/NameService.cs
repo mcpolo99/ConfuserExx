@@ -214,7 +214,7 @@ namespace Confuser.Renamer {
 
 		public string ObfuscateName(string format, string name, RenameMode mode, bool preserveGenericParams = false) {
 			int genericParamsCount = 0;
-			if (preserveGenericParams) {
+			if (preserveGenericParams && !string.IsNullOrEmpty(name)) {
 				name = ParseGenericName(name, out genericParamsCount);
 			}
 
