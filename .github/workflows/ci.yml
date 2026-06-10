@@ -36,8 +36,19 @@ jobs:
         run: msbuild Confuser2.sln -p:Configuration=Release -verbosity:minimal
 
       - name: Test
-        run: dotnet test Confuser2.sln -c Release --no-build --verbosity minimal
-        continue-on-error: true
+        shell: pwsh
+        run: |
+          # Run tests on all test projects — exclude the C++/CLI vcxproj which dotnet CLI cannot handle
+          $testProjects = Get-ChildItem -Path Tests -Filter '*.Test.csproj' -Recurse
+          $testProjects += Get-ChildItem -Path Tests -Filter 'Confuser.*.Test.csproj' -Recurse
+          $testProjects = $testProjects | Select-Object -Unique
+          $failed = $false
+          foreach ($proj in $testProjects) {
+            Write-Host "Testing $($proj.Name)..." -ForegroundColor Cyan
+            dotnet test $proj.FullName -c Release --no-build --verbosity minimal
+            if ($LASTEXITCODE -ne 0) { $failed = $true }
+          }
+          if ($failed) { exit 1 }
 
       - name: Package CLI
         shell: pwsh
