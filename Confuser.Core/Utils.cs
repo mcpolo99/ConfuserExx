@@ -76,14 +76,14 @@ namespace Confuser.Core {
 		/// <returns>The path of <paramref name="filespec" /> relative to <paramref name="folder" />.</returns>
 		public static string GetRelativePath(string fileSpec, string baseDirectory) {
 			if (fileSpec is null) throw new ArgumentNullException(nameof(fileSpec));
-			if (baseDirectory is null) throw new ArgumentNullException(nameof(fileSpec));
+			if (baseDirectory is null) throw new ArgumentNullException(nameof(baseDirectory));
 
 			return GetRelativePath(new FileInfo(fileSpec), new DirectoryInfo(baseDirectory));
 		}
 
 		public static string GetRelativePath(FileInfo fileSpec, DirectoryInfo baseDirectory) {
 			if (fileSpec is null) throw new ArgumentNullException(nameof(fileSpec));
-			if (baseDirectory is null) throw new ArgumentNullException(nameof(fileSpec));
+			if (baseDirectory is null) throw new ArgumentNullException(nameof(baseDirectory));
 
 			if (baseDirectory.FullName.EndsWith(Path.DirectorySeparatorChar.ToString())) {
 				baseDirectory = new DirectoryInfo(baseDirectory.FullName.TrimEnd(Path.DirectorySeparatorChar));
@@ -117,8 +117,8 @@ namespace Confuser.Core {
 		/// <param name="buffer">The input buffer.</param>
 		/// <returns>The SHA1 hash of the input buffer.</returns>
 		public static byte[] SHA1(byte[] buffer) {
-			var sha = new SHA1Managed();
-			return sha.ComputeHash(buffer);
+			using (var sha = new SHA1Managed())
+				return sha.ComputeHash(buffer);
 		}
 
 		/// <summary>
@@ -143,8 +143,8 @@ namespace Confuser.Core {
 		/// <param name="buffer">The input buffer.</param>
 		/// <returns>The SHA256 hash of the input buffer.</returns>
 		public static byte[] SHA256(byte[] buffer) {
-			var sha = new SHA256Managed();
-			return sha.ComputeHash(buffer);
+			using (var sha = new SHA256Managed())
+				return sha.ComputeHash(buffer);
 		}
 
 		/// <summary>

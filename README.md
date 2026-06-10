@@ -73,6 +73,12 @@ See the [Issues][issues] section. Please check existing issues before filing a n
 
 Licensed under the MIT license. See [LICENSE.md][license] for details.
 
+## Contributors
+
+<a href="https://github.com/mcpolo99/ConfuserExx/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=mcpolo99/ConfuserExx" />
+</a>
+
 ## Credits
 
 **[0xd4d]** for [dnlib][dnlib] and extensive .NET metadata knowledge.
@@ -90,6 +96,6 @@ Licensed under the MIT license. See [LICENSE.md][license] for details.
 [license]: LICENSE.md
 [project_format]: docs/ProjectFormat.md
 
-[img_ci]: https://github.com/mcpolo99/ConfuserExx/actions/workflows/ci.yml/badge.svg?branch=pre-release
+[img_ci]: https://github.com/mcpolo99/ConfuserExx/actions/workflows/ci.yml/badge.svg?branch=master
 [img_codeql]: https://github.com/mcpolo99/ConfuserExx/actions/workflows/codeql-analysis.yml/badge.svg
 [img_license]: https://img.shields.io/github/license/mcpolo99/ConfuserExx.svg?style=flat

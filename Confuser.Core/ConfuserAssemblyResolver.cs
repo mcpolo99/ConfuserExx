@@ -123,7 +123,7 @@ namespace Confuser.Core {
 
 			/// <inheritdoc />
 			public bool Remove(string item) =>
-				_lists.Aggregate(true, (current, list) => current | list.Remove(item));
+				_lists.Aggregate(false, (current, list) => current | list.Remove(item));
 
 			/// <inheritdoc />
 			public int Count => _lists[0].Count;
