@@ -38,10 +38,8 @@ jobs:
         id: tests
         shell: pwsh
         run: |
-          $coverageDir = 'coverage'
-          $trxDir = 'test-results'
-          New-Item -ItemType Directory -Path $coverageDir -Force | Out-Null
-          New-Item -ItemType Directory -Path $trxDir -Force | Out-Null
+          $resultsDir = 'test-results'
+          New-Item -ItemType Directory -Path $resultsDir -Force | Out-Null
 
           $testProjects = Get-ChildItem -Path Tests -Filter '*.Test.csproj' -Recurse | Select-Object -Unique
           $anyFailed = $false
@@ -54,16 +52,15 @@ jobs:
 
             dotnet test $proj.FullName -c Release --no-build --verbosity minimal `
               --collect:"XPlat Code Coverage" `
-              --results-directory "$coverageDir/$name" `
               --logger "trx;LogFileName=$name.trx" `
-              --results-directory "$trxDir"
+              --results-directory "$resultsDir/$name"
 
             if ($LASTEXITCODE -ne 0) { $anyFailed = $true }
           }
 
           # Parse all TRX files into a combined report
           $allTests = @()
-          $trxFiles = Get-ChildItem -Path $trxDir -Filter '*.trx' -Recurse
+          $trxFiles = Get-ChildItem -Path $resultsDir -Filter '*.trx' -Recurse
 
           foreach ($trx in $trxFiles) {
             [xml]$xml = Get-Content $trx.FullName
@@ -168,7 +165,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet tool install -g dotnet-reportgenerator-globaltool
-          $reports = (Get-ChildItem -Path coverage -Filter 'coverage.cobertura.xml' -Recurse).FullName -join ';'
+          $reports = (Get-ChildItem -Path test-results -Filter 'coverage.cobertura.xml' -Recurse).FullName -join ';'
           if ($reports) {
             reportgenerator "-reports:$reports" "-targetdir:coverage/report" "-reporttypes:HtmlInline_AzurePipelines;Cobertura;TextSummary;MarkdownSummaryGithub"
             Write-Host "--- Coverage Summary ---"
