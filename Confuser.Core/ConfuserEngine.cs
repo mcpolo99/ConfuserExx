@@ -62,8 +62,10 @@ namespace Confuser.Core {
 		///     <paramref name="parameters" />.Project is <c>null</c>.
 		/// </exception>
 		public static Task Run(ConfuserParameters parameters, CancellationToken? token = null) {
+			if (parameters == null)
+				throw new ArgumentNullException(nameof(parameters));
 			if (parameters.Project == null)
-				throw new ArgumentNullException("parameters");
+				throw new ArgumentNullException(nameof(parameters));
 			if (token == null)
 				token = new CancellationTokenSource().Token;
 			return Task.Factory.StartNew(() => RunInternal(parameters, token.Value), token.Value);

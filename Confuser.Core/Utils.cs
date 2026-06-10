@@ -76,14 +76,14 @@ namespace Confuser.Core {
 		/// <returns>The path of <paramref name="filespec" /> relative to <paramref name="folder" />.</returns>
 		public static string GetRelativePath(string fileSpec, string baseDirectory) {
 			if (fileSpec is null) throw new ArgumentNullException(nameof(fileSpec));
-			if (baseDirectory is null) throw new ArgumentNullException(nameof(fileSpec));
+			if (baseDirectory is null) throw new ArgumentNullException(nameof(baseDirectory));
 
 			return GetRelativePath(new FileInfo(fileSpec), new DirectoryInfo(baseDirectory));
 		}
 
 		public static string GetRelativePath(FileInfo fileSpec, DirectoryInfo baseDirectory) {
 			if (fileSpec is null) throw new ArgumentNullException(nameof(fileSpec));
-			if (baseDirectory is null) throw new ArgumentNullException(nameof(fileSpec));
+			if (baseDirectory is null) throw new ArgumentNullException(nameof(baseDirectory));
 
 			if (baseDirectory.FullName.EndsWith(Path.DirectorySeparatorChar.ToString())) {
 				baseDirectory = new DirectoryInfo(baseDirectory.FullName.TrimEnd(Path.DirectorySeparatorChar));
