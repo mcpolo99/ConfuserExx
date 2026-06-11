@@ -117,12 +117,12 @@ namespace Confuser.Protections.Constants {
 					var method = instr.Operand as IMethod;
 					var field = instr.Operand as IField;
 					if (instr.OpCode == OpCodes.Call &&
-					    method.DeclaringType.Name == "Mutation" &&
-					    method.Name == "Value") {
+						method.DeclaringType.Name == "Mutation" &&
+						method.Name == "Value") {
 						decoderInst.Body.Instructions[j] = Instruction.Create(OpCodes.Sizeof, new GenericMVar(0).ToTypeDefOrRef());
 					}
 					else if (instr.OpCode == OpCodes.Ldsfld &&
-					         method.DeclaringType.Name == "Constant") {
+							 method.DeclaringType.Name == "Constant") {
 						if (field.Name == "b") instr.Operand = moduleCtx.BufferField;
 						else throw new UnreachableException();
 					}
@@ -140,8 +140,8 @@ namespace Confuser.Protections.Constants {
 				do decoderDesc.InitializerID = (byte)(moduleCtx.Random.NextByte() & 3); while (decoderDesc.InitializerID == decoderDesc.StringID || decoderDesc.InitializerID == decoderDesc.NumberID);
 
 				MutationHelper.InjectKeys(decoderInst,
-				                          new[] { 0, 1, 2 },
-				                          new int[] { decoderDesc.StringID, decoderDesc.NumberID, decoderDesc.InitializerID });
+										  new[] { 0, 1, 2 },
+										  new int[] { decoderDesc.StringID, decoderDesc.NumberID, decoderDesc.InitializerID });
 				decoderDesc.Data = moduleCtx.ModeHandler.CreateDecoder(decoderInst, moduleCtx);
 				moduleCtx.Decoders.Add(Tuple.Create(decoderInst, decoderDesc));
 			}
@@ -155,7 +155,7 @@ namespace Confuser.Protections.Constants {
 				var method = instr.Operand as IMethod;
 				if (instr.OpCode == OpCodes.Call) {
 					if (method.DeclaringType.Name == "Mutation" &&
-					    method.Name == "Crypt") {
+						method.Name == "Crypt") {
 						Instruction ldBlock = instrs[i - 2];
 						Instruction ldKey = instrs[i - 1];
 						Debug.Assert(ldBlock.OpCode == OpCodes.Ldloc && ldKey.OpCode == OpCodes.Ldloc);
@@ -165,7 +165,7 @@ namespace Confuser.Protections.Constants {
 						instrs.InsertRange(i - 2, moduleCtx.ModeHandler.EmitDecrypt(moduleCtx.InitMethod, moduleCtx, (Local)ldBlock.Operand, (Local)ldKey.Operand));
 					}
 					else if (method.DeclaringType.Name == "Lzma" &&
-					         method.Name == "Decompress") {
+							 method.Name == "Decompress") {
 						instr.Operand = decomp;
 					}
 				}

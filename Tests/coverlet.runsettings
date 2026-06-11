@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <!-- Only collect coverage for the main ConfuserEx assemblies.
+               Exclude test subjects — they get obfuscated at test time and
+               Coverlet's RecordHit instrumentation breaks after renaming. -->
+          <Include>[Confuser.*]*,[ConfuserEx]*</Include>
+          <Exclude>[*.Test]*,[CrossFramework.*]*,[xunit.*]*,[Moq*]*</Exclude>
+          <ExcludeByFile>**/Tests/**</ExcludeByFile>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

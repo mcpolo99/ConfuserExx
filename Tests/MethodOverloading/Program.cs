@@ -1,14 +1,12 @@
 using System;
 
 namespace A {
-	public static class X
-	{
+	public static class X {
 	}
 }
 
 namespace B {
-	public static class X
-	{
+	public static class X {
 	}
 }
 
@@ -64,10 +62,8 @@ namespace MethodOverloading {
 	}
 
 	[AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
-	sealed class MyAttribute : Attribute
-	{
-		public MyAttribute(Type type)
-		{
+	sealed class MyAttribute : Attribute {
+		public MyAttribute(Type type) {
 		}
 	}
 

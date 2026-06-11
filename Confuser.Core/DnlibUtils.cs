@@ -544,7 +544,7 @@ namespace Confuser.Core {
 
 			return typeDef == typeDef.Module.EntryPoint?.DeclaringType;
 		}
-		
+
 		/// <summary>
 		///		Merges a specified call instruction into the body.
 		/// </summary>

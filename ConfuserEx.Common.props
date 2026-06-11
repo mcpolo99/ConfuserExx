@@ -1,15 +1,15 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003"> 
 
   <PropertyGroup Label="C-Sharp Compiler Settings" Condition="'$(MSBuildProjectExtension)' == '.csproj'">
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <LangVersion>7.3</LangVersion>
+    <AutoGenerateBindingRedirects Condition="'$(TargetFramework)' == 'net48'">true</AutoGenerateBindingRedirects>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Assembly Information">
     <_CurrentYear>$([System.DateTime]::Now.ToString(yyyy))</_CurrentYear>
     <Authors>Ki;Martin Karing</Authors>
     <Copyright>Copyright © 2014 Ki, 2018 - $(_CurrentYear) Martin Karing</Copyright>
-    <RepositoryUrl>https://github.com/mkaring/ConfuserEx.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/mcpolo99/ConfuserExx.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   

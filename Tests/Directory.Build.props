@@ -1,0 +1,20 @@
+<Project>
+
+  <!-- Inherit parent props (ConfuserEx.Common.props via solution root) -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" Condition="Exists('$([MSBuild]::GetPathOfFileAbove(`Directory.Build.props`, `$(MSBuildThisFileDirectory)..\`))')" />
+
+  <!-- Add coverlet to all test projects for code coverage collection -->
+  <ItemGroup Condition="$(MSBuildProjectName.EndsWith('.Test'))">
+    <PackageReference Include="coverlet.collector" Version="6.*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- Use shared runsettings to exclude test subjects from Coverlet instrumentation.
+       Test subjects get obfuscated at test time — Coverlet's RecordHit breaks after renaming. -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Test'))">
+    <RunSettingsFilePath>$(MSBuildThisFileDirectory)coverlet.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
+
+</Project>

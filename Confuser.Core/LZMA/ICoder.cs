@@ -61,7 +61,7 @@ namespace SevenZip {
 		///     if input stream is not valid
 		/// </exception>
 		void Code(Stream inStream, Stream outStream,
-		          Int64 inSize, Int64 outSize, ICodeProgress progress);
+				  Int64 inSize, Int64 outSize, ICodeProgress progress);
 
 	};
 

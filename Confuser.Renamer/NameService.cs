@@ -250,7 +250,7 @@ namespace Confuser.Renamer {
 					}
 
 					if (!identifiers.Contains(MakeGenericName(newName, genericParamsCount))
-					    && !_obfuscatedToOriginalNameMap.ContainsKey(newName))
+						&& !_obfuscatedToOriginalNameMap.ContainsKey(newName))
 						break;
 					hash = Utils.SHA1(hash);
 				}
@@ -329,27 +329,27 @@ namespace Confuser.Renamer {
 
 		static readonly char[] asciiCharset = Enumerable.Range(32, 95)
 			.Select(ord => (char)ord)
-			.Except(new[] {'.'})
+			.Except(new[] { '.' })
 			.ToArray();
 
-		static readonly char[] reflectionCharset = asciiCharset.Except(new[] {' ', '[', ']'}).ToArray();
+		static readonly char[] reflectionCharset = asciiCharset.Except(new[] { ' ', '[', ']' }).ToArray();
 
 		static readonly char[] letterCharset = Enumerable.Range(0, 26)
-			.SelectMany(ord => new[] {(char)('a' + ord), (char)('A' + ord)})
+			.SelectMany(ord => new[] { (char)('a' + ord), (char)('A' + ord) })
 			.ToArray();
 
 		static readonly char[] alphaNumCharset = Enumerable.Range(0, 26)
-			.SelectMany(ord => new[] {(char)('a' + ord), (char)('A' + ord)})
+			.SelectMany(ord => new[] { (char)('a' + ord), (char)('A' + ord) })
 			.Concat(Enumerable.Range(0, 10).Select(ord => (char)('0' + ord)))
 			.ToArray();
 
 		// Especially chosen, just to mess with people.
 		// Inspired by: http://xkcd.com/1137/ :D
-		static readonly char[] unicodeCharset = new char[] { }
+		static readonly char[] unicodeCharset = Array.Empty<char>()
 			.Concat(Enumerable.Range(0x200b, 5).Select(ord => (char)ord))
 			.Concat(Enumerable.Range(0x2029, 6).Select(ord => (char)ord))
 			.Concat(Enumerable.Range(0x206a, 6).Select(ord => (char)ord))
-			.Except(new[] {'\u2029'})
+			.Except(new[] { '\u2029' })
 			.ToArray();
 
 		#endregion
@@ -376,8 +376,8 @@ namespace Confuser.Renamer {
 
 		DisplayNormalizedName ExtractDisplayNormalizedName(IDnlibDef dnlibDef, bool forceShortNames = false) {
 			var shortNames = forceShortNames ||
-			                 GetParam(dnlibDef, "shortNames")?.Equals("true", StringComparison.OrdinalIgnoreCase) ==
-			                 true;
+							 GetParam(dnlibDef, "shortNames")?.Equals("true", StringComparison.OrdinalIgnoreCase) ==
+							 true;
 			var renameMode = GetRenameMode(dnlibDef);
 
 			if (dnlibDef is TypeDef typeDef) {
@@ -429,12 +429,9 @@ namespace Confuser.Renamer {
 				shortNames ? dnlibDef.Name.ToString() : normalizedNameBuilder.ToString());
 		}
 
-		DisplayNormalizedName CompressTypeName(string typeName, RenameMode renameMode)
-		{
-			if (renameMode == RenameMode.Reversible)
-			{
-				if (!_prefixesMap.TryGetValue(typeName, out string prefix))
-				{
+		DisplayNormalizedName CompressTypeName(string typeName, RenameMode renameMode) {
+			if (renameMode == RenameMode.Reversible) {
+				if (!_prefixesMap.TryGetValue(typeName, out string prefix)) {
 					_prefixesMap.Add(typeName, GetNextSequentialName());
 				}
 

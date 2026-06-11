@@ -15,7 +15,7 @@ namespace TypeScrambler.Test {
 		[Fact]
 		[Trait("Category", "Protection")]
 		[Trait("Protection", "typescramble")]
-		public async Task ScrambleAndExecuteTest()  =>
+		public async Task ScrambleAndExecuteTest() =>
 			await Run("TypeScrambler.exe",
 				new[] {
 					"Text from WriteTextToConsole",
@@ -25,8 +25,8 @@ namespace TypeScrambler.Test {
 					"Text from generic class",
 					"Text from Resources",
 					"Text from implicit interface implementation.",
-					"Text from implicit interface implementation.", 
-					"Text from explicit interface implementation.", 
+					"Text from implicit interface implementation.",
+					"Text from explicit interface implementation.",
 					"Text from static generic method.",
 					"From the factory: Test"
 				},

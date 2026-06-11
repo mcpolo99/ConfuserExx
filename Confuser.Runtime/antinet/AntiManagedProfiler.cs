@@ -276,13 +276,13 @@ namespace Confuser.Runtime {
 
 			[DllImport("kernel32", SetLastError = true)]
 			private static extern SafeFileHandle CreateNamedPipe(string lpName, uint dwOpenMode,
-			                                                     uint dwPipeMode, uint nMaxInstances, uint nOutBufferSize, uint nInBufferSize,
-			                                                     uint nDefaultTimeOut, IntPtr lpSecurityAttributes);
+																 uint dwPipeMode, uint nMaxInstances, uint nOutBufferSize, uint nInBufferSize,
+																 uint nDefaultTimeOut, IntPtr lpSecurityAttributes);
 
 			[DllImport("kernel32", SetLastError = true, CharSet = CharSet.Auto)]
 			private static extern SafeFileHandle CreateFile(string lpFileName, uint dwDesiredAccess,
-			                                                uint dwShareMode, IntPtr lpSecurityAttributes, uint dwCreationDisposition,
-			                                                uint dwFlagsAndAttributes, IntPtr hTemplateFile);
+															uint dwShareMode, IntPtr lpSecurityAttributes, uint dwCreationDisposition,
+															uint dwFlagsAndAttributes, IntPtr hTemplateFile);
 
 			[DllImport("kernel32")]
 			private static extern bool VirtualProtect(IntPtr lpAddress, int dwSize, uint flNewProtect, out uint lpflOldProtect);
@@ -425,8 +425,8 @@ namespace Confuser.Runtime {
 
 			private static string GetPipeName() {
 				return string.Format(@"\\.\pipe\CPFATP_{0}_v{1}.{2}.{3}",
-				                     GetCurrentProcessId(), Environment.Version.Major,
-				                     Environment.Version.Minor, Environment.Version.Build);
+									 GetCurrentProcessId(), Environment.Version.Major,
+									 Environment.Version.Minor, Environment.Version.Build);
 			}
 
 			private bool CreateNamedPipe() {
@@ -434,13 +434,13 @@ namespace Confuser.Runtime {
 					return true;
 
 				profilerPipe = CreateNamedPipe(GetPipeName(),
-				                               FILE_FLAG_OVERLAPPED | PIPE_ACCESS_DUPLEX,
-				                               PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
-				                               1, // nMaxInstances
-				                               0x24, // nOutBufferSize
-				                               0x338, // nInBufferSize
-				                               1000, // nDefaultTimeOut
-				                               IntPtr.Zero); // lpSecurityAttributes
+											   FILE_FLAG_OVERLAPPED | PIPE_ACCESS_DUPLEX,
+											   PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
+											   1, // nMaxInstances
+											   0x24, // nOutBufferSize
+											   0x338, // nInBufferSize
+											   1000, // nDefaultTimeOut
+											   IntPtr.Zero); // lpSecurityAttributes
 
 				return !profilerPipe.IsInvalid;
 			}
@@ -555,7 +555,7 @@ namespace Confuser.Runtime {
 					IntPtr sectionAddr;
 					uint sectionSize;
 					if (!peInfo.FindSection(".rdata", out sectionAddr, out sectionSize) &&
-					    !peInfo.FindSection(".text", out sectionAddr, out sectionSize))
+						!peInfo.FindSection(".text", out sectionAddr, out sectionSize))
 						return IntPtr.Zero;
 
 					var p = (byte*)sectionAddr;
@@ -793,15 +793,15 @@ namespace Confuser.Runtime {
 							else
 								addr = new IntPtr(p + 5 + *(int*)(p + 1));
 						}
-							// 8B 05 xx xx xx xx	mov eax,[mem]
-							// 83 F8 04				cmp eax,4
+						// 8B 05 xx xx xx xx	mov eax,[mem]
+						// 83 F8 04				cmp eax,4
 						else if (*p == 0x8B && p[1] == 0x05 && p[6] == 0x83 && p[7] == 0xF8 && p[8] == 0x04) {
 							if (IntPtr.Size == 4)
 								addr = new IntPtr((void*)*(uint*)(p + 2));
 							else
 								addr = new IntPtr(p + 6 + *(int*)(p + 2));
 						}
-							// 83 3D XX XX XX XX 04	cmp dword ptr [mem],4
+						// 83 3D XX XX XX XX 04	cmp dword ptr [mem],4
 						else if (*p == 0x83 && p[1] == 0x3D && p[6] == 0x04) {
 							if (IntPtr.Size == 4)
 								addr = new IntPtr((void*)*(uint*)(p + 2));

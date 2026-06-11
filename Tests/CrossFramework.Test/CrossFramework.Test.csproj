@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="2.9.*" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.*" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Confuser.UnitTest\Confuser.UnitTest.csproj" />
+    <!-- Console subjects -->
+    <ProjectReference Include="..\CrossFramework.Console.Net20\CrossFramework.Console.Net20.csproj" />
+    <ProjectReference Include="..\CrossFramework.Console.Net35\CrossFramework.Console.Net35.csproj" />
+    <ProjectReference Include="..\CrossFramework.Console.Net40\CrossFramework.Console.Net40.csproj" />
+    <ProjectReference Include="..\CrossFramework.Console.Net48\CrossFramework.Console.Net48.csproj" />
+    <ProjectReference Include="..\CrossFramework.Console.Net6\CrossFramework.Console.Net6.csproj" />
+    <ProjectReference Include="..\CrossFramework.Console.Net8\CrossFramework.Console.Net8.csproj" />
+    <ProjectReference Include="..\CrossFramework.Console.Net10\CrossFramework.Console.Net10.csproj" />
+    <!-- WinForms subjects -->
+    <ProjectReference Include="..\CrossFramework.WinForms.Net35\CrossFramework.WinForms.Net35.csproj" />
+    <ProjectReference Include="..\CrossFramework.WinForms.Net40\CrossFramework.WinForms.Net40.csproj" />
+    <ProjectReference Include="..\CrossFramework.WinForms.Net48\CrossFramework.WinForms.Net48.csproj" />
+    <ProjectReference Include="..\CrossFramework.WinForms.Net6\CrossFramework.WinForms.Net6.csproj" />
+    <ProjectReference Include="..\CrossFramework.WinForms.Net8\CrossFramework.WinForms.Net8.csproj" />
+    <ProjectReference Include="..\CrossFramework.WinForms.Net10\CrossFramework.WinForms.Net10.csproj" />
+    <!-- WPF subjects -->
+    <ProjectReference Include="..\CrossFramework.WPF.Net35\CrossFramework.WPF.Net35.csproj" />
+    <ProjectReference Include="..\CrossFramework.WPF.Net40\CrossFramework.WPF.Net40.csproj" />
+    <ProjectReference Include="..\CrossFramework.WPF.Net48\CrossFramework.WPF.Net48.csproj" />
+    <ProjectReference Include="..\CrossFramework.WPF.Net6\CrossFramework.WPF.Net6.csproj" />
+    <ProjectReference Include="..\CrossFramework.WPF.Net8\CrossFramework.WPF.Net8.csproj" />
+    <ProjectReference Include="..\CrossFramework.WPF.Net10\CrossFramework.WPF.Net10.csproj" />
+    <!-- Library subjects -->
+    <ProjectReference Include="..\CrossFramework.Library.NetStd20\CrossFramework.Library.NetStd20.csproj" />
+    <ProjectReference Include="..\CrossFramework.Library.Net48\CrossFramework.Library.Net48.csproj" />
+    <ProjectReference Include="..\CrossFramework.Library.Net6\CrossFramework.Library.Net6.csproj" />
+    <ProjectReference Include="..\CrossFramework.Library.Net8\CrossFramework.Library.Net8.csproj" />
+    <ProjectReference Include="..\CrossFramework.Library.Net10\CrossFramework.Library.Net10.csproj" />
+  </ItemGroup>
+
+  <!-- Copy Confuser.Runtime.dll next to test output (needed by protection pipeline) -->
+  <Target Name="CopyRuntime" AfterTargets="Build">
+    <Copy SourceFiles="..\..\Confuser.Runtime\bin\$(Configuration)\net20\Confuser.Runtime.dll"
+          DestinationFolder="$(OutputPath)"
+          SkipUnchangedFiles="true"
+          Condition="Exists('..\..\Confuser.Runtime\bin\$(Configuration)\net20\Confuser.Runtime.dll')" />
+  </Target>
+
+</Project>

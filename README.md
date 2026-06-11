@@ -58,6 +58,37 @@ The format of project file can be found in [docs/ProjectFormat.md][project_forma
 -snkeypass   : specifies strong name key password
 ```
 
+## Building from Source
+
+### Prerequisites
+
+* [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (or later)
+* [.NET Framework 4.8 Developer Pack](https://dotnet.microsoft.com/download/dotnet-framework/net48) (for library targets and test subjects)
+* [Visual Studio 2025+](https://visualstudio.microsoft.com/) with **Desktop development with C++** workload (for the C++/CLI test project)
+* Windows 10/11 (WPF GUI is Windows-only)
+
+### Build
+
+```bash
+# Full solution (requires VS 2025+ MSBuild 18)
+msbuild Confuser2.sln -p:Configuration=Release
+
+# .NET projects only (without C++/CLI test project)
+dotnet build Confuser2.sln -c Release
+
+# Run tests
+dotnet test Confuser2.sln -c Release
+```
+
+### Target Frameworks
+
+| Project | TFM |
+|---------|-----|
+| Core, Protections, Renamer, DynCipher | net48 + netstandard2.0 |
+| GUI (ConfuserEx) | net10.0-windows |
+| CLI (Confuser.CLI) | net10.0 |
+| Runtime | net20 (injected into targets) |
+
 ## Bug Report
 
 See the [Issues][issues] section. Please check existing issues before filing a new one.

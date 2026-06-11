@@ -5,7 +5,7 @@ using Confuser.UnitTest;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace VisualBasicRenamingResx.Test{
+namespace VisualBasicRenamingResx.Test {
 	public sealed class RenamingTest : TestBase {
 		public RenamingTest(ITestOutputHelper outputHelper) : base(outputHelper) { }
 
@@ -15,7 +15,7 @@ namespace VisualBasicRenamingResx.Test{
 		[Trait("Issue", "https://github.com/mkaring/ConfuserEx/issues/25")]
 		public async Task ProtectAndExecuteTest() =>
 			await Run("VisualBasicRenamingResx.exe",
-				new[] {"Test (neutral)"},
+				new[] { "Test (neutral)" },
 				new SettingItem<Protection>("rename"));
 	}
 }

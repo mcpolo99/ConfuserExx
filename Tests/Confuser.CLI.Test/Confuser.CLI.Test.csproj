@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="2.9.*" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.*" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Confuser.CLI\Confuser.CLI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Fixture source files are test subjects, not part of this project -->
+    <Compile Remove="Fixtures\**\*.cs" />
+  </ItemGroup>
+
+  <!-- Pre-build the SampleApp fixture so the test has a ready-made .exe -->
+  <Target Name="BuildSampleApp" BeforeTargets="Build">
+    <MSBuild Projects="Fixtures\SampleApp\SampleApp.csproj"
+             Targets="Restore;Build"
+             Properties="Configuration=Release;OutputPath=$([System.IO.Path]::GetFullPath('$(OutputPath)Fixtures\SampleApp\bin\'))" />
+  </Target>
+
+  <!-- Copy Confuser.Runtime.dll next to the test output (needed by protection pipeline) -->
+  <Target Name="CopyRuntime" AfterTargets="Build">
+    <Copy SourceFiles="..\..\Confuser.Runtime\bin\$(Configuration)\net20\Confuser.Runtime.dll"
+          DestinationFolder="$(OutputPath)"
+          SkipUnchangedFiles="true"
+          Condition="Exists('..\..\Confuser.Runtime\bin\$(Configuration)\net20\Confuser.Runtime.dll')" />
+  </Target>
+
+</Project>

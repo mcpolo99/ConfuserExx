@@ -53,7 +53,7 @@ namespace Confuser.DynCipher.Transforms {
 			Variable[] definition = context.Definitions[st];
 			for (int i = startIndex - 1; i >= 0; i--) {
 				if (context.Usages[block.Statements[i]].Intersect(definition).Count() > 0 ||
-				    context.Definitions[block.Statements[i]].Intersect(usage).Count() > 0)
+					context.Definitions[block.Statements[i]].Intersect(usage).Count() > 0)
 					return i;
 			}
 			return 0;
@@ -64,7 +64,7 @@ namespace Confuser.DynCipher.Transforms {
 			Variable[] definition = context.Definitions[st];
 			for (int i = startIndex + 1; i < block.Statements.Count; i++) {
 				if (context.Usages[block.Statements[i]].Intersect(definition).Count() > 0 ||
-				    context.Definitions[block.Statements[i]].Intersect(usage).Count() > 0)
+					context.Definitions[block.Statements[i]].Intersect(usage).Count() > 0)
 					return i;
 			}
 			return block.Statements.Count - 1;

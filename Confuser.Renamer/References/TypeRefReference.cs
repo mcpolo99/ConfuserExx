@@ -18,7 +18,7 @@ namespace Confuser.Renamer.References {
 		public bool DelayRenaming(INameService service, IDnlibDef currentDef) => false;
 
 		public bool UpdateNameReference(ConfuserContext context, INameService service) {
-			if (UTF8String.Equals(typeRef.Namespace, typeDef.Namespace) && 
+			if (UTF8String.Equals(typeRef.Namespace, typeDef.Namespace) &&
 				UTF8String.Equals(typeRef.Name, typeDef.Name)) return false;
 
 			typeRef.Namespace = typeDef.Namespace;

@@ -41,7 +41,7 @@ namespace Confuser.Renamer.Test.Analyzers {
 			var field2 = typeof(ReflectionAnalyzerTest).GetField(nameof(_referenceField), BindingFlags.NonPublic | BindingFlags.Instance);
 			Assert.NotNull(field2);
 		}
-		
+
 		[SuppressMessage("Usage", "xUnit1013:Public method should be marked as test", Justification = "It's not a test!")]
 		public void TestReferenceProperty1() {
 			var prop1 = typeof(ReflectionAnalyzerTest).GetProperty(nameof(ReferenceProperty));

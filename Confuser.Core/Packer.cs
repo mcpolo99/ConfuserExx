@@ -47,7 +47,7 @@ namespace Confuser.Core {
 				proj.Seed = context.Project.Seed;
 				foreach (Rule rule in context.Project.Rules)
 					proj.Rules.Add(rule);
-				proj.Add(new ProjectModule {Path = fileName});
+				proj.Add(new ProjectModule { Path = fileName });
 				proj.BaseDirectory = tmpDir;
 				proj.OutputDirectory = outDir;
 				foreach (var path in context.Project.ProbePaths)
@@ -85,8 +85,8 @@ namespace Confuser.Core {
 					throw new ConfuserException(ex);
 				}
 
-				context.OutputModules = new[] {File.ReadAllBytes(Path.Combine(outDir, fileName))};
-				context.OutputPaths = new[] {fileName};
+				context.OutputModules = new[] { File.ReadAllBytes(Path.Combine(outDir, fileName)) };
+				context.OutputPaths = new[] { fileName };
 			}
 			finally {
 				try {

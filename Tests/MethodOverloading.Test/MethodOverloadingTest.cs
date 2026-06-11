@@ -20,7 +20,7 @@ namespace MethodOverloading.Test {
 		public async Task MethodOverloading(bool shortNames, bool preserveGenericParams) =>
 			await Run(
 				"MethodOverloading.exe",
-				new [] {
+				new[] {
 					"1",
 					"Hello world",
 					"object",
@@ -73,9 +73,9 @@ namespace MethodOverloading.Test {
 			);
 
 		public static IEnumerable<object[]> MethodOverloadingData() {
-			foreach (var shortNames in new[] {false, true}) {
-				foreach (var preserveGenericParams in new[] {false, true}) {
-					yield return new object[] {shortNames, preserveGenericParams};
+			foreach (var shortNames in new[] { false, true }) {
+				foreach (var preserveGenericParams in new[] { false, true }) {
+					yield return new object[] { shortNames, preserveGenericParams };
 				}
 			}
 		}

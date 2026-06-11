@@ -81,14 +81,14 @@ namespace Confuser.Protections.ReferenceProxy {
 			else if (e.Event == ModuleWriterEvent.EndCalculateRvasAndFileOffsets) {
 				foreach (var native in nativeCodes) {
 					uint rid = writer.Metadata.GetRid(native.Item1);
-          RawMethodRow methodRow = writer.Metadata.TablesHeap.MethodTable[rid];
-          writer.Metadata.TablesHeap.MethodTable[rid] = new RawMethodRow(
-            (uint)native.Item3.RVA,
-            methodRow.ImplFlags,
-            methodRow.Flags,
-            methodRow.Name,
-            methodRow.Signature,
-            methodRow.ParamList);
+					RawMethodRow methodRow = writer.Metadata.TablesHeap.MethodTable[rid];
+					writer.Metadata.TablesHeap.MethodTable[rid] = new RawMethodRow(
+					  (uint)native.Item3.RVA,
+					  methodRow.ImplFlags,
+					  methodRow.Flags,
+					  methodRow.Name,
+					  methodRow.Signature,
+					  methodRow.ParamList);
 				}
 			}
 		}

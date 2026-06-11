@@ -51,8 +51,8 @@ namespace Confuser.Runtime {
 				id = (id & 0x3fffffff) << 2;
 
 				if (t == Mutation.KeyI0) {
-					int l = b[id] | (b[id+1] << 8) | (b[id+2] << 16) | (b[id+3] << 24);
-					ret = (T)(object)string.Intern(Encoding.UTF8.GetString(b, id+4, l));
+					int l = b[id] | (b[id + 1] << 8) | (b[id + 2] << 16) | (b[id + 3] << 24);
+					ret = (T)(object)string.Intern(Encoding.UTF8.GetString(b, id + 4, l));
 				}
 				// NOTE: Assume little-endian
 				else if (t == Mutation.KeyI1) {
@@ -61,10 +61,10 @@ namespace Confuser.Runtime {
 					ret = v[0];
 				}
 				else if (t == Mutation.KeyI2) {
-					int s = b[id] | (b[id+1] << 8) | (b[id+2] << 16) | (b[id+3] << 24);
-					int l = b[id+4] | (b[id+5] << 8) | (b[id+6] << 16) | (b[id+7] << 24);
+					int s = b[id] | (b[id + 1] << 8) | (b[id + 2] << 16) | (b[id + 3] << 24);
+					int l = b[id + 4] | (b[id + 5] << 8) | (b[id + 6] << 16) | (b[id + 7] << 24);
 					Array v = Array.CreateInstance(typeof(T).GetElementType(), l);
-					Buffer.BlockCopy(b, id+8, v, 0, s - 4);
+					Buffer.BlockCopy(b, id + 8, v, 0, s - 4);
 					ret = (T)(object)v;
 				}
 				else

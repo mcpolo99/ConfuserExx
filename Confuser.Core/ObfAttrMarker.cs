@@ -146,49 +146,49 @@ namespace Confuser.Core {
 				bool strip = true;
 				foreach (var prop in ca.Properties) {
 					switch (prop.Name) {
-					case "ApplyToMembers":
-						Debug.Assert(prop.Type.ElementType == ElementType.Boolean);
-						info.ApplyToMembers = (bool)prop.Value;
-						break;
+						case "ApplyToMembers":
+							Debug.Assert(prop.Type.ElementType == ElementType.Boolean);
+							info.ApplyToMembers = (bool)prop.Value;
+							break;
 
-					case "Exclude":
-						Debug.Assert(prop.Type.ElementType == ElementType.Boolean);
-						info.Exclude = (bool)prop.Value;
-						break;
+						case "Exclude":
+							Debug.Assert(prop.Type.ElementType == ElementType.Boolean);
+							info.Exclude = (bool)prop.Value;
+							break;
 
-					case "StripAfterObfuscation":
-						Debug.Assert(prop.Type.ElementType == ElementType.Boolean);
-						strip = (bool)prop.Value;
-						break;
+						case "StripAfterObfuscation":
+							Debug.Assert(prop.Type.ElementType == ElementType.Boolean);
+							strip = (bool)prop.Value;
+							break;
 
-					case "Feature":
-						Debug.Assert(prop.Type.ElementType == ElementType.String);
-						string feature = (UTF8String)prop.Value;
+						case "Feature":
+							Debug.Assert(prop.Type.ElementType == ElementType.String);
+							string feature = (UTF8String)prop.Value;
 
-						var match = OrderPattern.Match(feature);
-						if (match.Success) {
-							var orderStr = match.Groups[1].Value;
-							var f = match.Groups[2].Value;
-							int o;
-							if (!int.TryParse(orderStr, out o))
-								throw new NotSupportedException(string.Format("Failed to parse feature '{0}' in {1} ", feature, item));
-							order = o;
-							feature = f;
-						}
+							var match = OrderPattern.Match(feature);
+							if (match.Success) {
+								var orderStr = match.Groups[1].Value;
+								var f = match.Groups[2].Value;
+								int o;
+								if (!int.TryParse(orderStr, out o))
+									throw new NotSupportedException(string.Format("Failed to parse feature '{0}' in {1} ", feature, item));
+								order = o;
+								feature = f;
+							}
 
-						int sepIndex = feature.IndexOf(':');
-						if (sepIndex == -1) {
-							info.FeatureName = "";
-							info.FeatureValue = feature;
-						}
-						else {
-							info.FeatureName = feature.Substring(0, sepIndex);
-							info.FeatureValue = feature.Substring(sepIndex + 1);
-						}
-						break;
+							int sepIndex = feature.IndexOf(':');
+							if (sepIndex == -1) {
+								info.FeatureName = "";
+								info.FeatureValue = feature;
+							}
+							else {
+								info.FeatureName = feature.Substring(0, sepIndex);
+								info.FeatureValue = feature.Substring(sepIndex + 1);
+							}
+							break;
 
-					default:
-						throw new NotSupportedException("Unsupported property: " + prop.Name);
+						default:
+							throw new NotSupportedException("Unsupported property: " + prop.Name);
 					}
 				}
 				if (strip)

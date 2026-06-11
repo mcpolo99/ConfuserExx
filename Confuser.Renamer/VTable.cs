@@ -156,7 +156,7 @@ namespace Confuser.Renamer {
 					if (slots.Select(g => g.Key)
 						.Any(sig => virtualMethods.ContainsKey(sig) || vTbl.SlotsMap.ContainsKey(sig))) {
 						// Something has a new signature. We need to rewrite the whole thing.
-						
+
 						// This is the step 1 of 12.2 algorithm -- find implementation for still empty slots.
 						// Note that it seems we should include newslot methods as well, despite what the standard said.
 						slots = slots
@@ -214,7 +214,7 @@ namespace Confuser.Renamer {
 						vTbl.InterfaceSlots[iface] = ifaceVTbl
 							.SelectMany(g => g.Select(slot => (g.Key, Slot: slot)))
 							.ToLookup(t => t.Key, t => {
-								if (!t.Key.Equals(signature)) 
+								if (!t.Key.Equals(signature))
 									return t.Slot;
 
 								var targetSlot = t.Slot;

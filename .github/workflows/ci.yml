@@ -8,8 +8,10 @@ on:
 
 jobs:
   build:
-    runs-on: windows-2022
-    timeout-minutes: 15
+    runs-on: windows-2025
+    timeout-minutes: 10
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
     steps:
       - uses: actions/checkout@v5
         with:
@@ -18,14 +20,13 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Install .NET 4.6.1 targeting pack
-        shell: pwsh
-        run: |
-          $url = 'https://download.microsoft.com/download/F/1/D/F1DEB8DB-D277-4EF9-9F48-3A65D4D8F965/NDP461-DevPack-KB3105179-ENU.exe'
-          $installer = "$env:TEMP\ndp461-devpack.exe"
-          Invoke-WebRequest -Uri $url -OutFile $installer -UseBasicParsing
-          Start-Process -FilePath $installer -ArgumentList '/quiet','/norestart' -Wait
-          Write-Host "Installed .NET 4.6.1 Developer Pack"
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.vcxproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: Install nbgv
         run: dotnet tool install -g nbgv
@@ -47,7 +48,7 @@ jobs:
       - name: Package CLI
         shell: pwsh
         run: |
-          $src = 'Confuser.CLI/bin/Release/net461'
+          $src = 'Confuser.CLI/bin/Release/net10.0'
           $zip = 'ConfuserEx-CLI.zip'
           Get-ChildItem $src -Exclude '*.pdb','*.xml' | Compress-Archive -DestinationPath $zip
           Write-Host "Created $zip ($([math]::Round((Get-Item $zip).Length / 1MB, 1)) MB)"
@@ -55,7 +56,7 @@ jobs:
       - name: Package GUI
         shell: pwsh
         run: |
-          $src = 'ConfuserEx/bin/Release/net461'
+          $src = 'ConfuserEx/bin/Release/net10.0-windows'
           $zip = 'ConfuserEx-GUI.zip'
           Get-ChildItem $src -Exclude '*.pdb','*.xml' | Compress-Archive -DestinationPath $zip
           Write-Host "Created $zip ($([math]::Round((Get-Item $zip).Length / 1MB, 1)) MB)"
@@ -66,8 +67,8 @@ jobs:
           $zip = 'ConfuserEx.zip'
           $tmp = 'combined'
           New-Item -ItemType Directory -Path $tmp -Force | Out-Null
-          Copy-Item 'Confuser.CLI/bin/Release/net461/*' $tmp -Exclude '*.pdb','*.xml' -Recurse
-          Copy-Item 'ConfuserEx/bin/Release/net461/*' $tmp -Exclude '*.pdb','*.xml' -Recurse -Force
+          Copy-Item 'Confuser.CLI/bin/Release/net10.0/*' $tmp -Exclude '*.pdb','*.xml' -Recurse
+          Copy-Item 'ConfuserEx/bin/Release/net10.0-windows/*' $tmp -Exclude '*.pdb','*.xml' -Recurse -Force
           Get-ChildItem $tmp | Compress-Archive -DestinationPath $zip
           Remove-Item $tmp -Recurse -Force
           Write-Host "Created $zip ($([math]::Round((Get-Item $zip).Length / 1MB, 1)) MB)"
@@ -86,7 +87,7 @@ jobs:
   pre-release:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/pre-release'
-    runs-on: windows-2022
+    runs-on: windows-2025
     timeout-minutes: 5
     permissions:
       contents: write
@@ -136,7 +137,7 @@ jobs:
   release:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: windows-2022
+    runs-on: windows-2025
     timeout-minutes: 5
     permissions:
       contents: write

@@ -51,7 +51,7 @@ namespace Confuser.UnitTest {
 		void ILogger.WarnFormat(string format, params object[] args) =>
 			ProcessOutput("[WARN] " + format, args);
 
-		private void ProcessOutput(string format, params object[] args) => 
+		private void ProcessOutput(string format, params object[] args) =>
 			ProcessOutput(string.Format(format, args));
 
 		private void ProcessOutput(string message) {

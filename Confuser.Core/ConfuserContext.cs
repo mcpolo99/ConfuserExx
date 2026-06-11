@@ -166,7 +166,7 @@ namespace Confuser.Core {
 				return null;
 			if (CurrentModuleWriterOptions == null)
 				CurrentModuleWriterOptions = new NativeModuleWriterOptions(CurrentModule, optimizeImageSize);
-			
+
 			// Clone the current options to the new options
 			var newOptions = new NativeModuleWriterOptions(CurrentModule, optimizeImageSize) {
 				AddCheckSum = CurrentModuleWriterOptions.AddCheckSum,

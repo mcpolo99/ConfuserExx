@@ -63,7 +63,7 @@ namespace Confuser.Core {
 							MethodSig.CreateInstance(module.CorLibTypes.Void, module.CorLibTypes.String),
 							MethodImplAttributes.Managed,
 							MethodAttributes.HideBySig | MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName) {
-							Body = new CilBody {MaxStack = 1}
+							Body = new CilBody { MaxStack = 1 }
 						};
 						ctor.Body.Instructions.Add(OpCodes.Ldarg_0.ToInstruction());
 						ctor.Body.Instructions.Add(OpCodes.Call.ToInstruction(new MemberRefUser(module, ".ctor",

@@ -20,7 +20,7 @@ namespace DynamicTypeRename.Test {
 		public async Task RenameDynamicType(string renameMode, bool flatten) =>
 			await Run(
 				"161_DynamicTypeRename.exe",
-				new [] {
+				new[] {
 					"Type declaration done",
 					"Dynamic type created",
 					"Fields in type: 1",
@@ -34,8 +34,8 @@ namespace DynamicTypeRename.Test {
 			);
 
 		public static IEnumerable<object[]> RenameDynamicTypeData() {
-			foreach (var renameMode in new [] { nameof(RenameMode.Unicode), nameof(RenameMode.ASCII), nameof(RenameMode.Letters), nameof(RenameMode.Debug), nameof(RenameMode.Retain) })
-				foreach (var flatten in new [] { true, false })
+			foreach (var renameMode in new[] { nameof(RenameMode.Unicode), nameof(RenameMode.ASCII), nameof(RenameMode.Letters), nameof(RenameMode.Debug), nameof(RenameMode.Retain) })
+				foreach (var flatten in new[] { true, false })
 					yield return new object[] { renameMode, flatten };
 		}
 	}

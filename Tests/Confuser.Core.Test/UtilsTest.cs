@@ -6,7 +6,7 @@ namespace Confuser.Core.Test {
 		[Theory]
 		[MemberData(nameof(BuildRelativePathTestData))]
 		[Trait("Issue", "https://github.com/mkaring/ConfuserEx/issues/413")]
-		public void BuildRelativePath(string baseDirectory, string fileReference, string expectedRelativePath) => 
+		public void BuildRelativePath(string baseDirectory, string fileReference, string expectedRelativePath) =>
 			Assert.Equal(expectedRelativePath, Utils.GetRelativePath(fileReference, baseDirectory), ignoreCase: true);
 
 		public static IEnumerable<object[]> BuildRelativePathTestData() {

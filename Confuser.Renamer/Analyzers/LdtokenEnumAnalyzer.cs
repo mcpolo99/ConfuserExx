@@ -40,7 +40,7 @@ namespace Confuser.Renamer.Analyzers {
 						if (!(instr.Operand is TypeSpec)) {
 							TypeDef type = ((ITypeDefOrRef)instr.Operand).ResolveTypeDefThrow();
 							if (context.Modules.Contains((ModuleDefMD)type.Module) &&
-							    HandleTypeOf(context, service, method, i)) {
+								HandleTypeOf(context, service, method, i)) {
 								var t = type;
 								do {
 									DisableRename(service, t, false);
@@ -53,7 +53,7 @@ namespace Confuser.Renamer.Analyzers {
 						throw new UnreachableException();
 				}
 				else if ((instr.OpCode.Code == Code.Call || instr.OpCode.Code == Code.Callvirt) &&
-				         ((IMethod)instr.Operand).Name == "ToString") {
+						 ((IMethod)instr.Operand).Name == "ToString") {
 					HandleEnum(context, service, method, i);
 				}
 				else if (instr.OpCode.Code == Code.Ldstr) {
@@ -75,7 +75,7 @@ namespace Confuser.Renamer.Analyzers {
 		void HandleEnum(ConfuserContext context, INameService service, MethodDef method, int index) {
 			var target = (IMethod)method.Body.Instructions[index].Operand;
 			if (target.FullName == "System.String System.Object::ToString()" ||
-			    target.FullName == "System.String System.Enum::ToString(System.String)") {
+				target.FullName == "System.String System.Enum::ToString(System.String)") {
 				int prevIndex = index - 1;
 				while (prevIndex >= 0 && method.Body.Instructions[prevIndex].OpCode.Code == Code.Nop)
 					prevIndex--;
@@ -139,8 +139,8 @@ namespace Confuser.Renamer.Analyzers {
 							if (operand.Name.StartsWith("Get") || operand.Name == "InvokeMember")
 								return true;
 							if (operand.Name == "get_AssemblyQualifiedName" ||
-							    operand.Name == "get_FullName" ||
-							    operand.Name == "get_Namespace")
+								operand.Name == "get_FullName" ||
+								operand.Name == "get_Namespace")
 								return true;
 							return false;
 						case "System.Reflection.MemberInfo":

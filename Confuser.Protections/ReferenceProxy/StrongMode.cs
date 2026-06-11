@@ -151,14 +151,14 @@ namespace Confuser.Protections.ReferenceProxy {
 			// Insert field load & replace instruction
 			if (argBeginIndex == instrIndex) {
 				ctx.Body.Instructions.Insert(instrIndex + 1,
-				                             new Instruction(OpCodes.Call, delegateType.FindMethod("Invoke")));
+											 new Instruction(OpCodes.Call, delegateType.FindMethod("Invoke")));
 				instr.OpCode = OpCodes.Ldsfld;
 				instr.Operand = proxy.Item1;
 			}
 			else {
 				Instruction argBegin = ctx.Body.Instructions[argBeginIndex];
 				ctx.Body.Instructions.Insert(argBeginIndex + 1,
-				                             new Instruction(argBegin.OpCode, argBegin.Operand));
+											 new Instruction(argBegin.OpCode, argBegin.Operand));
 				argBegin.OpCode = OpCodes.Ldsfld;
 				argBegin.Operand = proxy.Item1;
 

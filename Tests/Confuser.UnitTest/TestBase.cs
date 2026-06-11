@@ -24,30 +24,31 @@ namespace Confuser.UnitTest {
 		protected Task Run(string inputFileName, string[] expectedOutput, SettingItem<Protection> protection,
 			string outputDirSuffix = "", Action<string> outputAction = null, SettingItem<Packer> packer = null,
 			Action<ProjectModule> projectModuleAction = null, Func<string, Task> postProcessAction = null,
-			string seed = null, bool checkOutput = true) =>
+			string seed = null, bool checkOutput = true, string processArguments = null) =>
 
 			Run(new[] { inputFileName }, expectedOutput, protection, outputDirSuffix, outputAction, packer,
-				projectModuleAction, postProcessAction, seed, checkOutput);
+				projectModuleAction, postProcessAction, seed, checkOutput, processArguments);
 
 		protected Task Run(string inputFileName, string[] expectedOutput, IEnumerable<SettingItem<Protection>> protections,
 			string outputDirSuffix = "", Action<string> outputAction = null, SettingItem<Packer> packer = null,
-			Action<ProjectModule> projectModuleAction = null, Func<string, Task> postProcessAction = null) =>
+			Action<ProjectModule> projectModuleAction = null, Func<string, Task> postProcessAction = null,
+			string processArguments = null) =>
 
 			Run(new[] { inputFileName }, expectedOutput, protections, outputDirSuffix, outputAction, packer,
-				projectModuleAction, postProcessAction);
+				projectModuleAction, postProcessAction, processArguments: processArguments);
 
 		protected Task Run(string[] inputFileNames, string[] expectedOutput, SettingItem<Protection> protection,
 			string outputDirSuffix = "", Action<string> outputAction = null, SettingItem<Packer> packer = null,
 			Action<ProjectModule> projectModuleAction = null, Func<string, Task> postProcessAction = null,
-			string seed = null, bool checkOutput = true) {
+			string seed = null, bool checkOutput = true, string processArguments = null) {
 			var protections = (protection is null) ? Enumerable.Empty<SettingItem<Protection>>() : new[] { protection };
-			return Run(inputFileNames, expectedOutput, protections, outputDirSuffix, outputAction, packer, projectModuleAction, postProcessAction, seed, checkOutput);
+			return Run(inputFileNames, expectedOutput, protections, outputDirSuffix, outputAction, packer, projectModuleAction, postProcessAction, seed, checkOutput, processArguments);
 		}
 
 		protected async Task Run(string[] inputFileNames, string[] expectedOutput, IEnumerable<SettingItem<Protection>> protections,
 			string outputDirSuffix = "", Action<string> outputAction = null, SettingItem<Packer> packer = null,
 			Action<ProjectModule> projectModuleAction = null, Func<string, Task> postProcessAction = null,
-			string seed = null, bool checkOutput = true) {
+			string seed = null, bool checkOutput = true, string processArguments = null) {
 
 			var baseDir = Environment.CurrentDirectory;
 			var outputDir = Path.Combine(baseDir, "obfuscated" + outputDirSuffix);
@@ -115,7 +116,8 @@ namespace Confuser.UnitTest {
 				var info = new ProcessStartInfo(entryOutputFileName) {
 					RedirectStandardOutput = true,
 					RedirectStandardError = true,
-					UseShellExecute = false
+					UseShellExecute = false,
+					Arguments = processArguments ?? ""
 				};
 				using (var process = Process.Start(info)) {
 					using (var stdout = process.StandardOutput) {

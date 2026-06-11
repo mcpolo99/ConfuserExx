@@ -1,0 +1,240 @@
+name: test
+
+on:
+  push:
+    branches: [master, pre-release, feature/**, fix/**]
+  pull_request:
+    branches: [master, pre-release]
+
+jobs:
+  test:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET runtimes for cross-framework tests
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.vcxproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore
+        run: msbuild Confuser2.sln -t:Restore -verbosity:minimal
+
+      - name: Build
+        run: msbuild Confuser2.sln -p:Configuration=Release -verbosity:minimal
+
+      - name: Run tests with coverage
+        id: tests
+        shell: pwsh
+        run: |
+          $resultsDir = 'test-results'
+          New-Item -ItemType Directory -Path $resultsDir -Force | Out-Null
+
+          $testProjects = Get-ChildItem -Path Tests -Filter '*.Test.csproj' -Recurse | Select-Object -Unique
+          $anyFailed = $false
+
+          foreach ($proj in $testProjects) {
+            $name = $proj.BaseName
+            Write-Host "`n========================================" -ForegroundColor Cyan
+            Write-Host "Testing $name" -ForegroundColor Cyan
+            Write-Host "========================================" -ForegroundColor Cyan
+
+            dotnet test $proj.FullName -c Release --no-build --verbosity minimal `
+              --collect:"XPlat Code Coverage" `
+              --logger "trx;LogFileName=$name.trx" `
+              --results-directory "$resultsDir/$name"
+
+            if ($LASTEXITCODE -ne 0) { $anyFailed = $true }
+          }
+
+          # Parse all TRX files into a combined report
+          $allTests = @()
+          $trxFiles = Get-ChildItem -Path $resultsDir -Filter '*.trx' -Recurse
+
+          foreach ($trx in $trxFiles) {
+            [xml]$xml = Get-Content $trx.FullName
+            $ns = @{ t = 'http://microsoft.com/schemas/VisualStudio/TeamTest/2010' }
+
+            $results = Select-Xml -Xml $xml -XPath '//t:UnitTestResult' -Namespace $ns
+            foreach ($r in $results) {
+              $node = $r.Node
+              $testName = $node.testName
+              $outcome = $node.outcome  # Passed, Failed, NotExecuted
+              $duration = $node.duration
+              $errorMsg = ''
+              if ($node.Output -and $node.Output.ErrorInfo) {
+                $errorMsg = $node.Output.ErrorInfo.Message
+              }
+              $allTests += [PSCustomObject]@{
+                Name = $testName
+                Outcome = $outcome
+                Duration = $duration
+                Error = $errorMsg
+                TrxFile = $trx.BaseName
+              }
+            }
+          }
+
+          # Group by category for nice display
+          $passed = $allTests | Where-Object { $_.Outcome -eq 'Passed' }
+          $failed = $allTests | Where-Object { $_.Outcome -eq 'Failed' }
+          $skipped = $allTests | Where-Object { $_.Outcome -eq 'NotExecuted' }
+
+          # Build markdown report
+          $md = @()
+          $md += '## Test Results'
+          $md += ''
+          if ($failed.Count -gt 0) {
+            $md += "> :x: **$($failed.Count) test(s) failed** out of $($allTests.Count) total"
+          } else {
+            $md += "> :white_check_mark: **All $($passed.Count) tests passed**"
+          }
+          $md += ''
+
+          # Summary table grouped by project (TRX file)
+          $grouped = $allTests | Group-Object TrxFile
+          $md += '| Project | :white_check_mark: Passed | :x: Failed | :fast_forward: Skipped | Total |'
+          $md += '|---------|--------|--------|---------|-------|'
+          foreach ($g in $grouped | Sort-Object Name) {
+            $p = ($g.Group | Where-Object { $_.Outcome -eq 'Passed' }).Count
+            $f = ($g.Group | Where-Object { $_.Outcome -eq 'Failed' }).Count
+            $s = ($g.Group | Where-Object { $_.Outcome -eq 'NotExecuted' }).Count
+            $icon = if ($f -gt 0) { ':x:' } else { ':white_check_mark:' }
+            $md += "| $icon $($g.Name) | $p | $f | $s | $($g.Group.Count) |"
+          }
+
+          # Expand CrossFramework tests individually
+          $crossTests = $allTests | Where-Object { $_.Name -match 'CrossFramework|Console_Net|WinForms_Net|WPF_Net|Library_Net' }
+          if ($crossTests.Count -gt 0) {
+            $md += ''
+            $md += '<details><summary><strong>Cross-Framework Test Details (click to expand)</strong></summary>'
+            $md += ''
+            $md += '| Test | Framework | App Type | Result |'
+            $md += '|------|-----------|----------|--------|'
+            foreach ($t in $crossTests | Sort-Object Name) {
+              $icon = switch ($t.Outcome) { 'Passed' { ':white_check_mark:' } 'Failed' { ':x:' } default { ':fast_forward:' } }
+              # Parse TFM and app type from test name
+              $tfm = ''; $appType = ''
+              if ($t.Name -match '_Net(\w+)_') { $tfm = $Matches[1] }
+              if ($t.Name -match '(Console|WinForms|WPF|Library)_') { $appType = $Matches[1] }
+              $md += "| ``$($t.Name)`` | $tfm | $appType | $icon |"
+            }
+            $md += ''
+            $md += '</details>'
+          }
+
+          # List failed tests with error messages
+          if ($failed.Count -gt 0) {
+            $md += ''
+            $md += '### :x: Failed Tests'
+            $md += ''
+            foreach ($f in $failed) {
+              $md += "**``$($f.Name)``**"
+              if ($f.Error) {
+                $shortError = ($f.Error -split "`n")[0]
+                if ($shortError.Length -gt 200) { $shortError = $shortError.Substring(0, 200) + '...' }
+                $md += "> $shortError"
+              }
+              $md += ''
+            }
+          }
+
+          $md += ''
+
+          # Write results
+          $md -join "`n" | Set-Content -Path 'test-results.md' -Encoding utf8
+          $md -join "`n" >> $env:GITHUB_STEP_SUMMARY
+
+          echo "any_failed=$anyFailed" >> $env:GITHUB_OUTPUT
+          echo "total_passed=$($passed.Count)" >> $env:GITHUB_OUTPUT
+          echo "total_failed=$($failed.Count)" >> $env:GITHUB_OUTPUT
+
+      - name: Generate coverage report
+        if: always()
+        shell: pwsh
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          $reports = (Get-ChildItem -Path test-results -Filter 'coverage.cobertura.xml' -Recurse).FullName -join ';'
+          if ($reports) {
+            reportgenerator "-reports:$reports" "-targetdir:coverage/report" "-reporttypes:HtmlInline_AzurePipelines;Cobertura;TextSummary;MarkdownSummaryGithub"
+            Write-Host "--- Coverage Summary ---"
+            Get-Content coverage/report/Summary.txt
+          } else {
+            Write-Host "No coverage files found."
+          }
+
+      - name: Build PR comment
+        if: always() && github.event_name == 'pull_request'
+        shell: pwsh
+        run: |
+          $comment = @()
+          if (Test-Path 'test-results.md') {
+            $comment += Get-Content 'test-results.md' -Raw
+          }
+          $coverageMd = 'coverage/report/SummaryGithub.md'
+          if (Test-Path $coverageMd) {
+            $comment += "`n---`n"
+            $comment += Get-Content $coverageMd -Raw
+          }
+          $comment -join "`n" | Set-Content -Path 'pr-comment.md' -Encoding utf8
+
+      - name: Coverage to job summary
+        if: always()
+        shell: pwsh
+        run: |
+          $mdFile = 'coverage/report/SummaryGithub.md'
+          if (Test-Path $mdFile) {
+            "`n---`n" >> $env:GITHUB_STEP_SUMMARY
+            Get-Content $mdFile >> $env:GITHUB_STEP_SUMMARY
+          }
+
+      - name: Post PR comment
+        if: always() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: test-coverage-report
+          path: pr-comment.md
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: test-results
+          path: test-results/
+          if-no-files-found: ignore
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage-report
+          path: coverage/report/
+          if-no-files-found: ignore
+
+      - name: Fail if tests failed
+        if: always() && steps.tests.outputs.any_failed == 'True'
+        run: |
+          Write-Host "::error::Tests failed. See the test results above for details."
+          exit 1
+        shell: pwsh

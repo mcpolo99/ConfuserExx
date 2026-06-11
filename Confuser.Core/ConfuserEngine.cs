@@ -11,11 +11,11 @@ using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.Writer;
 using Microsoft.Win32;
-using InformationalAttribute = System.Reflection.AssemblyInformationalVersionAttribute;
-using ProductAttribute = System.Reflection.AssemblyProductAttribute;
 using CopyrightAttribute = System.Reflection.AssemblyCopyrightAttribute;
+using InformationalAttribute = System.Reflection.AssemblyInformationalVersionAttribute;
 using MethodAttributes = dnlib.DotNet.MethodAttributes;
 using MethodImplAttributes = dnlib.DotNet.MethodImplAttributes;
+using ProductAttribute = System.Reflection.AssemblyProductAttribute;
 using TypeAttributes = dnlib.DotNet.TypeAttributes;
 
 namespace Confuser.Core {
@@ -93,7 +93,7 @@ namespace Confuser.Core {
 					new SettingItem<Protection>(WatermarkingProtection._Id)
 				});
 
-				var asmResolver = new ConfuserAssemblyResolver {EnableTypeDefCache = true};
+				var asmResolver = new ConfuserAssemblyResolver { EnableTypeDefCache = true };
 				asmResolver.DefaultModuleContext = new ModuleContext(asmResolver);
 				context.InternalResolver = asmResolver;
 				context.BaseDirectory = Path.GetFullPath(context.Project.BaseDirectory).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
@@ -320,7 +320,7 @@ namespace Confuser.Core {
 			else if (isKeyProvided && !moduleIsSignedOrDelayedSigned)
 				context.Logger.WarnFormat("[{0}] SN Key or SN public Key is provided for an unsigned module, the output may not be working.", module.Name);
 			else if (snPubKeyBytes != null && moduleIsSignedOrDelayedSigned &&
-			         !module.Assembly.PublicKey.Data.SequenceEqual(snPubKeyBytes))
+					 !module.Assembly.PublicKey.Data.SequenceEqual(snPubKeyBytes))
 				context.Logger.WarnFormat("[{0}] Provided SN public Key and signed module's public key do not match, the output may not be working.",
 					module.Name);
 		}
@@ -375,7 +375,7 @@ namespace Confuser.Core {
 				}
 		}
 
-		static void ProcessModule(ConfuserContext context) => 
+		static void ProcessModule(ConfuserContext context) =>
 			context.CurrentModuleWriterOptions.WriterEvent += (sender, e) => context.CheckCancellation();
 
 		static void OptimizeMethods(ConfuserContext context) {
@@ -396,7 +396,8 @@ namespace Confuser.Core {
 					context.Logger.WarnFormat("Input file is not inside the base directory. Relative path can't be created. Placing file into output root." +
 						Environment.NewLine + "Responsible file is: {0}", output);
 					output = Path.GetFileName(output);
-				} else {
+				}
+				else {
 					output = relativeOutput;
 				}
 			}

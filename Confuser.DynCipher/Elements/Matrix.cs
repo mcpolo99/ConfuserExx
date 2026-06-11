@@ -67,11 +67,11 @@ namespace Confuser.DynCipher.Elements {
 
 		static uint det3(uint[,] mat) {
 			return mat[0, 0] * mat[1, 1] * mat[2, 2] +
-			       mat[0, 1] * mat[1, 2] * mat[2, 0] +
-			       mat[0, 2] * mat[1, 0] * mat[2, 1] -
-			       mat[0, 2] * mat[1, 1] * mat[2, 0] -
-			       mat[0, 1] * mat[1, 0] * mat[2, 2] -
-			       mat[0, 0] * mat[1, 2] * mat[2, 1];
+				   mat[0, 1] * mat[1, 2] * mat[2, 0] +
+				   mat[0, 2] * mat[1, 0] * mat[2, 1] -
+				   mat[0, 2] * mat[1, 1] * mat[2, 0] -
+				   mat[0, 1] * mat[1, 0] * mat[2, 2] -
+				   mat[0, 0] * mat[1, 2] * mat[2, 1];
 		}
 
 		static uint[,] transpose4(uint[,] mat) {
@@ -118,10 +118,10 @@ namespace Confuser.DynCipher.Elements {
 					Value = a * l(k[3, 0]) + b * l(k[3, 1]) + c * l(k[3, 2]) + d * l(k[3, 3]),
 					Target = td
 				})
-				       .Emit(new AssignmentStatement { Value = ta, Target = a })
-				       .Emit(new AssignmentStatement { Value = tb, Target = b })
-				       .Emit(new AssignmentStatement { Value = tc, Target = c })
-				       .Emit(new AssignmentStatement { Value = td, Target = d });
+					   .Emit(new AssignmentStatement { Value = ta, Target = a })
+					   .Emit(new AssignmentStatement { Value = tb, Target = b })
+					   .Emit(new AssignmentStatement { Value = tc, Target = c })
+					   .Emit(new AssignmentStatement { Value = td, Target = d });
 			}
 		}
 

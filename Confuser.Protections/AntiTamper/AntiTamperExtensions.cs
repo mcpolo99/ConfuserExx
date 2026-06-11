@@ -21,7 +21,7 @@ namespace Confuser.Protections.AntiTamper {
 				sections.Insert(relocIndex, newSection);
 		}
 
-		private static bool IsRelocSection(PESection section) => 
+		private static bool IsRelocSection(PESection section) =>
 			section.Name.Equals(".reloc", StringComparison.Ordinal);
 	}
 }

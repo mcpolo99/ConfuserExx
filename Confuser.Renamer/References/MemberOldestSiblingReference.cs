@@ -18,7 +18,7 @@ namespace Confuser.Renamer.References {
 		public MemberOldestSiblingReference(IMemberDef oldestSiblingDef, IMemberDef otherSiblingDef) {
 			OldestSiblingDef = oldestSiblingDef ?? throw new ArgumentNullException(nameof(oldestSiblingDef));
 			if (otherSiblingDef is null) throw new ArgumentNullException(nameof(otherSiblingDef));
-			OtherSiblings = new List<IMemberDef> {otherSiblingDef};
+			OtherSiblings = new List<IMemberDef> { otherSiblingDef };
 		}
 
 		/// <inheritdoc />
@@ -31,14 +31,14 @@ namespace Confuser.Renamer.References {
 		public bool UpdateNameReference(ConfuserContext context, INameService service) => false;
 
 		public override string ToString() => ToString(null);
-		
+
 		/// <inheritdoc />
 		public string ToString(INameService nameService) {
 			var builder = new StringBuilder();
 			builder.Append("Oldest Sibling Reference").Append("(");
 			builder.Append("Oldest Sibling ").AppendReferencedDef(OldestSiblingDef, nameService);
 			builder.Append("; Other Siblings: ");
-			foreach (var otherSibling in OtherSiblings) 
+			foreach (var otherSibling in OtherSiblings)
 				builder.AppendReferencedDef(otherSibling, nameService).Append(", ");
 
 			builder.Length -= 2;
