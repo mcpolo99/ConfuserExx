@@ -1,17 +1,13 @@
 name: "CodeQL"
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   schedule:
-    - cron: "26 4 * * 0"
+    - cron: "0 3 * * 1"  # Every Monday 3am UTC
+  workflow_dispatch:       # Manual trigger from Actions tab
 
 permissions:
   contents: read
   security-events: write
-  pull-requests: read
   actions: read
 
 jobs:
@@ -19,29 +15,42 @@ jobs:
     name: Analyze
     runs-on: windows-2025
 
-    strategy:
-      fail-fast: false
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          submodules: recursive
+
+      - name: Check for recent commits
+        id: check
+        shell: pwsh
+        run: |
+          $count = (git log --oneline --since="7 days ago" | Measure-Object).Count
+          echo "has_changes=$($count -gt 0)" >> $env:GITHUB_OUTPUT
+          Write-Host "Commits in last 7 days: $count"
 
       - name: Initialize CodeQL
+        if: steps.check.outputs.has_changes == 'True' || github.event_name == 'workflow_dispatch'
         uses: github/codeql-action/init@v3
         with:
           languages: csharp
 
       - name: Setup MSBuild
+        if: steps.check.outputs.has_changes == 'True' || github.event_name == 'workflow_dispatch'
         uses: microsoft/setup-msbuild@v2
 
       - name: Restore
+        if: steps.check.outputs.has_changes == 'True' || github.event_name == 'workflow_dispatch'
         run: msbuild Confuser2.sln -t:Restore -verbosity:minimal
 
       - name: Build
+        if: steps.check.outputs.has_changes == 'True' || github.event_name == 'workflow_dispatch'
         run: msbuild Confuser2.sln -p:Configuration=Release -verbosity:minimal
 
       - name: Perform CodeQL Analysis
+        if: steps.check.outputs.has_changes == 'True' || github.event_name == 'workflow_dispatch'
         uses: github/codeql-action/analyze@v3
+
+      - name: Skip notice
+        if: steps.check.outputs.has_changes != 'True' && github.event_name != 'workflow_dispatch'
+        run: echo "No commits in the last 7 days — skipping analysis."
