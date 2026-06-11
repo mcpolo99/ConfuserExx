@@ -9,6 +9,7 @@ using dnlib.DotNet.Emit;
 using dnlib.DotNet.MD;
 using dnlib.DotNet.Pdb;
 using dnlib.DotNet.Writer;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Protections.ControlFlow {
 	internal class ControlFlowPhase : ProtectionPhase {
@@ -74,7 +75,7 @@ namespace Confuser.Protections.ControlFlow {
 			bool disabledOpti = DisabledOptimization(context.CurrentModule);
 			RandomGenerator random = context.Registry.GetService<IRandomService>().GetRandomGenerator(ControlFlowProtection._FullId);
 
-			foreach (MethodDef method in parameters.Targets.OfType<MethodDef>().WithProgress(context.Logger))
+			foreach (MethodDef method in parameters.Targets.OfType<MethodDef>().WithProgress(context.ProgressReporter))
 				if (method.HasBody && method.Body.Instructions.Count > 0) {
 					ProcessMethod(method.Body, ParseParameters(method, context, parameters, random, disabledOpti));
 					context.CheckCancellation();
@@ -90,7 +91,7 @@ namespace Confuser.Protections.ControlFlow {
 		void ProcessMethod(CilBody body, CFContext ctx) {
 			uint maxStack;
 			if (!MaxStackCalculator.GetMaxStack(body.Instructions, body.ExceptionHandlers, out maxStack)) {
-				ctx.Context.Logger.Error("Failed to calcuate maxstack.");
+				ctx.Context.Logger.LogError("Failed to calcuate maxstack.");
 				throw new ConfuserException(null);
 			}
 			body.MaxStack = (ushort)maxStack;

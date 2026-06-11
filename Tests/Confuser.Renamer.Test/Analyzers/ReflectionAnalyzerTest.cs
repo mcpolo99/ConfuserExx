@@ -6,10 +6,10 @@ using Confuser.Core.Services;
 using Confuser.Renamer.Analyzers;
 using Confuser.UnitTest;
 using dnlib.DotNet;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 using Xunit.Abstractions;
-using ILogger = Confuser.Core.ILogger;
 
 namespace Confuser.Renamer.Test.Analyzers {
 	public sealed class ReflectionAnalyzerTest {
@@ -21,7 +21,7 @@ namespace Confuser.Renamer.Test.Analyzers {
 		public ReflectionAnalyzerTest(ITestOutputHelper outputHelper) =>
 			_outputHelper = outputHelper ?? throw new ArgumentNullException(nameof(outputHelper));
 
-		private ILogger CreateLogger() => new XunitLogger(_outputHelper);
+		private Microsoft.Extensions.Logging.ILogger CreateLogger() => new XunitLogger(_outputHelper);
 
 		private string ReferenceProperty { get; }
 

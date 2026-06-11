@@ -80,9 +80,11 @@ namespace Confuser.UnitTest {
 			if (rule.Count > 0)
 				proj.Rules.Add(rule);
 
+			var xunitLogger = new XunitLogger(outputHelper, outputAction);
 			var parameters = new ConfuserParameters {
 				Project = proj,
-				Logger = new XunitLogger(outputHelper, outputAction)
+				Logger = xunitLogger,
+				ProgressReporter = xunitLogger
 			};
 
 			await ConfuserEngine.Run(parameters);

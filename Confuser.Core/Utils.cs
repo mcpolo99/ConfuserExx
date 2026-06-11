@@ -204,33 +204,33 @@ namespace Confuser.Core {
 		}
 
 		/// <summary>
-		///     Returns a <see cref="IEnumerable{T}" /> that log the progress of iterating the specified list.
+		///     Returns a <see cref="IEnumerable{T}" /> that reports the progress of iterating the specified list.
 		/// </summary>
 		/// <typeparam name="T">The type of list element</typeparam>
 		/// <param name="enumerable">The list.</param>
-		/// <param name="logger">The logger.</param>
+		/// <param name="reporter">The progress reporter.</param>
 		/// <returns>A wrapper of the list.</returns>
-		public static IEnumerable<T> WithProgress<T>(this IEnumerable<T> enumerable, ILogger logger) {
+		public static IEnumerable<T> WithProgress<T>(this IEnumerable<T> enumerable, IProgressReporter reporter) {
 			switch (enumerable) {
 				case IReadOnlyCollection<T> readOnlyCollection:
-					return WithProgress(enumerable, readOnlyCollection.Count, logger);
+					return WithProgress(enumerable, readOnlyCollection.Count, reporter);
 				case ICollection<T> collection:
-					return WithProgress(enumerable, collection.Count, logger);
+					return WithProgress(enumerable, collection.Count, reporter);
 				default:
 					var buffered = enumerable.ToList();
-					return WithProgress(buffered, buffered.Count, logger);
+					return WithProgress(buffered, buffered.Count, reporter);
 			}
 		}
 
-		public static IEnumerable<T> WithProgress<T>(this IEnumerable<T> enumerable, int totalCount, ILogger logger) {
+		public static IEnumerable<T> WithProgress<T>(this IEnumerable<T> enumerable, int totalCount, IProgressReporter reporter) {
 			var counter = 0;
 			foreach (var obj in enumerable) {
-				logger.Progress(counter, totalCount);
+				reporter.Progress(counter, totalCount);
 				yield return obj;
 				counter++;
 			}
-			logger.Progress(totalCount, totalCount);
-			logger.EndProgress();
+			reporter.Progress(totalCount, totalCount);
+			reporter.EndProgress();
 		}
 	}
 }

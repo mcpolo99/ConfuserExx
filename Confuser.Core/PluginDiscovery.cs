@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Core {
 	/// <summary>
@@ -64,7 +65,7 @@ namespace Confuser.Core {
 							protections.Add((Protection)Activator.CreateInstance(i));
 						}
 						catch (Exception ex) {
-							context.Logger.ErrorException("Failed to instantiate protection '" + i.Name + "'.", ex);
+							context.Logger.LogError(ex, "Failed to instantiate protection '" + i.Name + "'.");
 						}
 					}
 					else if (typeof(Packer).IsAssignableFrom(i)) {
@@ -72,7 +73,7 @@ namespace Confuser.Core {
 							packers.Add((Packer)Activator.CreateInstance(i));
 						}
 						catch (Exception ex) {
-							context.Logger.ErrorException("Failed to instantiate packer '" + i.Name + "'.", ex);
+							context.Logger.LogError(ex, "Failed to instantiate packer '" + i.Name + "'.");
 						}
 					}
 					else if (typeof(ConfuserComponent).IsAssignableFrom(i)) {
@@ -80,7 +81,7 @@ namespace Confuser.Core {
 							components.Add((ConfuserComponent)Activator.CreateInstance(i));
 						}
 						catch (Exception ex) {
-							context.Logger.ErrorException("Failed to instantiate component '" + i.Name + "'.", ex);
+							context.Logger.LogError(ex, "Failed to instantiate component '" + i.Name + "'.");
 						}
 					}
 				}
@@ -103,7 +104,7 @@ namespace Confuser.Core {
 				AddPlugins(context, protections, packers, components, protAsm);
 			}
 			catch (Exception ex) {
-				context.Logger.WarnException("Failed to load built-in protections.", ex);
+				context.Logger.LogWarning(ex, "Failed to load built-in protections.");
 			}
 
 			try {
@@ -111,7 +112,7 @@ namespace Confuser.Core {
 				AddPlugins(context, protections, packers, components, renameAsm);
 			}
 			catch (Exception ex) {
-				context.Logger.WarnException("Failed to load renamer.", ex);
+				context.Logger.LogWarning(ex, "Failed to load renamer.");
 			}
 
 			try {
@@ -119,7 +120,7 @@ namespace Confuser.Core {
 				AddPlugins(context, protections, packers, components, renameAsm);
 			}
 			catch (Exception ex) {
-				context.Logger.WarnException("Failed to load dynamic cipher library.", ex);
+				context.Logger.LogWarning(ex, "Failed to load dynamic cipher library.");
 			}
 
 			foreach (string pluginPath in context.Project.PluginPaths) {
@@ -129,7 +130,7 @@ namespace Confuser.Core {
 					AddPlugins(context, protections, packers, components, plugin);
 				}
 				catch (Exception ex) {
-					context.Logger.WarnException("Failed to load plugin '" + pluginPath + "'.", ex);
+					context.Logger.LogWarning(ex, "Failed to load plugin '" + pluginPath + "'.");
 				}
 			}
 		}

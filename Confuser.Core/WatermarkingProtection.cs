@@ -2,6 +2,7 @@
 using Confuser.Core.Services;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Core {
 	public sealed class WatermarkingProtection : Protection {
@@ -45,7 +46,7 @@ namespace Confuser.Core {
 			protected internal override void Execute(ConfuserContext context, ProtectionParameters parameters) {
 				var marker = context.Registry.GetService<IMarkerService>();
 
-				context.Logger.Debug("Watermarking...");
+				context.Logger.LogDebug("Watermarking...");
 				foreach (var module in parameters.Targets.OfType<ModuleDef>()) {
 					var attrRef = module.CorLibTypes.GetTypeRef("System", "Attribute");
 					var attrType = module.FindNormal("ConfusedByAttribute");

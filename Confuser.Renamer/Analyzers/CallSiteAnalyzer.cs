@@ -4,6 +4,7 @@ using Confuser.Core.Services;
 using Confuser.Renamer.References;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Renamer.Analyzers {
 	internal sealed class CallSiteAnalyzer : IRenamer {
@@ -61,7 +62,7 @@ namespace Confuser.Renamer.Analyzers {
 				BuildMemberReferences(context, typeDefOrRef, boundMemberName, nameInstruction);
 			}
 			else {
-				context.Logger.WarnFormat(
+				context.Logger.LogWarning(
 					"Failed to resolve type for dynamic invoke member in {0} - blocking all members with name {1} from renaming.",
 					method, boundMemberName);
 

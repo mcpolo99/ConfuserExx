@@ -6,6 +6,7 @@ using Confuser.Core;
 using Confuser.Core.Services;
 using Confuser.Renamer.Analyzers;
 using dnlib.DotNet;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Renamer {
 	internal class AnalyzePhase : ProtectionPhase {
@@ -34,12 +35,12 @@ namespace Confuser.Renamer {
 		protected override void Execute(ConfuserContext context, ProtectionParameters parameters) {
 			var service = (NameService)context.Registry.GetService<INameService>();
 
-			context.Logger.Debug("Building VTables & identifier list...");
+			context.Logger.LogDebug("Building VTables & identifier list...");
 
 			foreach (ModuleDef moduleDef in parameters.Targets.OfType<ModuleDef>())
 				moduleDef.EnableTypeDefFindCache = true;
 
-			foreach (IDnlibDef def in parameters.Targets.WithProgress(context.Logger)) {
+			foreach (IDnlibDef def in parameters.Targets.WithProgress(context.ProgressReporter)) {
 				ParseParameters(def, context, service, parameters);
 
 				if (def is ModuleDef module) {
@@ -56,10 +57,10 @@ namespace Confuser.Renamer {
 				context.CheckCancellation();
 			}
 
-			context.Logger.Debug("Analyzing...");
+			context.Logger.LogDebug("Analyzing...");
 			RegisterRenamers(context, service);
 			IList<IRenamer> renamers = service.Renamers;
-			foreach (IDnlibDef def in parameters.Targets.WithProgress(context.Logger)) {
+			foreach (IDnlibDef def in parameters.Targets.WithProgress(context.ProgressReporter)) {
 				Analyze(service, context, parameters, def, true);
 				context.CheckCancellation();
 			}
@@ -106,35 +107,35 @@ namespace Confuser.Renamer {
 
 			if (wpf) {
 				var wpfAnalyzer = new WPFAnalyzer();
-				context.Logger.Debug("WPF found, enabling compatibility.");
+				context.Logger.LogDebug("WPF found, enabling compatibility.");
 				service.Renamers.Add(wpfAnalyzer);
 				if (caliburn) {
-					context.Logger.Debug("Caliburn.Micro found, enabling compatibility.");
+					context.Logger.LogDebug("Caliburn.Micro found, enabling compatibility.");
 					service.Renamers.Add(new CaliburnAnalyzer(wpfAnalyzer));
 				}
 			}
 
 			if (winforms) {
 				var winformsAnalyzer = new WinFormsAnalyzer();
-				context.Logger.Debug("WinForms found, enabling compatibility.");
+				context.Logger.LogDebug("WinForms found, enabling compatibility.");
 				service.Renamers.Add(winformsAnalyzer);
 			}
 
 			if (json) {
 				var jsonAnalyzer = new JsonAnalyzer();
-				context.Logger.Debug("Newtonsoft.Json found, enabling compatibility.");
+				context.Logger.LogDebug("Newtonsoft.Json found, enabling compatibility.");
 				service.Renamers.Add(jsonAnalyzer);
 			}
 
 			if (visualBasic) {
 				var vbAnalyzer = new VisualBasicRuntimeAnalyzer();
-				context.Logger.Debug("Visual Basic Embedded Runtime found, enabling compatibility.");
+				context.Logger.LogDebug("Visual Basic Embedded Runtime found, enabling compatibility.");
 				service.Renamers.Add(vbAnalyzer);
 			}
 
 			if (vsComposition) {
 				var analyzer = new VsCompositionAnalyzer();
-				context.Logger.Debug("Visual Studio Composition found, enabling compatibility.");
+				context.Logger.LogDebug("Visual Studio Composition found, enabling compatibility.");
 				service.Renamers.Add(analyzer);
 			}
 		}

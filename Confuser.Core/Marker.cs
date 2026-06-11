@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using Confuser.Core.Project;
 using Confuser.Core.Project.Patterns;
 using dnlib.DotNet;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Core {
 	using Rules = Dictionary<Rule, PatternExpression>;
@@ -83,7 +84,7 @@ namespace Confuser.Core {
 				return new StrongNamePublicKey(path);
 			}
 			catch (Exception ex) {
-				context.Logger.ErrorException("Cannot load the Strong Name Public Key located at: " + path, ex);
+				context.Logger.LogError(ex, "Cannot load the Strong Name Public Key located at: " + path);
 				throw new ConfuserException(ex);
 			}
 		}
@@ -117,7 +118,7 @@ namespace Confuser.Core {
 				return new StrongNameKey(path);
 			}
 			catch (Exception ex) {
-				context.Logger.ErrorException("Cannot load the Strong Name Key located at: " + path, ex);
+				context.Logger.LogError(ex, "Cannot load the Strong Name Key located at: " + path);
 				throw new ConfuserException(ex);
 			}
 		}
@@ -134,11 +135,11 @@ namespace Confuser.Core {
 
 			if (proj.Packer != null) {
 				if (!packers.ContainsKey(proj.Packer.Id)) {
-					context.Logger.ErrorFormat("Cannot find packer with ID '{0}'.", proj.Packer.Id);
+					context.Logger.LogError("Cannot find packer with ID '{0}'.", proj.Packer.Id);
 					throw new ConfuserException(null);
 				}
 				if (proj.Debug)
-					context.Logger.Warn("Generated Debug symbols might not be usable with packers!");
+					context.Logger.LogWarning("Generated Debug symbols might not be usable with packers!");
 
 				packer = packers[proj.Packer.Id];
 				packerParams = new Dictionary<string, string>(proj.Packer, StringComparer.OrdinalIgnoreCase);
@@ -167,7 +168,7 @@ namespace Confuser.Core {
 			}
 
 			foreach (var module in modules) {
-				context.Logger.InfoFormat("Loading '{0}'...", module.Item1.Path);
+				context.Logger.LogInformation("Loading '{0}'...", module.Item1.Path);
 				Rules rules = ParseRules(proj, module.Item1, context);
 
 				context.Annotations.Set(module.Item2, SNKey, LoadSNKey(context, module.Item1.SNKeyPath == null ? null : Path.Combine(proj.BaseDirectory, module.Item1.SNKeyPath), module.Item1.SNKeyPassword));
@@ -219,12 +220,12 @@ namespace Confuser.Core {
 					ret.Add(rule, parser.Parse(rule.Pattern));
 				}
 				catch (InvalidPatternException ex) {
-					context.Logger.ErrorFormat("Invalid rule pattern: " + rule.Pattern + ": {0}", ex.Message);
+					context.Logger.LogError("Invalid rule pattern: " + rule.Pattern + ": {0}", ex.Message);
 					throw new ConfuserException(ex);
 				}
 				foreach (var setting in rule) {
 					if (!protections.ContainsKey(setting.Id)) {
-						context.Logger.ErrorFormat("Cannot find protection with ID '{0}'.", setting.Id);
+						context.Logger.LogError("Cannot find protection with ID '{0}'.", setting.Id);
 						throw new ConfuserException(null);
 					}
 				}

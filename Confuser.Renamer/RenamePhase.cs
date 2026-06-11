@@ -5,6 +5,7 @@ using System.Text;
 using Confuser.Core;
 using dnlib.DotNet;
 using dnlib.DotNet.Pdb;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Renamer {
 	class RenamePhase : ProtectionPhase {
@@ -22,7 +23,7 @@ namespace Confuser.Renamer {
 			var service = (NameService)context.Registry.GetService<INameService>();
 			bool overloadConfusion = parameters.GetParameter(context, context.CurrentModule, "overload", false);
 
-			context.Logger.Debug("Renaming...");
+			context.Logger.LogDebug("Renaming...");
 			foreach (var renamer in service.Renamers) {
 				foreach (var def in parameters.Targets)
 					renamer.PreRename(context, service, parameters, def);
@@ -32,7 +33,7 @@ namespace Confuser.Renamer {
 			var targets = parameters.Targets.ToList();
 			service.GetRandom().Shuffle(targets);
 			var pdbDocs = new HashSet<string>();
-			foreach (var def in GetTargetsWithDelay(targets, context, service).WithProgress(targets.Count, context.Logger)) {
+			foreach (var def in GetTargetsWithDelay(targets, context, service).WithProgress(targets.Count, context.ProgressReporter)) {
 				if (def is ModuleDef moduleDef && parameters.GetParameter(context, moduleDef, "rickroll", false))
 					RickRoller.CommenceRickroll(context, moduleDef);
 
@@ -115,7 +116,7 @@ namespace Confuser.Renamer {
 						foreach (var reference in updatedReferenceList) {
 							errorBuilder.Append(" - ").AppendLine(reference.ToString(service));
 						}
-						context.Logger.Error(errorBuilder.ToString().Trim());
+						context.Logger.LogError(errorBuilder.ToString().Trim());
 						throw new ConfuserException();
 					}
 					context.CheckCancellation();
@@ -189,7 +190,7 @@ namespace Confuser.Renamer {
 					foreach (var def in delayedItems) {
 						errorBuilder.Append("• ").AppendDescription(def, service).AppendLine();
 					}
-					context.Logger.Warn(errorBuilder.ToString().Trim());
+					context.Logger.LogWarning(errorBuilder.ToString().Trim());
 					yield break;
 				}
 				lastCount = delayedItems.Count;

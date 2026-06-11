@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using Confuser.Core;
+using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
 namespace Confuser.UnitTest {
-	public sealed class XunitLogger : ILogger {
+	public sealed class XunitLogger : Microsoft.Extensions.Logging.ILogger, IProgressReporter {
 		private readonly ITestOutputHelper _outputHelper;
 		private readonly Action<string> _outputAction;
 
@@ -14,45 +15,25 @@ namespace Confuser.UnitTest {
 			_outputAction = outputAction;
 		}
 
-		void ILogger.Debug(string msg) =>
-			ProcessOutput("[DEBUG] " + msg);
+		public IDisposable BeginScope<TState>(TState state) => null;
 
-		void ILogger.DebugFormat(string format, params object[] args) =>
-			ProcessOutput("[DEBUG] " + format, args);
+		public bool IsEnabled(LogLevel logLevel) => true;
 
-		void ILogger.EndProgress() { }
+		public void Log<TState>(LogLevel logLevel, EventId eventId, TState state,
+			Exception exception, Func<TState, Exception, string> formatter) {
+			var message = formatter(state, exception);
 
-		void ILogger.Error(string msg) =>
-			throw new Exception(msg);
+			if (logLevel >= LogLevel.Error)
+				throw new Exception(message, exception);
 
-		void ILogger.ErrorException(string msg, Exception ex) =>
-			throw new Exception(msg, ex);
+			ProcessOutput(message);
+		}
 
-		void ILogger.ErrorFormat(string format, params object[] args) =>
-			throw new Exception(string.Format(format, args));
+		void IProgressReporter.Progress(int progress, int overall) { }
 
-		void ILogger.Finish(bool successful) =>
-			ProcessOutput("[DONE]");
+		void IProgressReporter.EndProgress() { }
 
-		void ILogger.Info(string msg) =>
-			ProcessOutput("[INFO] " + msg);
-
-		void ILogger.InfoFormat(string format, params object[] args) =>
-			ProcessOutput("[INFO] " + format, args);
-
-		void ILogger.Progress(int progress, int overall) { }
-
-		void ILogger.Warn(string msg) =>
-			ProcessOutput("[WARN] " + msg);
-
-		void ILogger.WarnException(string msg, Exception ex) =>
-			ProcessOutput("[WARN] " + msg + Environment.NewLine + ex.ToString());
-
-		void ILogger.WarnFormat(string format, params object[] args) =>
-			ProcessOutput("[WARN] " + format, args);
-
-		private void ProcessOutput(string format, params object[] args) =>
-			ProcessOutput(string.Format(format, args));
+		void IProgressReporter.Finish(bool successful) => ProcessOutput("[DONE]");
 
 		private void ProcessOutput(string message) {
 			_outputAction?.Invoke(message);

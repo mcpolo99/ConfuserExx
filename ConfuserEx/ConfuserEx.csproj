@@ -19,6 +19,8 @@
   <ItemGroup Label="Nuget Dependencies">
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.*" />
+    <PackageReference Include="Serilog" Version="4.*" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="9.*" />
   </ItemGroup>
   
   <ItemGroup Label="Project Dependencies">

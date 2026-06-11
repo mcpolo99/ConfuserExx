@@ -10,6 +10,7 @@ using Confuser.DynCipher;
 using Confuser.Renamer;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Protections.Resources {
 	internal class InjectPhase : ProtectionPhase {
@@ -27,7 +28,7 @@ namespace Confuser.Protections.Resources {
 		protected override void Execute(ConfuserContext context, ProtectionParameters parameters) {
 			if (parameters.Targets.Any()) {
 				if (!UTF8String.IsNullOrEmpty(context.CurrentModule.Assembly.Culture)) {
-					context.Logger.DebugFormat("Skipping resource encryption for satellite assembly '{0}'.",
+					context.Logger.LogDebug("Skipping resource encryption for satellite assembly '{0}'.",
 											   context.CurrentModule.Assembly.FullName);
 					return;
 				}

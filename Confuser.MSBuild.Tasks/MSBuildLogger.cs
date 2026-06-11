@@ -1,61 +1,54 @@
-﻿using System;
+using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using ILogger = Confuser.Core.ILogger;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.MSBuild.Tasks {
-	internal sealed class MSBuildLogger : ILogger {
+	internal sealed class MSBuildMelLogger : Microsoft.Extensions.Logging.ILogger {
 		private readonly TaskLoggingHelper loggingHelper;
 
-		internal bool HasError { get; private set; }
-
-		internal MSBuildLogger(TaskLoggingHelper loggingHelper) =>
+		internal MSBuildMelLogger(TaskLoggingHelper loggingHelper) =>
 			this.loggingHelper = loggingHelper ?? throw new ArgumentNullException(nameof(loggingHelper));
 
-		void ILogger.Debug(string msg) => loggingHelper.LogMessage(MessageImportance.Low, "[DEBUG] " + msg);
+		public IDisposable BeginScope<TState>(TState state) => null;
 
-		void ILogger.DebugFormat(string format, params object[] args) {
-			loggingHelper.LogMessage(MessageImportance.Low, "[DEBUG] " + format, args);
-		}
+		public bool IsEnabled(LogLevel logLevel) => true;
 
-		void ILogger.EndProgress() { }
-
-		void ILogger.Error(string msg) {
-			loggingHelper.LogError(msg);
-			HasError = true;
-		}
-
-		void ILogger.ErrorException(string msg, Exception ex) {
-			loggingHelper.LogError(msg);
-			loggingHelper.LogErrorFromException(ex);
-			HasError = true;
-		}
-
-		void ILogger.ErrorFormat(string format, params object[] args) {
-			loggingHelper.LogError(format, args);
-			HasError = true;
-		}
-
-		void ILogger.Finish(bool successful) {
-			if (!successful) {
-				HasError = false;
+		public void Log<TState>(LogLevel logLevel, EventId eventId, TState state,
+			Exception exception, Func<TState, Exception, string> formatter) {
+			var message = formatter(state, exception);
+			switch (logLevel) {
+				case LogLevel.Trace:
+				case LogLevel.Debug:
+					loggingHelper.LogMessage(MessageImportance.Low, message);
+					break;
+				case LogLevel.Information:
+					loggingHelper.LogMessage(MessageImportance.Normal, message);
+					break;
+				case LogLevel.Warning:
+					loggingHelper.LogWarning(message);
+					if (exception != null) loggingHelper.LogWarningFromException(exception);
+					break;
+				case LogLevel.Error:
+				case LogLevel.Critical:
+					loggingHelper.LogError(message);
+					if (exception != null) loggingHelper.LogErrorFromException(exception);
+					break;
 			}
 		}
+	}
 
-		void ILogger.Info(string msg) => loggingHelper.LogMessage(MessageImportance.Normal, msg);
+	internal sealed class MSBuildProgressReporter : Confuser.Core.IProgressReporter {
+		internal bool HasError { get; private set; }
 
-		void ILogger.InfoFormat(string format, params object[] args) =>
-			loggingHelper.LogMessage(MessageImportance.Normal, format, args);
+		void Confuser.Core.IProgressReporter.Progress(int progress, int overall) { }
 
-		void ILogger.Progress(int progress, int overall) { }
+		void Confuser.Core.IProgressReporter.EndProgress() { }
 
-		void ILogger.Warn(string msg) => loggingHelper.LogWarning(msg);
-
-		void ILogger.WarnException(string msg, Exception ex) {
-			loggingHelper.LogWarning(msg);
-			loggingHelper.LogWarningFromException(ex);
+		void Confuser.Core.IProgressReporter.Finish(bool successful) {
+			if (!successful) {
+				HasError = true;
+			}
 		}
-
-		void ILogger.WarnFormat(string format, params object[] args) => loggingHelper.LogWarning(format, args);
 	}
 }

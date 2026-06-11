@@ -6,7 +6,10 @@ using System.Linq;
 using System.Xml;
 using Confuser.Core;
 using Confuser.Core.Project;
+using Microsoft.Extensions.Logging;
 using NDesk.Options;
+using Serilog;
+using Serilog.Events;
 
 namespace Confuser.CLI {
 	internal class Program {
@@ -21,6 +24,8 @@ namespace Confuser.CLI {
 			try {
 				bool noPause = false;
 				bool debug = false;
+				bool quiet = false;
+				int verbosity = 0;
 				string outDir = null;
 				string snKeyPath = null;
 				string snKeyPass = null;
@@ -48,6 +53,12 @@ namespace Confuser.CLI {
 					}, {
 						"snkeypass=", "specifies strong name key password.",
 						value => { snKeyPass = value; }
+					}, {
+						"v|verbose", "increase verbosity (repeat for more: -v, -vv, -vvv).",
+						value => { verbosity++; }
+					}, {
+						"q|quiet", "only show warnings and errors.",
+						value => { quiet = (value != null); }
 					}
 				};
 
@@ -130,7 +141,7 @@ namespace Confuser.CLI {
 					parameters.Project = proj;
 				}
 
-				int retVal = RunProject(parameters);
+				int retVal = RunProject(parameters, quiet, verbosity);
 
 				if (NeedPause() && !noPause) {
 					Console.WriteLine("Press any key to continue...");
@@ -192,14 +203,34 @@ namespace Confuser.CLI {
 					templateModules.Add(templateModule);
 		}
 
-		static int RunProject(ConfuserParameters parameters) {
-			var logger = new ConsoleLogger();
-			parameters.Logger = logger;
+		static int RunProject(ConfuserParameters parameters, bool quiet, int verbosity) {
+			var levelSwitch = quiet
+				? LogEventLevel.Warning
+				: verbosity >= 3 ? LogEventLevel.Verbose
+				: verbosity >= 2 ? LogEventLevel.Verbose
+				: verbosity >= 1 ? LogEventLevel.Debug
+				: LogEventLevel.Information;
 
-			Console.Title = "ConfuserEx - Running...";
+			Log.Logger = new LoggerConfiguration()
+				.MinimumLevel.Is(levelSwitch)
+				.WriteTo.Console(
+					outputTemplate: "[{Level:u4}] {Message:lj}{NewLine}{Exception}")
+				.CreateLogger();
+
+			using var loggerFactory = LoggerFactory.Create(builder =>
+				builder.AddSerilog(dispose: false));
+			var melLogger = loggerFactory.CreateLogger("ConfuserEx");
+
+			var progressReporter = new ConsoleProgressReporter();
+			parameters.Logger = melLogger;
+			parameters.ProgressReporter = progressReporter;
+
+			if (OperatingSystem.IsWindows())
+				Console.Title = "ConfuserEx - Running...";
 			ConfuserEngine.Run(parameters).GetAwaiter().GetResult();
 
-			return logger.ReturnValue;
+			Log.CloseAndFlush();
+			return progressReporter.ReturnValue;
 		}
 
 		static bool NeedPause() {
@@ -217,6 +248,8 @@ namespace Confuser.CLI {
 			WriteLine("    -debug     : specifies debug symbol generation.");
 			WriteLine("    -snkey     : specifies strong name key file path.");
 			WriteLine("    -snkeypass : specifies strong name key password.");
+			WriteLine("    -v|verbose : increase verbosity (-v debug, -vv trace).");
+			WriteLine("    -q|quiet   : only show warnings and errors.");
 		}
 
 		static void WriteLineWithColor(ConsoleColor color, string txt) {
@@ -234,56 +267,14 @@ namespace Confuser.CLI {
 			Console.WriteLine();
 		}
 
-		class ConsoleLogger : ILogger {
+		class ConsoleProgressReporter : IProgressReporter {
 			readonly DateTime begin;
 
-			public ConsoleLogger() {
+			public ConsoleProgressReporter() {
 				begin = DateTime.Now;
 			}
 
 			public int ReturnValue { get; private set; }
-
-			public void Debug(string msg) {
-				WriteLineWithColor(ConsoleColor.Gray, "[DEBUG] " + msg);
-			}
-
-			public void DebugFormat(string format, params object[] args) {
-				WriteLineWithColor(ConsoleColor.Gray, "[DEBUG] " + string.Format(format, args));
-			}
-
-			public void Info(string msg) {
-				WriteLineWithColor(ConsoleColor.White, " [INFO] " + msg);
-			}
-
-			public void InfoFormat(string format, params object[] args) {
-				WriteLineWithColor(ConsoleColor.White, " [INFO] " + string.Format(format, args));
-			}
-
-			public void Warn(string msg) {
-				WriteLineWithColor(ConsoleColor.Yellow, " [WARN] " + msg);
-			}
-
-			public void WarnFormat(string format, params object[] args) {
-				WriteLineWithColor(ConsoleColor.Yellow, " [WARN] " + string.Format(format, args));
-			}
-
-			public void WarnException(string msg, Exception ex) {
-				WriteLineWithColor(ConsoleColor.Yellow, " [WARN] " + msg);
-				WriteLineWithColor(ConsoleColor.Yellow, "Exception: " + ex);
-			}
-
-			public void Error(string msg) {
-				WriteLineWithColor(ConsoleColor.Red, "[ERROR] " + msg);
-			}
-
-			public void ErrorFormat(string format, params object[] args) {
-				WriteLineWithColor(ConsoleColor.Red, "[ERROR] " + string.Format(format, args));
-			}
-
-			public void ErrorException(string msg, Exception ex) {
-				WriteLineWithColor(ConsoleColor.Red, "[ERROR] " + msg);
-				WriteLineWithColor(ConsoleColor.Red, "Exception: " + ex);
-			}
 
 			public void Progress(int progress, int overall) { }
 

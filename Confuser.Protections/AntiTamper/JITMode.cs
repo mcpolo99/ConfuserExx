@@ -12,6 +12,7 @@ using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.MD;
 using dnlib.DotNet.Writer;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Protections.AntiTamper {
 	internal class JITMode : IModeHandler {
@@ -154,11 +155,11 @@ namespace Confuser.Protections.AntiTamper {
 		void OnWriterEvent(object sender, ModuleWriterEventArgs e) {
 			var writer = (ModuleWriterBase)sender;
 			if (e.Event == ModuleWriterEvent.MDBeginWriteMethodBodies) {
-				context.Logger.Debug("Extracting method bodies...");
+				context.Logger.LogDebug("Extracting method bodies...");
 				CreateSection(writer);
 			}
 			else if (e.Event == ModuleWriterEvent.BeginStrongNameSign) {
-				context.Logger.Debug("Encrypting method section...");
+				context.Logger.LogDebug("Encrypting method section...");
 				EncryptSection(writer);
 			}
 		}
@@ -210,7 +211,7 @@ namespace Confuser.Protections.AntiTamper {
 			newSection.Add(bodyIndex, 0x10);
 
 			// save methods
-			foreach (MethodDef method in methods.WithProgress(context.Logger)) {
+			foreach (MethodDef method in methods.WithProgress(context.ProgressReporter)) {
 				if (!method.HasBody)
 					continue;
 

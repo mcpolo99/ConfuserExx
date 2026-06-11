@@ -27,7 +27,7 @@ namespace Confuser.Protections.TypeScrambler {
 
 			// In this stage the references to the scrambled types need to be fixed. This needs to be done for all
 			// methods in the assembly, because all methods may contain references to the scrambled types and methods.
-			foreach (var def in context.CurrentModule.FindDefinitions().WithProgress(context.Logger)) {
+			foreach (var def in context.CurrentModule.FindDefinitions().WithProgress(context.ProgressReporter)) {
 				switch (def) {
 					case MethodDef md:
 						if (md.HasReturnType)

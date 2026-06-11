@@ -40,3 +40,7 @@ gh-pages/
 
 .idea/
 **/*out*
+
+# Local CI artifacts
+test-results/
+coverage/

@@ -7,6 +7,7 @@ using Confuser.Core;
 using dnlib.DotNet;
 using dnlib.DotNet.MD;
 using dnlib.DotNet.Writer;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Protections.Compress {
 	internal class ExtractPhase : ProtectionPhase {
@@ -29,7 +30,7 @@ namespace Confuser.Protections.Compress {
 
 			if (context.Annotations.Get<CompressorContext>(context, Compressor.ContextKey) != null) {
 				if (isExe) {
-					context.Logger.Error("Too many executable modules!");
+					context.Logger.LogError("Too many executable modules!");
 					throw new ConfuserException(null);
 				}
 				return;

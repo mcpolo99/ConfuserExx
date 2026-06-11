@@ -7,7 +7,7 @@ using Confuser.Renamer.Properties;
 using Confuser.Renamer.References;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
-using ILogger = Confuser.Core.ILogger;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Renamer.Analyzers {
 	/// <summary>
@@ -20,7 +20,7 @@ namespace Confuser.Renamer.Analyzers {
 			Analyze(service, context.Registry.GetService<ITraceService>(), context.Modules.Cast<ModuleDef>().ToArray(), context.Logger, method);
 		}
 
-		public void Analyze(INameService nameService, ITraceService traceService, IReadOnlyList<ModuleDef> moduleDefs, ILogger logger, MethodDef method) {
+		public void Analyze(INameService nameService, ITraceService traceService, IReadOnlyList<ModuleDef> moduleDefs, Microsoft.Extensions.Logging.ILogger logger, MethodDef method) {
 			if (!method.HasBody) return;
 
 			MethodTrace methodTrace = null;
@@ -49,7 +49,7 @@ namespace Confuser.Renamer.Analyzers {
 							var trace = GetMethodTrace();
 							var arguments = trace.TraceArguments(instr);
 							if (arguments == null) {
-								logger.WarnFormat(Resources.ReflectionAnalyzer_Analyze_TracingArgumentsFailed, calledMethod.FullName, method.FullName);
+								logger.LogWarning(Resources.ReflectionAnalyzer_Analyze_TracingArgumentsFailed, calledMethod.FullName, method.FullName);
 							}
 							else if (arguments.Length >= 2) {
 								var types = GetReferencedTypes(method.Body.Instructions[arguments[0]], method, trace);
