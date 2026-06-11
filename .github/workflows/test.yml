@@ -1,29 +1,29 @@
 name: test
 
 on:
-  workflow_run:
-    workflows: [ci]
-    types: [completed]
+  push:
+    branches: [master, pre-release, feature/**, fix/**]
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE*']
+  pull_request:
+    branches: [master, pre-release]
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE*']
 
 concurrency:
-  group: test-${{ github.event.workflow_run.head_branch }}
+  group: test-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   test:
-    if: github.event.workflow_run.conclusion == 'success'
     runs-on: windows-2025
     timeout-minutes: 15
     permissions:
       contents: read
       pull-requests: write
-      actions: read
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
       - name: Setup .NET runtimes for cross-framework tests
@@ -33,12 +33,22 @@ jobs:
             6.0.x
             8.0.x
 
-      - name: Download build output from CI
-        uses: actions/download-artifact@v5
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
         with:
-          name: build-output
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ github.workspace }}/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.vcxproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore
+        run: msbuild Confuser2.sln -t:Restore -verbosity:minimal
+
+      - name: Build
+        run: msbuild Confuser2.sln -p:Configuration=Release -verbosity:minimal
 
       - name: Run tests with coverage
         id: tests
@@ -145,8 +155,8 @@ jobs:
             Get-Content coverage/report/SummaryGithub.md >> $env:GITHUB_STEP_SUMMARY
           }
 
-      - name: Build PR comment
-        if: always() && github.event.workflow_run.event == 'pull_request'
+      - name: Post PR comment
+        if: always() && github.event_name == 'pull_request'
         shell: pwsh
         run: |
           $comment = @()
@@ -157,13 +167,12 @@ jobs:
           }
           $comment -join "`n" | Set-Content -Path 'pr-comment.md' -Encoding utf8
 
-      - name: Post PR comment
-        if: always() && github.event.workflow_run.event == 'pull_request'
+      - name: Post PR comment (sticky)
+        if: always() && github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: test-coverage-report
           path: pr-comment.md
-          number: ${{ github.event.workflow_run.pull_requests[0].number }}
 
       - name: Upload test results
         if: always()

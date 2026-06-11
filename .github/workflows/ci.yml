@@ -89,13 +89,6 @@ jobs:
             ConfuserEx.zip
             Confuser.MSBuild.Tasks/bin/Release/*.nupkg
 
-      - name: Upload build output (for test workflow)
-        uses: actions/upload-artifact@v5
-        with:
-          name: build-output
-          path: '**/bin/Release/'
-          retention-days: 1
-
   # Pre-release: on push to pre-release branch
   pre-release:
     needs: build
