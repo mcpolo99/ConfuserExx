@@ -17,14 +17,14 @@ permissions:
 jobs:
   analyze:
     name: Analyze
-    runs-on: windows-2022
+    runs-on: windows-2025
 
     strategy:
       fail-fast: false
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: recursive
@@ -36,14 +36,6 @@ jobs:
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
-
-      - name: Install .NET 4.6.1 targeting pack
-        shell: pwsh
-        run: |
-          $url = 'https://download.microsoft.com/download/F/1/D/F1DEB8DB-D277-4EF9-9F48-3A65D4D8F965/NDP461-DevPack-KB3105179-ENU.exe'
-          $installer = "$env:TEMP\ndp461-devpack.exe"
-          Invoke-WebRequest -Uri $url -OutFile $installer -UseBasicParsing
-          Start-Process -FilePath $installer -ArgumentList '/quiet','/norestart' -Wait
 
       - name: Restore
         run: msbuild Confuser2.sln -t:Restore -verbosity:minimal
