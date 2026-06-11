@@ -96,9 +96,9 @@ See the [Issues][issues] section. Please check existing issues before filing a n
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch from `pre-release`
+2. Create a branch from `develop` (see [CONTRIBUTING.md](CONTRIBUTING.md) for naming conventions)
 3. Make your changes and ensure CI passes
-4. Open a PR targeting `pre-release`
+4. Open a PR targeting `develop`
 
 ## License
 
@@ -127,6 +127,6 @@ Licensed under the MIT license. See [LICENSE.md][license] for details.
 [license]: LICENSE.md
 [project_format]: docs/ProjectFormat.md
 
-[img_ci]: https://github.com/mcpolo99/ConfuserExx/actions/workflows/ci.yml/badge.svg?branch=master
+[img_ci]: https://github.com/mcpolo99/ConfuserExx/actions/workflows/ci.yml/badge.svg?branch=main
 [img_codeql]: https://github.com/mcpolo99/ConfuserExx/actions/workflows/codeql-analysis.yml/badge.svg
 [img_license]: https://img.shields.io/github/license/mcpolo99/ConfuserExx.svg?style=flat
