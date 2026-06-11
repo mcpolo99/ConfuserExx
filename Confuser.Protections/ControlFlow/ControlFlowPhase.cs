@@ -4,12 +4,12 @@ using System.Linq;
 using Confuser.Core;
 using Confuser.Core.Services;
 using Confuser.DynCipher;
-using Microsoft.Extensions.Logging;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.MD;
 using dnlib.DotNet.Pdb;
 using dnlib.DotNet.Writer;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Protections.ControlFlow {
 	internal class ControlFlowPhase : ProtectionPhase {

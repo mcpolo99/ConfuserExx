@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using Confuser.Core;
 using dnlib.DotNet;
-using Microsoft.Extensions.Logging;
 using dnlib.DotNet.MD;
 using dnlib.DotNet.Writer;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Protections.Compress {
 	internal class ExtractPhase : ProtectionPhase {

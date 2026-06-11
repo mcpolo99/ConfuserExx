@@ -5,9 +5,9 @@ using System.Linq;
 using Confuser.Core;
 using Confuser.Renamer.References;
 using dnlib.DotNet;
-using Microsoft.Extensions.Logging;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.MD;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Renamer.Analyzers {
 	public sealed class TypeBlobAnalyzer : IRenamer {

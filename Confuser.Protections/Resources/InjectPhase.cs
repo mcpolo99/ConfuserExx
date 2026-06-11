@@ -7,10 +7,10 @@ using Confuser.Core;
 using Confuser.Core.Helpers;
 using Confuser.Core.Services;
 using Confuser.DynCipher;
-using Microsoft.Extensions.Logging;
 using Confuser.Renamer;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Protections.Resources {
 	internal class InjectPhase : ProtectionPhase {

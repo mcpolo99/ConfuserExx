@@ -3,10 +3,10 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Confuser.Core;
 using Confuser.Renamer.Properties;
-using Microsoft.Extensions.Logging;
 using Confuser.Renamer.References;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Renamer.Analyzers {
 	internal class ResourceAnalyzer : IRenamer {

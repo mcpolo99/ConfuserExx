@@ -10,12 +10,12 @@ using Confuser.Core;
 using Confuser.Core.Helpers;
 using Confuser.Core.Services;
 using Confuser.Protections.Compress;
-using Microsoft.Extensions.Logging;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.MD;
 using dnlib.DotNet.Writer;
 using dnlib.PE;
+using Microsoft.Extensions.Logging;
 using FileAttributes = dnlib.DotNet.FileAttributes;
 using SR = System.Reflection;
 

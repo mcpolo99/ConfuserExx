@@ -8,11 +8,11 @@ using Confuser.Core;
 using Confuser.Core.Helpers;
 using Confuser.Core.Services;
 using Confuser.Renamer;
-using Microsoft.Extensions.Logging;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.MD;
 using dnlib.DotNet.Writer;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Protections.AntiTamper {
 	internal class JITMode : IModeHandler {
