@@ -5,11 +5,36 @@ Contributions of any kind are welcome. For bugfixes and unit tests, you can subm
 ## Getting Started
 
 1. Fork the repository
-2. Create a feature branch from `pre-release`: `git checkout -b feat/my-feature pre-release`
+2. Create a branch from `develop` (see naming conventions below)
 3. Make your changes and ensure CI passes
-4. Open a PR targeting `pre-release`
+4. Open a PR targeting `develop`
 
 See [README.md](README.md#building-from-source) for build prerequisites.
+
+## Branch Naming Convention
+
+### With an issue (preferred)
+
+Use GitHub's built-in branch creation:
+
+```bash
+gh issue develop 42 --checkout
+# → creates branch: 42-fix-samba-timeout (auto-sanitized by GitHub)
+```
+
+### Without an issue
+
+| Scenario | Pattern | Example |
+|----------|---------|---------|
+| Feature | `feature/{description}` | `feature/add-symbol-server` |
+| Chore | `chore/{description}` | `chore/update-dependencies` |
+| Documentation | `docs/{description}` | `docs/add-plugin-guide` |
+| Hotfix (urgent) | `hotfix/{description}` | `hotfix/crash-on-startup` |
+| Experiment | `experiment/{description}` | `experiment/avalonia-port` |
+
+**Slug rules:** lowercase, words separated by `-`, no special characters, max ~50 chars.
+
+All branches target `develop` except `hotfix/` which branches from and merges to `main`.
 
 ## Testing Policy
 
@@ -104,24 +129,47 @@ dotnet test Tests/Confuser.CLI.Test/Confuser.CLI.Test.csproj -c Release --collec
 
 Every PR receives an automatic coverage comment showing per-assembly line and branch coverage. The full HTML drill-down report is downloadable as the `coverage-report` artifact from the test workflow.
 
-## Commit Conventions
-
-We use [Conventional Commits](https://www.conventionalcommits.org/):
+## Commit Format
 
 ```
-feat(scope): add new feature
-fix(scope): fix a bug
-test(scope): add or update tests
-refactor(scope): code change that doesn't fix a bug or add a feature
-chore(scope): build, CI, dependency updates
-docs(scope): documentation changes
+<type>: <short description>
+
+[optional body — what changed and why]
 ```
 
-Always reference the issue number: `fix(renamer): handle FnPtr types (#6)`
+**Types** — full words, matching branch naming:
+
+| Type | When to use |
+|------|-------------|
+| `feature` | New feature or capability added |
+| `fix` | Bug fix |
+| `test` | Adding or updating tests |
+| `refactor` | Code change that neither fixes a bug nor adds a feature |
+| `chore` | Build config, dependencies, tooling, project setup |
+| `docs` | Documentation only changes |
+| `hotfix` | Urgent fix applied directly to main |
+| `experiment` | Exploratory or throwaway work |
+
+**Rules:**
+- Full words only — no abbreviations (`feature` not `feat`)
+- No parenthesized scopes — the description should be clear enough
+- Reference issue number at end when applicable: `(#42)`
+- Lowercase first word after colon
+
+**Examples:**
+
+```
+feature: add symbol server support (#54)
+fix: handle locked file exception on folder scan (#42)
+test: add cross-framework integration tests
+chore: update dependencies
+docs: add plugin development guide
+refactor: extract base repository to reduce duplication
+```
 
 ## Pull Request Process
 
-1. PRs target `pre-release`, not `master`
+1. PRs target `develop`, not `main`
 2. CI must pass (build + tests + coverage)
 3. Coverage must not decrease
 4. Only include files that are part of your change — no unrelated modifications

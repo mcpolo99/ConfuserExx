@@ -1,0 +1,145 @@
+name: lint
+
+on:
+  push:
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE*']
+  pull_request:
+    branches: [main, develop]
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE*']
+
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: windows-2025
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.vcxproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore
+        run: dotnet restore Confuser2.sln
+
+      - name: Check whitespace
+        id: whitespace
+        run: dotnet format whitespace Confuser2.sln --verify-no-changes --verbosity minimal 2>&1 | Tee-Object -Variable wsOutput
+        shell: pwsh
+        continue-on-error: true
+
+      - name: Check style
+        id: style
+        run: dotnet format style Confuser2.sln --verify-no-changes --severity warn 2>&1 | Tee-Object -Variable styleOutput
+        shell: pwsh
+        continue-on-error: true
+
+      - name: Check analyzers
+        id: analyzers
+        run: dotnet format analyzers Confuser2.sln --verify-no-changes --severity warn 2>&1 | Tee-Object -Variable analyzerOutput
+        shell: pwsh
+        continue-on-error: true
+
+      - name: Build lint report
+        if: always()
+        id: report
+        shell: pwsh
+        run: |
+          $ws = '${{ steps.whitespace.outcome }}'
+          $st = '${{ steps.style.outcome }}'
+          $an = '${{ steps.analyzers.outcome }}'
+          $anyFailed = ($ws -eq 'failure') -or ($st -eq 'failure') -or ($an -eq 'failure')
+
+          $md = @()
+          $md += '## Lint Results'
+          $md += ''
+
+          if (-not $anyFailed) {
+            $md += '> :white_check_mark: **All checks passed**'
+          } else {
+            $md += '> :warning: **Issues found** — run `dotnet format Confuser2.sln` locally to fix'
+          }
+
+          $md += ''
+          $md += '| Check | Result |'
+          $md += '|-------|--------|'
+
+          $icon = if ($ws -eq 'success') { ':white_check_mark:' } else { ':x:' }
+          $md += "| Whitespace (indentation, line endings) | $icon |"
+
+          $icon = if ($st -eq 'success') { ':white_check_mark:' } else { ':x:' }
+          $md += "| Style (IDE rules, naming, var usage) | $icon |"
+
+          $icon = if ($an -eq 'success') { ':white_check_mark:' } else { ':x:' }
+          $md += "| Analyzers (CA*, RCS* rules) | $icon |"
+
+          # Get specific violations if any failed
+          if ($anyFailed) {
+            $md += ''
+            $md += '<details><summary><strong>Details (click to expand)</strong></summary>'
+            $md += ''
+            $md += '```'
+            # Re-run to capture output
+            $violations = dotnet format Confuser2.sln --verify-no-changes --verbosity diagnostic 2>&1 | Select-String 'error|warning' | Select-Object -First 30
+            foreach ($v in $violations) { $md += $v.ToString().Trim() }
+            if ($violations.Count -ge 30) { $md += '... (truncated, run dotnet format locally for full list)' }
+            $md += '```'
+            $md += ''
+            $md += '</details>'
+          }
+
+          $md -join "`n" | Set-Content -Path 'lint-report.md' -Encoding utf8
+          $md -join "`n" >> $env:GITHUB_STEP_SUMMARY
+
+          echo "any_failed=$anyFailed" >> $env:GITHUB_OUTPUT
+
+      - name: Post PR comment
+        if: always() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: lint-report
+          path: lint-report.md
+
+      - name: Post issue comment
+        if: always() && github.event_name == 'push' && github.event.pull_request == null
+        shell: pwsh
+        run: |
+          # Extract issue number from branch name (e.g. 54-nuget-packages → 54)
+          $branch = "${{ github.ref_name }}"
+          if ($branch -match '^(\d+)-') {
+            $issueNumber = $Matches[1]
+            $marker = '<!-- lint-bot -->'
+            $body = $marker + "`n" + (Get-Content 'lint-report.md' -Raw)
+
+            # Find existing lint comment
+            $comments = gh api "repos/${{ github.repository }}/issues/$issueNumber/comments" --jq '.[] | select(.body | startswith("<!-- lint-bot -->")) | .id' 2>$null
+            if ($comments) {
+              # Update existing
+              gh api "repos/${{ github.repository }}/issues/comments/$comments" -X PATCH -f body="$body" 2>$null
+            } else {
+              # Create new
+              gh issue comment $issueNumber --repo ${{ github.repository }} --body "$body" 2>$null
+            }
+          }
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fail if issues found
+        if: always() && steps.report.outputs.any_failed == 'True'
+        shell: pwsh
+        run: |
+          Write-Host "::warning::Lint issues found. Run 'dotnet format Confuser2.sln' locally to fix."
+          exit 1

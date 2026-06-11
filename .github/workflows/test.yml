@@ -1,11 +1,8 @@
 name: test
 
 on:
-  push:
-    branches: [master, pre-release, feature/**, fix/**]
-    paths-ignore: ['**.md', 'docs/**', 'LICENSE*']
   pull_request:
-    branches: [master, pre-release]
+    branches: [main, develop]
     paths-ignore: ['**.md', 'docs/**', 'LICENSE*']
 
 concurrency:
