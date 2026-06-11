@@ -8,9 +8,11 @@ using System.Windows.Media;
 using CommunityToolkit.Mvvm.Input;
 using Confuser.Core;
 using Confuser.Core.Project;
+using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace ConfuserEx.ViewModel {
-	internal class ProtectTabVM : TabViewModel, ILogger, IProgressReporter {
+	internal class ProtectTabVM : TabViewModel, IProgressReporter {
 		readonly Paragraph documentContent;
 		CancellationTokenSource cancelSrc;
 		double? progress = 0;
@@ -48,10 +50,21 @@ namespace ConfuserEx.ViewModel {
 			parameters.Project = ((IViewModel<ConfuserProject>)App.Project).Model;
 			if (File.Exists(App.FileName))
 				Environment.CurrentDirectory = Path.GetDirectoryName(App.FileName);
-			parameters.Logger = this;
-			parameters.ProgressReporter = this;
 
 			documentContent.Inlines.Clear();
+
+			var serilogLogger = new LoggerConfiguration()
+				.MinimumLevel.Debug()
+				.WriteTo.Sink(new FlowDocumentSink(documentContent))
+				.CreateLogger();
+
+			using var loggerFactory = LoggerFactory.Create(builder =>
+				builder.AddSerilog(serilogLogger, dispose: true));
+			var melLogger = loggerFactory.CreateLogger("ConfuserEx");
+
+			parameters.Logger = new MelLoggerAdapter(melLogger);
+			parameters.ProgressReporter = this;
+
 			cancelSrc = new CancellationTokenSource();
 			Result = null;
 			Progress = null;
@@ -71,58 +84,9 @@ namespace ConfuserEx.ViewModel {
 			cancelSrc.Cancel();
 		}
 
-		void AppendLine(string format, Brush foreground, params object[] args) {
-			Application.Current.Dispatcher.BeginInvoke(new Action(() => {
-				documentContent.Inlines.Add(new Run(string.Format(format, args)) { Foreground = foreground });
-				documentContent.Inlines.Add(new LineBreak());
-			}));
-		}
-
-		#region Logger Impl
+		#region IProgressReporter
 
 		DateTime begin;
-
-		void ILogger.Debug(string msg) {
-			AppendLine("[DEBUG] {0}", Brushes.Gray, msg);
-		}
-
-		void ILogger.DebugFormat(string format, params object[] args) {
-			AppendLine("[DEBUG] {0}", Brushes.Gray, string.Format(format, args));
-		}
-
-		void ILogger.Info(string msg) {
-			AppendLine(" [INFO] {0}", Brushes.White, msg);
-		}
-
-		void ILogger.InfoFormat(string format, params object[] args) {
-			AppendLine(" [INFO] {0}", Brushes.White, string.Format(format, args));
-		}
-
-		void ILogger.Warn(string msg) {
-			AppendLine(" [WARN] {0}", Brushes.Yellow, msg);
-		}
-
-		void ILogger.WarnFormat(string format, params object[] args) {
-			AppendLine(" [WARN] {0}", Brushes.Yellow, string.Format(format, args));
-		}
-
-		void ILogger.WarnException(string msg, Exception ex) {
-			AppendLine(" [WARN] {0}", Brushes.Yellow, msg);
-			AppendLine("Exception: {0}", Brushes.Yellow, ex);
-		}
-
-		void ILogger.Error(string msg) {
-			AppendLine("[ERROR] {0}", Brushes.Red, msg);
-		}
-
-		void ILogger.ErrorFormat(string format, params object[] args) {
-			AppendLine("[ERROR] {0}", Brushes.Red, string.Format(format, args));
-		}
-
-		void ILogger.ErrorException(string msg, Exception ex) {
-			AppendLine("[ERROR] {0}", Brushes.Red, msg);
-			AppendLine("Exception: {0}", Brushes.Red, ex);
-		}
 
 		void IProgressReporter.Progress(int progress, int overall) {
 			Progress = (double)progress / overall;
@@ -139,10 +103,17 @@ namespace ConfuserEx.ViewModel {
 				now.ToShortTimeString(),
 				(int)now.Subtract(begin).TotalMinutes,
 				now.Subtract(begin).Seconds);
-			if (successful)
-				AppendLine("Finished {0}", Brushes.Lime, timeString);
-			else
-				AppendLine("Failed {0}", Brushes.Red, timeString);
+
+			Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+				if (successful) {
+					documentContent.Inlines.Add(new Run("Finished " + timeString) { Foreground = Brushes.Lime });
+				}
+				else {
+					documentContent.Inlines.Add(new Run("Failed " + timeString) { Foreground = Brushes.Red });
+				}
+				documentContent.Inlines.Add(new LineBreak());
+			}));
+
 			Result = successful;
 		}
 
