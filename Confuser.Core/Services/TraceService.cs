@@ -8,11 +8,9 @@ using dnlib.DotNet.Emit;
 namespace Confuser.Core.Services {
 	public sealed class TraceService : ITraceService {
 		readonly Dictionary<MethodDef, MethodTrace> cache = new Dictionary<MethodDef, MethodTrace>();
-
 		/// <summary>
 		///     Initializes a new instance of the <see cref="TraceService" /> class.
 		/// </summary>
-		/// <param name="context">The working context.</param>
 		public TraceService() {
 		}
 
@@ -224,10 +222,12 @@ namespace Confuser.Core.Services {
 						if (push == 0 && pop == 0) {
 							// This instruction isn't doing anything to the stack. Could be a nop or some prefix.
 							// Ignore it and move on to the next.
-						} else if (Instructions[index].OpCode.Code != Code.Dup) {
+						}
+						else if (Instructions[index].OpCode.Code != Code.Dup) {
 							// It's not a duplicate instruction, this is an acceptable start point.
 							break;
-						} else {
+						}
+						else {
 							var prevInstr = Instructions[index - 1];
 							prevInstr.CalculateStackUsage(Method.HasReturnType, out push, out _);
 							if (push > 0) {
@@ -319,7 +319,7 @@ namespace Confuser.Core.Services {
 					// To handle things properly we're only using the required amount on the top of the stack.
 					var tmp = evalStack.ToArray();
 					evalStack.Clear();
-					foreach(var idx in tmp.Take(argCount).Reverse())
+					foreach (var idx in tmp.Take(argCount).Reverse())
 						evalStack.Push(idx);
 				}
 
@@ -337,8 +337,7 @@ namespace Confuser.Core.Services {
 			return ret;
 		}
 
-		public static Stack<T> CopyStack<T>(Stack<T> original)
-		{
+		public static Stack<T> CopyStack<T>(Stack<T> original) {
 			var arr = new T[original.Count];
 			original.CopyTo(arr, 0);
 			Array.Reverse(arr);

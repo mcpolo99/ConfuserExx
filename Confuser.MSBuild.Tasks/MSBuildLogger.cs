@@ -6,7 +6,7 @@ using ILogger = Confuser.Core.ILogger;
 namespace Confuser.MSBuild.Tasks {
 	internal sealed class MSBuildLogger : ILogger {
 		private readonly TaskLoggingHelper loggingHelper;
-		
+
 		internal bool HasError { get; private set; }
 
 		internal MSBuildLogger(TaskLoggingHelper loggingHelper) =>
@@ -18,7 +18,7 @@ namespace Confuser.MSBuild.Tasks {
 			loggingHelper.LogMessage(MessageImportance.Low, "[DEBUG] " + format, args);
 		}
 
-		void ILogger.EndProgress() {}
+		void ILogger.EndProgress() { }
 
 		void ILogger.Error(string msg) {
 			loggingHelper.LogError(msg);

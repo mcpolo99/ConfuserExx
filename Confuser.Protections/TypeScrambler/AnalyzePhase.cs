@@ -6,7 +6,7 @@ using dnlib.DotNet;
 
 namespace Confuser.Protections.TypeScrambler {
 	internal sealed class AnalyzePhase : ProtectionPhase {
-		public AnalyzePhase(TypeScrambleProtection parent) : base(parent) {}
+		public AnalyzePhase(TypeScrambleProtection parent) : base(parent) { }
 
 		public override ProtectionTargets Targets => ProtectionTargets.Types | ProtectionTargets.Methods;
 

@@ -1,4 +1,3 @@
-﻿namespace ComplexInterfaceRenaming
-{
-  public interface IWorker : IName, IC {}
+﻿namespace ComplexInterfaceRenaming {
+	public interface IWorker : IName, IC { }
 }

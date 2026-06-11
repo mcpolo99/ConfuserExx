@@ -14,7 +14,7 @@ namespace EnhancedStrongName.Test {
 		[Trait("Issue", "https://github.com/mkaring/ConfuserEx/issues/118")]
 		public async Task EnhancedStrongName() =>
 			await Run("118_EnhancedStrongName.exe",
-				new[] {"My strong key token: 79A18AF4CEA8A9BD", "My signature is valid!"},
+				new[] { "My strong key token: 79A18AF4CEA8A9BD", "My signature is valid!" },
 				NoProtections,
 				projectModuleAction: projectModule => {
 					projectModule.SNSigKeyPath = Path.Combine(Environment.CurrentDirectory, "SignatureKey.snk");

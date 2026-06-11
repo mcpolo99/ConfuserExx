@@ -19,7 +19,7 @@ namespace SevenZip.Compression.RangeCoder {
 				UInt32 end = (UInt32)1 << (kNumBits - i);
 				for (UInt32 j = start; j < end; j++)
 					ProbPrices[j] = ((UInt32)i << kNumBitPriceShiftBits) +
-					                (((end - j) << kNumBitPriceShiftBits) >> (kNumBits - i - 1));
+									(((end - j) << kNumBitPriceShiftBits) >> (kNumBits - i - 1));
 			}
 		}
 

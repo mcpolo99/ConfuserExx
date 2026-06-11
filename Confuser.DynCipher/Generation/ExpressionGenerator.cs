@@ -14,18 +14,18 @@ namespace Confuser.DynCipher.Generation {
 			switch ((ExpressionOps)random.NextInt32(6)) {
 				case ExpressionOps.Add:
 					return GenerateExpression(random, current, currentDepth + 1, targetDepth) +
-					       GenerateExpression(random, (LiteralExpression)random.NextUInt32(), currentDepth + 1, targetDepth);
+						   GenerateExpression(random, (LiteralExpression)random.NextUInt32(), currentDepth + 1, targetDepth);
 
 				case ExpressionOps.Sub:
 					return GenerateExpression(random, current, currentDepth + 1, targetDepth) -
-					       GenerateExpression(random, (LiteralExpression)random.NextUInt32(), currentDepth + 1, targetDepth);
+						   GenerateExpression(random, (LiteralExpression)random.NextUInt32(), currentDepth + 1, targetDepth);
 
 				case ExpressionOps.Mul:
 					return GenerateExpression(random, current, currentDepth + 1, targetDepth) * (LiteralExpression)(random.NextUInt32() | 1);
 
 				case ExpressionOps.Xor:
 					return GenerateExpression(random, current, currentDepth + 1, targetDepth) ^
-					       GenerateExpression(random, (LiteralExpression)random.NextUInt32(), currentDepth + 1, targetDepth);
+						   GenerateExpression(random, (LiteralExpression)random.NextUInt32(), currentDepth + 1, targetDepth);
 
 				case ExpressionOps.Not:
 					return ~GenerateExpression(random, current, currentDepth + 1, targetDepth);

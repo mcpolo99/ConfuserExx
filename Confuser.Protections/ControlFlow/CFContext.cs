@@ -33,8 +33,8 @@ namespace Confuser.Protections.ControlFlow {
 
 		public void AddJump(IList<Instruction> instrs, Instruction target) {
 			if (!Method.Module.IsClr40 && JunkCode &&
-			    !Method.DeclaringType.HasGenericParameters && !Method.HasGenericParameters &&
-			    (instrs[0].OpCode.FlowControl == FlowControl.Call || instrs[0].OpCode.FlowControl == FlowControl.Next)) {
+				!Method.DeclaringType.HasGenericParameters && !Method.HasGenericParameters &&
+				(instrs[0].OpCode.FlowControl == FlowControl.Call || instrs[0].OpCode.FlowControl == FlowControl.Next)) {
 				switch (Random.NextInt32(3)) {
 					case 0:
 						instrs.Add(Instruction.Create(OpCodes.Ldc_I4_0));

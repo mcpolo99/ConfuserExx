@@ -1,10 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\ConfuserEx.Common.props" Condition="Exists('..\ConfuserEx.Common.props')" />
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\ConfuserEx.snk</AssemblyOriginatorKeyFile>
@@ -17,8 +17,8 @@
   </PropertyGroup>
 
   <ItemGroup Label="Nuget Dependencies">
-    <PackageReference Include="MvvmLightLibs" Version="5.4.1.1" />
-    <PackageReference Include="Ookii.Dialogs.Wpf" Version="4.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
+    <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.*" />
   </ItemGroup>
   
   <ItemGroup Label="Project Dependencies">
@@ -32,6 +32,14 @@
     <Resource Include="ConfuserEx.ico" />
     <Resource Include="Resources\FontAwesome.otf" />
   </ItemGroup>
+
+  <!-- Copy Confuser.Runtime.dll (net20) to output — needed by protection pipeline at runtime -->
+  <Target Name="CopyConfuserRuntime" AfterTargets="Build">
+    <Copy SourceFiles="..\Confuser.Runtime\bin\$(Configuration)\net20\Confuser.Runtime.dll"
+          DestinationFolder="$(OutputPath)"
+          SkipUnchangedFiles="true"
+          Condition="Exists('..\Confuser.Runtime\bin\$(Configuration)\net20\Confuser.Runtime.dll')" />
+  </Target>
 
   <Import Project="..\ConfuserEx.Common.targets" Condition="Exists('..\ConfuserEx.Common.targets')" />
 

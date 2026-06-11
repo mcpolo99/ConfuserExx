@@ -7,10 +7,8 @@ using Confuser.UnitTest;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace ImplementationInBaseClass.Test
-{
-	public class RenameTest : TestBase
-	{
+namespace ImplementationInBaseClass.Test {
+	public class RenameTest : TestBase {
 		public RenameTest(ITestOutputHelper outputHelper) : base(outputHelper) { }
 
 		[Theory]

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows;
+using CommunityToolkit.Mvvm.Input;
 using ConfuserEx.ViewModel;
-using GalaSoft.MvvmLight.CommandWpf;
 using Ookii.Dialogs.Wpf;
 
 namespace ConfuserEx.Views {

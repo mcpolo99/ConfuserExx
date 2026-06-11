@@ -28,7 +28,7 @@ namespace Confuser.Renamer.Test {
 
 			var moduleDef = Helpers.LoadTestModuleDef();
 			var refClassTypeDef = moduleDef.Find("Confuser.Renamer.Test.VTableTestRefClass", false);
-			
+
 			Assert.NotNull(refClassTypeDef);
 			var vTableStorage = new VTableStorage(new XunitLogger(outputHelper));
 			var refClassVTable = vTableStorage.GetVTable(refClassTypeDef);

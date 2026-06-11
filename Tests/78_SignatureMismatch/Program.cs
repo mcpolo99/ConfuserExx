@@ -12,12 +12,12 @@ namespace SignatureMismatch {
 
 			var file = new TextFile("filename", "text");
 
-			foreach (var kvp in dict) 
+			foreach (var kvp in dict)
 				Console.WriteLine($"[{kvp.Key}] = {kvp.Value}");
-			
+
 			Console.WriteLine("END");
 
-            return 42;
+			return 42;
 		}
 	}
 }

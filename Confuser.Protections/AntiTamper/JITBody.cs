@@ -104,7 +104,7 @@ namespace Confuser.Protections.AntiTamper {
 				counter ^= (state >> 5) | (state << 27);
 			}
 		}
-  }
+	}
 
 	internal class JITMethodBodyWriter : MethodBodyWriterBase {
 		readonly CilBody body;
@@ -136,13 +136,13 @@ namespace Confuser.Protections.AntiTamper {
 			else
 				jitBody.LocalVars = Array.Empty<byte>();
 
-      {
-        var newCode = new byte[codeSize];
-        var writer = new ArrayWriter(newCode);
-        uint _codeSize = WriteInstructions(ref writer);
-        Debug.Assert(codeSize == _codeSize);
-        jitBody.ILCode = newCode;
-      }
+			{
+				var newCode = new byte[codeSize];
+				var writer = new ArrayWriter(newCode);
+				uint _codeSize = WriteInstructions(ref writer);
+				Debug.Assert(codeSize == _codeSize);
+				jitBody.ILCode = newCode;
+			}
 
 			jitBody.EHs = new JITEHClause[exceptionHandlers.Count];
 			if (exceptionHandlers.Count > 0) {
@@ -176,7 +176,7 @@ namespace Confuser.Protections.AntiTamper {
 		}
 
 		protected override void WriteInlineField(ref ArrayWriter writer, Instruction instr) {
-      writer.WriteUInt32(metadata.GetToken(instr.Operand).Raw);
+			writer.WriteUInt32(metadata.GetToken(instr.Operand).Raw);
 		}
 
 		protected override void WriteInlineMethod(ref ArrayWriter writer, Instruction instr) {

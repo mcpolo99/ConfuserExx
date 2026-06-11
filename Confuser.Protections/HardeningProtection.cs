@@ -20,7 +20,7 @@ namespace Confuser.Protections {
 		protected override void Initialize(ConfuserContext context) { }
 
 		/// <inheritdoc />
-		protected override void PopulatePipeline(ProtectionPipeline pipeline) => 
+		protected override void PopulatePipeline(ProtectionPipeline pipeline) =>
 			pipeline.InsertPreStage(PipelineStage.OptimizeMethods, new HardeningPhase(this));
 
 		/// <inheritdoc />

@@ -4,7 +4,7 @@ namespace RenameDynamicParameter {
 	public class Program {
 		internal static int Main(string[] args) {
 			Console.WriteLine("START");
-			
+
 			SimpleTestClass.TestStatic();
 			SimpleTestClass.TestDynamic();
 

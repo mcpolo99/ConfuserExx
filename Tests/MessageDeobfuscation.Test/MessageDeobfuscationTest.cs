@@ -104,16 +104,16 @@ namespace MessageDeobfuscation.Test {
 			string actualPassword1 = null, actualPassword2 = null;
 			await RunDeobfuscationWithPassword(true, null, "_0", Array.Empty<string>(),
 				outputPath => {
-				actualPassword1 = File.ReadAllText(Path.Combine(outputPath, CoreComponent.PasswordFileName));
-				Assert.True(Guid.TryParse(actualPassword1, out _));
-				return Task.Delay(0);
-			});
+					actualPassword1 = File.ReadAllText(Path.Combine(outputPath, CoreComponent.PasswordFileName));
+					Assert.True(Guid.TryParse(actualPassword1, out _));
+					return Task.Delay(0);
+				});
 			await RunDeobfuscationWithPassword(true, null, "_1", Array.Empty<string>(),
 				outputPath => {
-				actualPassword2 = File.ReadAllText(Path.Combine(outputPath, CoreComponent.PasswordFileName));
-				Assert.True(Guid.TryParse(actualPassword2, out _));
-				return Task.Delay(0);
-			});
+					actualPassword2 = File.ReadAllText(Path.Combine(outputPath, CoreComponent.PasswordFileName));
+					Assert.True(Guid.TryParse(actualPassword2, out _));
+					return Task.Delay(0);
+				});
 			Assert.NotEqual(actualPassword1, actualPassword2);
 		}
 
@@ -128,13 +128,13 @@ namespace MessageDeobfuscation.Test {
 			await RunDeobfuscationWithPassword(true, Seed, "_0", expectedObfuscatedOutput,
 				outputPath => {
 					Assert.Equal(Seed, File.ReadAllText(Path.Combine(outputPath, CoreComponent.PasswordFileName)));
-				return Task.Delay(0);
-			});
+					return Task.Delay(0);
+				});
 			await RunDeobfuscationWithPassword(true, Seed, "_1", expectedObfuscatedOutput,
 				outputPath => {
 					Assert.Equal(Seed, File.ReadAllText(Path.Combine(outputPath, CoreComponent.PasswordFileName)));
-				return Task.Delay(0);
-			});
+					return Task.Delay(0);
+				});
 		}
 
 		[Fact]

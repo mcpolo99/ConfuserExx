@@ -10,7 +10,15 @@
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="&quot;$(SDK40ToolsPath)sn.exe&quot; -Ra &quot;$(TargetPath)&quot; &quot;$(ProjectDir)SignatureKey.snk&quot;" />
+    <!-- Resolve sn.exe: SDK40ToolsPath is set by VS MSBuild but not dotnet CLI.
+         Fall back to registry lookup for the .NET Framework SDK tools path. -->
+    <PropertyGroup>
+      <_SnExeDir Condition="'$(SDK40ToolsPath)' != ''">$(SDK40ToolsPath)</_SnExeDir>
+      <_SnExeDir Condition="'$(_SnExeDir)' == ''">$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.8\WinSDK-NetFx40Tools', 'InstallationFolder', '', RegistryView.Registry32))</_SnExeDir>
+      <_SnExeDir Condition="'$(_SnExeDir)' == ''">$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.6.1\WinSDK-NetFx40Tools', 'InstallationFolder', '', RegistryView.Registry32))</_SnExeDir>
+    </PropertyGroup>
+    <Error Condition="'$(_SnExeDir)' == ''" Text="Cannot find sn.exe. Install the .NET Framework SDK or build with Visual Studio." />
+    <Exec Command="&quot;$(_SnExeDir)sn.exe&quot; -Ra &quot;$(TargetPath)&quot; &quot;$(ProjectDir)SignatureKey.snk&quot;" />
   </Target>
 
 </Project>

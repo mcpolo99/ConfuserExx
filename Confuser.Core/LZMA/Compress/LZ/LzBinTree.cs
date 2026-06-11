@@ -57,13 +57,13 @@ namespace SevenZip.Compression.LZ {
 		}
 
 		public void Create(UInt32 historySize, UInt32 keepAddBufferBefore,
-		                   UInt32 matchMaxLen, UInt32 keepAddBufferAfter) {
+						   UInt32 matchMaxLen, UInt32 keepAddBufferAfter) {
 			if (historySize > kMaxValForNormalize - 256)
 				throw new Exception();
 			_cutValue = 16 + (matchMaxLen >> 1);
 
 			UInt32 windowReservSize = (historySize + keepAddBufferBefore +
-			                           matchMaxLen + keepAddBufferAfter) / 2 + 256;
+									   matchMaxLen + keepAddBufferAfter) / 2 + 256;
 
 			base.Create(historySize + keepAddBufferBefore, matchMaxLen + keepAddBufferAfter, windowReservSize);
 
@@ -157,7 +157,7 @@ namespace SevenZip.Compression.LZ {
 			if (kNumHashDirectBytes != 0) {
 				if (curMatch > matchMinPos) {
 					if (_bufferBase[_bufferOffset + curMatch + kNumHashDirectBytes] !=
-					    _bufferBase[cur + kNumHashDirectBytes]) {
+						_bufferBase[cur + kNumHashDirectBytes]) {
 						distances[offset++] = maxLen = kNumHashDirectBytes;
 						distances[offset++] = _pos - curMatch - 1;
 					}
@@ -173,8 +173,8 @@ namespace SevenZip.Compression.LZ {
 				}
 				UInt32 delta = _pos - curMatch;
 				UInt32 cyclicPos = ((delta <= _cyclicBufferPos) ?
-					                    (_cyclicBufferPos - delta) :
-					                    (_cyclicBufferPos - delta + _cyclicBufferSize)) << 1;
+										(_cyclicBufferPos - delta) :
+										(_cyclicBufferPos - delta + _cyclicBufferSize)) << 1;
 
 				UInt32 pby1 = _bufferOffset + curMatch;
 				UInt32 len = Math.Min(len0, len1);
@@ -257,8 +257,8 @@ namespace SevenZip.Compression.LZ {
 
 					UInt32 delta = _pos - curMatch;
 					UInt32 cyclicPos = ((delta <= _cyclicBufferPos) ?
-						                    (_cyclicBufferPos - delta) :
-						                    (_cyclicBufferPos - delta + _cyclicBufferSize)) << 1;
+											(_cyclicBufferPos - delta) :
+											(_cyclicBufferPos - delta + _cyclicBufferSize)) << 1;
 
 					UInt32 pby1 = _bufferOffset + curMatch;
 					UInt32 len = Math.Min(len0, len1);

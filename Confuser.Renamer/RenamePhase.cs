@@ -123,10 +123,9 @@ namespace Confuser.Renamer {
 			}
 		}
 
-		static void RenameGenericParameters(IList<GenericParam> genericParams)
-		{
+		static void RenameGenericParameters(IList<GenericParam> genericParams) {
 			foreach (var param in genericParams)
-				param.Name = ((char) (param.Number + 1)).ToString();
+				param.Name = ((char)(param.Number + 1)).ToString();
 		}
 
 		/// <summary>

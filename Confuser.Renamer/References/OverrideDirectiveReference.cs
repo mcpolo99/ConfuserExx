@@ -8,7 +8,7 @@ namespace Confuser.Renamer.References {
 		readonly VTableSlot thisSlot;
 
 		public bool ShouldCancelRename => baseSlot.MethodDefDeclType is GenericInstSig && thisSlot.MethodDef.Module.IsClr20;
-		
+
 		public OverrideDirectiveReference(VTableSlot thisSlot, VTableSlot baseSlot) {
 			this.thisSlot = thisSlot;
 			this.baseSlot = baseSlot;

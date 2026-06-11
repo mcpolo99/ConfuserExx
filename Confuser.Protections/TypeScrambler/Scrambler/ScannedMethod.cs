@@ -42,7 +42,7 @@ namespace Confuser.Protections.TypeScrambler.Scrambler {
 			if (TargetMethod.HasReturnType) {
 				RegisterGeneric(TargetMethod.ReturnType);
 			}
-			
+
 			foreach (var param in TargetMethod.Parameters.Where(ProcessParameter))
 				RegisterGeneric(param.Type);
 
@@ -155,13 +155,16 @@ namespace Confuser.Protections.TypeScrambler.Scrambler {
 						$"{nameof(number)} < {nameof(original)}.GenericArguments.Count");
 					var originalArgument = original.GenericArguments[(int)number];
 					types.Add(originalArgument);
-				} else if (from?.IsScambled == true) {
+				}
+				else if (from?.IsScambled == true) {
 					types.Add(from.ConvertToGenericIfAvalible(trueType));
-				} else if (trueType.ToTypeDefOrRef() is TypeDef def) {
+				}
+				else if (trueType.ToTypeDefOrRef() is TypeDef def) {
 					// I am sure there are cleaner and better ways to do this.
 					var item = srv.GetItem(def);
 					types.Add(item?.IsScambled == true ? item.CreateGenericTypeSig(null) : trueType);
-				} else {
+				}
+				else {
 					types.Add(trueType);
 				}
 			}

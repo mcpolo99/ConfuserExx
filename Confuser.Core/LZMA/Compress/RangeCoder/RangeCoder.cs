@@ -94,7 +94,7 @@ namespace SevenZip.Compression.RangeCoder {
 
 		public long GetProcessedSizeAdd() {
 			return _cacheSize +
-			       Stream.Position - StartPosition + 4;
+				   Stream.Position - StartPosition + 4;
 			// (long)Stream.GetProcessedSize();
 		}
 

@@ -24,9 +24,9 @@ namespace Confuser.Renamer.Analyzers {
 			for (var i = 0; i < instructions.Count; i++) {
 				var instruction = instructions[i];
 				if (instruction.OpCode != OpCodes.Callvirt ||
-				    !(instruction.Operand is IMethodDefOrRef targetMethodDefOrRef) ||
-				    !UTF8String.Equals(targetMethodDefOrRef.Name, "GetManifestResourceStream") ||
-				    !UTF8String.Equals(targetMethodDefOrRef.DeclaringType.FullName, "System.Reflection.Assembly")) continue;
+					!(instruction.Operand is IMethodDefOrRef targetMethodDefOrRef) ||
+					!UTF8String.Equals(targetMethodDefOrRef.Name, "GetManifestResourceStream") ||
+					!UTF8String.Equals(targetMethodDefOrRef.DeclaringType.FullName, "System.Reflection.Assembly")) continue;
 
 				var targetMethodDef = targetMethodDefOrRef.ResolveMethodDefThrow();
 				if (targetMethodDef.Parameters.Count != 3) continue;
@@ -38,18 +38,18 @@ namespace Confuser.Renamer.Analyzers {
 				var resNameInstruction = instructions[argumentIdx[2]];
 
 				if (typeLoadInstruction.OpCode != OpCodes.Call ||
-				    !(typeLoadInstruction.Operand is IMethodDefOrRef loadTypeMethodRef) ||
-				    !UTF8String.Equals(loadTypeMethodRef.Name, "GetTypeFromHandle") ||
-				    !UTF8String.Equals(loadTypeMethodRef.DeclaringType.FullName, "System.Type")) continue;
+					!(typeLoadInstruction.Operand is IMethodDefOrRef loadTypeMethodRef) ||
+					!UTF8String.Equals(loadTypeMethodRef.Name, "GetTypeFromHandle") ||
+					!UTF8String.Equals(loadTypeMethodRef.DeclaringType.FullName, "System.Type")) continue;
 				if (resNameInstruction.OpCode != OpCodes.Ldstr ||
-				    !(resNameInstruction.Operand is string resName)) continue;
+					!(resNameInstruction.Operand is string resName)) continue;
 
 				var typeLoadArguments = methodTrace.Value.TraceArguments(typeLoadInstruction);
 				if (typeLoadArguments.Length != 1) continue;
 
 				var typeTokenLoadInstruction = instructions[typeLoadArguments[0]];
 				if (typeTokenLoadInstruction.OpCode != OpCodes.Ldtoken ||
-				    !(typeTokenLoadInstruction.Operand is ITypeDefOrRef refTypeDefOrRef)) continue;
+					!(typeTokenLoadInstruction.Operand is ITypeDefOrRef refTypeDefOrRef)) continue;
 
 				var resourceName = refTypeDefOrRef.Namespace + '.' + resName;
 
@@ -58,7 +58,7 @@ namespace Confuser.Renamer.Analyzers {
 				var expectedSig = MethodSig.CreateInstance(getManifestMethodDef.MethodSig.RetType, getManifestMethodDef.MethodSig.Params.Last());
 				var newMethodDef = assemblyTypeDef.FindMethod("GetManifestResourceStream", expectedSig);
 				var newMethodRef = currentModule.Import(newMethodDef);
-				
+
 				resNameInstruction.Operand = resourceName;
 				instruction.Operand = newMethodRef;
 

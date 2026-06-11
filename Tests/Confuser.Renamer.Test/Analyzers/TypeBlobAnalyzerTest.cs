@@ -18,21 +18,21 @@ namespace Confuser.Renamer.Test.Analyzers {
 		public TypeBlobAnalyzerTest(ITestOutputHelper outputHelper) =>
 			this.outputHelper = outputHelper ?? throw new ArgumentNullException(nameof(outputHelper));
 
-        [Fact]
+		[Fact]
 		[Trait("Category", "Protection")]
 		[Trait("Protection", "rename")]
 		[Trait("Issue", "https://github.com/mkaring/ConfuserEx/issues/84")]
 		public void AnalyseAttributeTest() {
 			var moduleDef = Helpers.LoadTestModuleDef();
-            
+
 			var nameService = Mock.Of<INameService>();
 
-            void VerifyLog(string message) {
-                Assert.DoesNotContain("Failed to resolve CA field", message);
-                Assert.DoesNotContain("Failed to resolve CA property", message);
+			void VerifyLog(string message) {
+				Assert.DoesNotContain("Failed to resolve CA field", message);
+				Assert.DoesNotContain("Failed to resolve CA property", message);
 			}
 
-            TypeBlobAnalyzer.Analyze(nameService, new List<ModuleDefMD>() { moduleDef }, new XunitLogger(outputHelper, VerifyLog), moduleDef);
+			TypeBlobAnalyzer.Analyze(nameService, new List<ModuleDefMD>() { moduleDef }, new XunitLogger(outputHelper, VerifyLog), moduleDef);
 
 			Mock.Get(nameService).VerifyAll();
 		}

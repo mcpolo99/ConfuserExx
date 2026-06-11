@@ -19,7 +19,7 @@ namespace NewtonsoftJsonSerialization.Test {
 					"421_NewtonsoftJsonSerialization.exe",
 					"external:Newtonsoft.Json.dll"
 				},
-				new [] {
+				new[] {
 					"{\"a\":\"a\",\"b\":\"b\",\"c\":\"c\"}",
 					"{\"a\":\"a\",\"b\":\"b\",\"c\":\"c\"}"
 				},

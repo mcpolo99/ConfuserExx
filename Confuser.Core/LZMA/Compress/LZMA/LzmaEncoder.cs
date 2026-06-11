@@ -103,7 +103,7 @@ namespace SevenZip.Compression.LZMA {
 		}
 
 		public void Code(Stream inStream, Stream outStream,
-		                 Int64 inSize, Int64 outSize, ICodeProgress progress) {
+						 Int64 inSize, Int64 outSize, ICodeProgress progress) {
 			_needReleaseMFStream = false;
 			try {
 				SetStreams(inStream, outStream, inSize, outSize);
@@ -168,7 +168,7 @@ namespace SevenZip.Compression.LZMA {
 						;
 						var dictionarySize = (Int32)prop;
 						if (dictionarySize < (UInt32)(1 << Base.kDicLogSizeMin) ||
-						    dictionarySize > (UInt32)(1 << kDicLogSizeMaxCompress))
+							dictionarySize > (UInt32)(1 << kDicLogSizeMaxCompress))
 							throw new InvalidParamException();
 						_dictionarySize = (UInt32)dictionarySize;
 						int dicLogSize;
@@ -311,7 +311,7 @@ namespace SevenZip.Compression.LZMA {
 				lenRes = _matchDistances[numDistancePairs - 2];
 				if (lenRes == _numFastBytes)
 					lenRes += _matchFinder.GetMatchLen((int)lenRes - 1, _matchDistances[numDistancePairs - 1],
-					                                   Base.kMatchMaxLen - lenRes);
+													   Base.kMatchMaxLen - lenRes);
 			}
 			_additionalOffset++;
 		}
@@ -326,7 +326,7 @@ namespace SevenZip.Compression.LZMA {
 
 		private UInt32 GetRepLen1Price(Base.State state, UInt32 posState) {
 			return _isRepG0[state.Index].GetPrice0() +
-			       _isRep0Long[(state.Index << Base.kNumPosStatesBitsMax) + posState].GetPrice0();
+				   _isRep0Long[(state.Index << Base.kNumPosStatesBitsMax) + posState].GetPrice0();
 		}
 
 		private UInt32 GetPureRepPrice(UInt32 repIndex, Base.State state, UInt32 posState) {
@@ -359,7 +359,7 @@ namespace SevenZip.Compression.LZMA {
 				price = _distancesPrices[(lenToPosState * Base.kNumFullDistances) + pos];
 			else
 				price = _posSlotPrices[(lenToPosState << Base.kNumPosSlotBits) + GetPosSlot2(pos)] +
-				        _alignPrices[pos & Base.kAlignMask];
+						_alignPrices[pos & Base.kAlignMask];
 			return price + _lenEncoder.GetPrice(len - Base.kMatchMinLen, posState);
 		}
 
@@ -454,7 +454,7 @@ namespace SevenZip.Compression.LZMA {
 			UInt32 posState = (position & _posStateMask);
 
 			_optimum[1].Price = _isMatch[(_state.Index << Base.kNumPosStatesBitsMax) + posState].GetPrice0() +
-			                    _literalEncoder.GetSubCoder(position, _previousByte).GetPrice(!_state.IsCharState(), matchByte, currentByte);
+								_literalEncoder.GetSubCoder(position, _previousByte).GetPrice(!_state.IsCharState(), matchByte, currentByte);
 			_optimum[1].MakeAsChar();
 
 			UInt32 matchPrice = _isMatch[(_state.Index << Base.kNumPosStatesBitsMax) + posState].GetPrice1();
@@ -510,7 +510,7 @@ namespace SevenZip.Compression.LZMA {
 				UInt32 offs = 0;
 				while (len > _matchDistances[offs])
 					offs += 2;
-				for (;; len++) {
+				for (; ; len++) {
 					UInt32 distance = _matchDistances[offs + 1];
 					UInt32 curAndLenPrice = normalMatchPrice + GetPosLenPrice(distance, len, posState);
 					Optimal optimum = _optimum[len];
@@ -627,9 +627,9 @@ namespace SevenZip.Compression.LZMA {
 				posState = (position & _posStateMask);
 
 				UInt32 curAnd1Price = curPrice +
-				                      _isMatch[(state.Index << Base.kNumPosStatesBitsMax) + posState].GetPrice0() +
-				                      _literalEncoder.GetSubCoder(position, _matchFinder.GetIndexByte(0 - 2)).
-				                                      GetPrice(!state.IsCharState(), matchByte, currentByte);
+									  _isMatch[(state.Index << Base.kNumPosStatesBitsMax) + posState].GetPrice0() +
+									  _literalEncoder.GetSubCoder(position, _matchFinder.GetIndexByte(0 - 2)).
+													  GetPrice(!state.IsCharState(), matchByte, currentByte);
 
 				Optimal nextOptimum = _optimum[cur + 1];
 
@@ -645,7 +645,7 @@ namespace SevenZip.Compression.LZMA {
 				repMatchPrice = matchPrice + _isRep[state.Index].GetPrice1();
 
 				if (matchByte == currentByte &&
-				    !(nextOptimum.PosPrev < cur && nextOptimum.BackPrev == 0)) {
+					!(nextOptimum.PosPrev < cur && nextOptimum.BackPrev == 0)) {
 					UInt32 shortRepPrice = repMatchPrice + GetRepLen1Price(state, posState);
 					if (shortRepPrice <= nextOptimum.Price) {
 						nextOptimum.Price = shortRepPrice;
@@ -672,8 +672,8 @@ namespace SevenZip.Compression.LZMA {
 						state2.UpdateChar();
 						UInt32 posStateNext = (position + 1) & _posStateMask;
 						UInt32 nextRepMatchPrice = curAnd1Price +
-						                           _isMatch[(state2.Index << Base.kNumPosStatesBitsMax) + posStateNext].GetPrice1() +
-						                           _isRep[state2.Index].GetPrice1();
+												   _isMatch[(state2.Index << Base.kNumPosStatesBitsMax) + posStateNext].GetPrice1() +
+												   _isRep[state2.Index].GetPrice1();
 						{
 							UInt32 offset = cur + 1 + lenTest2;
 							while (lenEnd < offset)
@@ -728,9 +728,9 @@ namespace SevenZip.Compression.LZMA {
 								repMatchPrice + GetRepPrice(repIndex, lenTest, state, posState) +
 								_isMatch[(state2.Index << Base.kNumPosStatesBitsMax) + posStateNext].GetPrice0() +
 								_literalEncoder.GetSubCoder(position + lenTest,
-								                            _matchFinder.GetIndexByte((Int32)lenTest - 1 - 1)).GetPrice(true,
-								                                                                                        _matchFinder.GetIndexByte((Int32)lenTest - 1 - (Int32)(reps[repIndex] + 1)),
-								                                                                                        _matchFinder.GetIndexByte((Int32)lenTest - 1));
+															_matchFinder.GetIndexByte((Int32)lenTest - 1 - 1)).GetPrice(true,
+																														_matchFinder.GetIndexByte((Int32)lenTest - 1 - (Int32)(reps[repIndex] + 1)),
+																														_matchFinder.GetIndexByte((Int32)lenTest - 1));
 							state2.UpdateChar();
 							posStateNext = (position + lenTest + 1) & _posStateMask;
 							UInt32 nextMatchPrice = curAndLenCharPrice + _isMatch[(state2.Index << Base.kNumPosStatesBitsMax) + posStateNext].GetPrice1();
@@ -772,7 +772,7 @@ namespace SevenZip.Compression.LZMA {
 					while (startLen > _matchDistances[offs])
 						offs += 2;
 
-					for (UInt32 lenTest = startLen;; lenTest++) {
+					for (UInt32 lenTest = startLen; ; lenTest++) {
 						UInt32 curBack = _matchDistances[offs + 1];
 						UInt32 curAndLenPrice = normalMatchPrice + GetPosLenPrice(curBack, lenTest, posState);
 						Optimal optimum = _optimum[cur + lenTest];
@@ -792,12 +792,12 @@ namespace SevenZip.Compression.LZMA {
 									state2.UpdateMatch();
 									UInt32 posStateNext = (position + lenTest) & _posStateMask;
 									UInt32 curAndLenCharPrice = curAndLenPrice +
-									                            _isMatch[(state2.Index << Base.kNumPosStatesBitsMax) + posStateNext].GetPrice0() +
-									                            _literalEncoder.GetSubCoder(position + lenTest,
-									                                                        _matchFinder.GetIndexByte((Int32)lenTest - 1 - 1)).
-									                                            GetPrice(true,
-									                                                     _matchFinder.GetIndexByte((Int32)lenTest - (Int32)(curBack + 1) - 1),
-									                                                     _matchFinder.GetIndexByte((Int32)lenTest - 1));
+																_isMatch[(state2.Index << Base.kNumPosStatesBitsMax) + posStateNext].GetPrice0() +
+																_literalEncoder.GetSubCoder(position + lenTest,
+																							_matchFinder.GetIndexByte((Int32)lenTest - 1 - 1)).
+																				GetPrice(true,
+																						 _matchFinder.GetIndexByte((Int32)lenTest - (Int32)(curBack + 1) - 1),
+																						 _matchFinder.GetIndexByte((Int32)lenTest - 1));
 									state2.UpdateChar();
 									posStateNext = (position + lenTest + 1) & _posStateMask;
 									UInt32 nextMatchPrice = curAndLenCharPrice + _isMatch[(state2.Index << Base.kNumPosStatesBitsMax) + posStateNext].GetPrice1();
@@ -966,7 +966,7 @@ namespace SevenZip.Compression.LZMA {
 
 							if (posSlot < Base.kEndPosModelIndex)
 								BitTreeEncoder.ReverseEncode(_posEncoders,
-								                             baseVal - posSlot - 1, _rangeEncoder, footerBits, posReduced);
+															 baseVal - posSlot - 1, _rangeEncoder, footerBits, posReduced);
 							else {
 								_rangeEncoder.EncodeDirectBits(posReduced >> Base.kNumAlignBits, footerBits - Base.kNumAlignBits);
 								_posAlignEncoder.ReverseEncode(_rangeEncoder, posReduced & Base.kAlignMask);
@@ -1026,7 +1026,7 @@ namespace SevenZip.Compression.LZMA {
 		}
 
 		private void SetStreams(Stream inStream, Stream outStream,
-		                        Int64 inSize, Int64 outSize) {
+								Int64 inSize, Int64 outSize) {
 			_inStream = inStream;
 			_finished = false;
 			Create();
@@ -1034,10 +1034,10 @@ namespace SevenZip.Compression.LZMA {
 			Init();
 
 			// if (!_fastMode)
-			                        {
-				                        FillDistancesPrices();
-				                        FillAlignPrices();
-			                        }
+			{
+				FillDistancesPrices();
+				FillAlignPrices();
+			}
 
 			_lenEncoder.SetTableSize(_numFastBytes + 1 - Base.kMatchMinLen);
 			_lenEncoder.UpdateTables((UInt32)1 << _posStateBits);
@@ -1054,7 +1054,7 @@ namespace SevenZip.Compression.LZMA {
 				var footerBits = (int)((posSlot >> 1) - 1);
 				UInt32 baseVal = ((2 | (posSlot & 1)) << footerBits);
 				tempPrices[i] = BitTreeEncoder.ReverseGetPrice(_posEncoders,
-				                                               baseVal - posSlot - 1, footerBits, i - baseVal);
+															   baseVal - posSlot - 1, footerBits, i - baseVal);
 			}
 
 			for (UInt32 lenToPosState = 0; lenToPosState < Base.kNumLenToPosStates; lenToPosState++) {

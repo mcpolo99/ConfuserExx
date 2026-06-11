@@ -4,7 +4,7 @@
   <Import Project="..\ConfuserEx.Common.props" Condition="Exists('..\ConfuserEx.Common.props')" />
 
   <PropertyGroup Label="Assembly Settings">
-    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net48;netstandard2.0</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\ConfuserEx.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
@@ -14,7 +14,7 @@
     <Product>ConfuserEx - MSBuild Integration</Product>
     <Description>This package contains the integration of ConfuserEx into the MSBuild build procedure. It allows automatically obfuscating the assemblies during the build.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/mkaring/ConfuserEx</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/mcpolo99/ConfuserExx</PackageProjectUrl>
     <PackageTags>Obfuscation Confuser ConfuserEx</PackageTags>
     <DevelopmentDependency>true</DevelopmentDependency>
     <IncludeBuildOutput>false</IncludeBuildOutput>
@@ -25,14 +25,14 @@
   </PropertyGroup>
 
   <ItemGroup Label="Nuget Dependencies">
-    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.9.*" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="17.*" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Label="Project Dependencies">
     <ProjectReference Include="..\Confuser.Core\Confuser.Core.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Confuser.Protections\Confuser.Protections.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Confuser.Renamer\Confuser.Renamer.csproj" PrivateAssets="all" />
-    <ProjectReference Include="..\Confuser.Runtime\Confuser.Runtime.csproj" Condition="'$(TargetFramework)' == 'net461'" PrivateAssets="all" />
+    <ProjectReference Include="..\Confuser.Runtime\Confuser.Runtime.csproj" Condition="'$(TargetFramework)' == 'net48'" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,10 +48,10 @@
 
   <Target Name="IncludeConfuserDependencyFiles" DependsOnTargets="$(IncludeConfuserDependencyFilesDependsOn)" />
 
-  <Target Name="IncludeConfuserDependencyFilesFramework" Condition="'$(TargetFramework)' == 'net461'">
+  <Target Name="IncludeConfuserDependencyFilesFramework" Condition="'$(TargetFramework)' == 'net48'">
     <ItemGroup>
-      <ConfuserNetFrameworkDependencies Include="$(BaseOutputPath)\$(Configuration)\net461\*.dll" />
-      <ConfuserNetFrameworkDependencies Include="$(BaseOutputPath)\$(Configuration)\net461\*.pdb" />
+      <ConfuserNetFrameworkDependencies Include="$(BaseOutputPath)\$(Configuration)\net48\*.dll" />
+      <ConfuserNetFrameworkDependencies Include="$(BaseOutputPath)\$(Configuration)\net48\*.pdb" />
     </ItemGroup>
     <CreateItem Include="@(ConfuserNetFrameworkDependencies)" AdditionalMetadata="PackagePath=netframework">
       <Output TaskParameter="Include" ItemName="TfmSpecificPackageFile" />

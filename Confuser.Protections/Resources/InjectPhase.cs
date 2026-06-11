@@ -28,7 +28,7 @@ namespace Confuser.Protections.Resources {
 			if (parameters.Targets.Any()) {
 				if (!UTF8String.IsNullOrEmpty(context.CurrentModule.Assembly.Culture)) {
 					context.Logger.DebugFormat("Skipping resource encryption for satellite assembly '{0}'.",
-					                           context.CurrentModule.Assembly.FullName);
+											   context.CurrentModule.Assembly.FullName);
 					return;
 				}
 				var compression = context.Registry.GetService<ICompressionService>();
@@ -112,7 +112,7 @@ namespace Confuser.Protections.Resources {
 				var method = instr.Operand as IMethod;
 				if (instr.OpCode == OpCodes.Call) {
 					if (method.DeclaringType.Name == "Mutation" &&
-					    method.Name == "Crypt") {
+						method.Name == "Crypt") {
 						Instruction ldBlock = instrs[i - 2];
 						Instruction ldKey = instrs[i - 1];
 						Debug.Assert(ldBlock.OpCode == OpCodes.Ldloc && ldKey.OpCode == OpCodes.Ldloc);
@@ -122,7 +122,7 @@ namespace Confuser.Protections.Resources {
 						instrs.InsertRange(i - 2, moduleCtx.ModeHandler.EmitDecrypt(moduleCtx.InitMethod, moduleCtx, (Local)ldBlock.Operand, (Local)ldKey.Operand));
 					}
 					else if (method.DeclaringType.Name == "Lzma" &&
-					         method.Name == "Decompress") {
+							 method.Name == "Decompress") {
 						instr.Operand = decomp;
 					}
 				}

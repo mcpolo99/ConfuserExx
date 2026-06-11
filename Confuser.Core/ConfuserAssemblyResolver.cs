@@ -84,7 +84,7 @@ namespace Confuser.Core {
 			InternalFuzzyResolver.Clear();
 		}
 
-		public IEnumerable<AssemblyDef> GetCachedAssemblies() => 
+		public IEnumerable<AssemblyDef> GetCachedAssemblies() =>
 			InternalExactResolver.GetCachedAssemblies().Concat(InternalFuzzyResolver.GetCachedAssemblies());
 
 		public void AddToCache(ModuleDefMD modDef) {
@@ -105,13 +105,13 @@ namespace Confuser.Core {
 
 			/// <inheritdoc />
 			public void Add(string item) {
-				foreach (var list in _lists) 
+				foreach (var list in _lists)
 					list.Add(item);
 			}
 
 			/// <inheritdoc />
 			public void Clear() {
-				foreach (var list in _lists) 
+				foreach (var list in _lists)
 					list.Clear();
 			}
 
@@ -136,13 +136,13 @@ namespace Confuser.Core {
 
 			/// <inheritdoc />
 			public void Insert(int index, string item) {
-				foreach (var list in _lists) 
+				foreach (var list in _lists)
 					list.Insert(index, item);
 			}
 
 			/// <inheritdoc />
 			public void RemoveAt(int index) {
-				foreach (var list in _lists) 
+				foreach (var list in _lists)
 					list.RemoveAt(index);
 			}
 

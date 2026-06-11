@@ -637,7 +637,7 @@ namespace Confuser.Renamer.BAML {
 			foreach (var indexerArg in part.ParamList) {
 				if (!string.IsNullOrWhiteSpace(indexerArg.ParenString)) {
 					var sig = ResolveType(indexerArg.ParenString, out var prefix);
-					if (sig != null && context.Modules.Contains((ModuleDefMD) sig.ToBasicTypeDefOrRef().ResolveTypeDefThrow().Module)) {
+					if (sig != null && context.Modules.Contains((ModuleDefMD)sig.ToBasicTypeDefOrRef().ResolveTypeDefThrow().Module)) {
 						var reference = new BAMLPathTypeReference(xmlnsCtx, sig, indexerArg);
 						AddTypeSigReference(sig, reference);
 						break;
@@ -680,7 +680,7 @@ namespace Confuser.Renamer.BAML {
 				Debug.Assert(rootIndex != -1);
 			}
 
-			public void AddNsMap(string clrNs, AssemblyDef assembly, string prefix) => 
+			public void AddNsMap(string clrNs, AssemblyDef assembly, string prefix) =>
 				AddNsMap(Tuple.Create(assembly, clrNs), prefix);
 
 			public void AddNsMap(Tuple<AssemblyDef, string> scope, string prefix) {

@@ -114,8 +114,8 @@ namespace Confuser.Protections.Constants {
 			moduleCtx.DataField.HasFieldRVA = true;
 			moduleCtx.DataType.ClassLayout = new ClassLayoutUser(0, (uint)encryptedBuffer.Length);
 			MutationHelper.InjectKeys(moduleCtx.InitMethod,
-			                          new[] { 0, 1 },
-			                          new[] { encryptedBuffer.Length / 4, (int)keySeed });
+									  new[] { 0, 1 },
+									  new[] { encryptedBuffer.Length / 4, (int)keySeed });
 			MutationHelper.ReplacePlaceholder(moduleCtx.InitMethod, arg => {
 				var repl = new List<Instruction>();
 				repl.AddRange(arg);
@@ -150,7 +150,7 @@ namespace Confuser.Protections.Constants {
 				if (buffIndex + 1 < moduleCtx.EncodedBuffer.Count && moduleCtx.EncodedBuffer[buffIndex + 1] == hi)
 					break;
 			} while (buffIndex >= 0);
-			
+
 			if (buffIndex == -1) {
 				buffIndex = moduleCtx.EncodedBuffer.Count;
 				moduleCtx.EncodedBuffer.Add(lo);
@@ -274,9 +274,9 @@ namespace Confuser.Protections.Constants {
 					else if (instr.OpCode == OpCodes.Call && (moduleCtx.Elements & EncodeElements.Initializers) != 0) {
 						var operand = (IMethod)instr.Operand;
 						if (operand.DeclaringType.DefinitionAssembly.IsCorLib() &&
-						    operand.DeclaringType.Namespace == "System.Runtime.CompilerServices" &&
-						    operand.DeclaringType.Name == "RuntimeHelpers" &&
-						    operand.Name == "InitializeArray") {
+							operand.DeclaringType.Namespace == "System.Runtime.CompilerServices" &&
+							operand.DeclaringType.Name == "RuntimeHelpers" &&
+							operand.Name == "InitializeArray") {
 							IList<Instruction> instrs = method.Body.Instructions;
 							int i = instrs.IndexOf(instr);
 							if (instrs[i - 1].OpCode != OpCodes.Ldtoken) continue;

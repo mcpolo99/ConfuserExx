@@ -23,7 +23,7 @@ namespace ComplexClassStructureRename.Test {
 				new[] {
 					"InternalClass1: test1 Hello"
 				},
-				new SettingItem<Protection>("rename") { 
+				new SettingItem<Protection>("rename") {
 					{ "mode", "sequential" },
 					{ "renPublic", "true" },
 					{ "flatten", "false" }

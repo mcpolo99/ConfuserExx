@@ -91,7 +91,7 @@ namespace Confuser.Core.Helpers {
 						blockHeaders.Add(body.Instructions[i + 1]);
 				}
 				else if ((instr.OpCode.FlowControl == FlowControl.Throw || instr.OpCode.FlowControl == FlowControl.Return) &&
-				         i + 1 < body.Instructions.Count) {
+						 i + 1 < body.Instructions.Count) {
 					blockHeaders.Add(body.Instructions[i + 1]);
 				}
 			}
@@ -164,8 +164,8 @@ namespace Confuser.Core.Helpers {
 			}
 			for (int i = 0; i < blocks.Count; i++) {
 				if (blocks[i].Footer.OpCode.FlowControl != FlowControl.Branch &&
-				    blocks[i].Footer.OpCode.FlowControl != FlowControl.Return &&
-				    blocks[i].Footer.OpCode.FlowControl != FlowControl.Throw) {
+					blocks[i].Footer.OpCode.FlowControl != FlowControl.Return &&
+					blocks[i].Footer.OpCode.FlowControl != FlowControl.Throw) {
 					blocks[i].Targets.Add(blocks[i + 1]);
 					blocks[i + 1].Sources.Add(blocks[i]);
 				}

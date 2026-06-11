@@ -1,0 +1,35 @@
+name: format
+
+on:
+  pull_request:
+    branches: [master, pre-release]
+    paths: ['**.cs', '**.vb', '.editorconfig']
+
+jobs:
+  check-format:
+    runs-on: windows-2025
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check formatting
+        run: dotnet format Confuser2.sln --verify-no-changes --verbosity diagnostic
+        continue-on-error: true
+        id: format-check
+
+      - name: Format diff
+        if: steps.format-check.outcome == 'failure'
+        shell: pwsh
+        run: |
+          dotnet format Confuser2.sln
+          git diff --stat
+          $diff = git diff --name-only
+          if ($diff) {
+            Write-Host "::warning::The following files need formatting:" -ForegroundColor Yellow
+            $diff | ForEach-Object { Write-Host "  $_" }
+            Write-Host ""
+            Write-Host "Run 'dotnet format Confuser2.sln' locally and commit the changes."
+            exit 1
+          }

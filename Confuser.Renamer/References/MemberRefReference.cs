@@ -23,7 +23,7 @@ namespace Confuser.Renamer.References {
 			return true;
 		}
 
-		public override string ToString() => ToString(null); 
+		public override string ToString() => ToString(null);
 
 		public string ToString(INameService nameService) {
 			var builder = new StringBuilder();

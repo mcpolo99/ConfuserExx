@@ -50,8 +50,8 @@ namespace Confuser.Core.API {
 			random.Shuffle(randomPredicates);
 			foreach (var predicate in randomPredicates) {
 				if (predicate.IsUsable(method) &&
-				    (type == null || predicate.Type == type.Value) &&
-				    (argCount == null || Array.IndexOf(argCount, predicate.ArgumentCount) != -1))
+					(type == null || predicate.Type == type.Value) &&
+					(argCount == null || Array.IndexOf(argCount, predicate.ArgumentCount) != -1))
 					return predicate;
 			}
 			return null;

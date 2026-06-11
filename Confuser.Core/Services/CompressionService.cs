@@ -100,7 +100,7 @@ namespace Confuser.Core.Services {
 			var length = BitConverter.GetBytes(data.Length);
 			if (!BitConverter.IsLittleEndian)
 				Array.Reverse(length);
-			
+
 			// Store 4 byte length value (little-endian)
 			x.Write(length, 0, sizeof(int));
 

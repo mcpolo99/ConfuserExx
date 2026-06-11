@@ -7,7 +7,7 @@ using dnlib.DotNet.Emit;
 
 namespace Confuser.Protections.TypeScrambler.Scrambler.Rewriter.Instructions {
 	internal sealed class InstructionRewriterFactory : IEnumerable<InstructionRewriter> {
-		private IDictionary<Type, InstructionRewriter> RewriterDefinitions { get; } 
+		private IDictionary<Type, InstructionRewriter> RewriterDefinitions { get; }
 			= new Dictionary<Type, InstructionRewriter>();
 
 		internal void Add(InstructionRewriter i) {

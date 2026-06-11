@@ -54,7 +54,7 @@ namespace Confuser.Core {
 		protected static void AddPlugins(
 			ConfuserContext context, IList<Protection> protections, IList<Packer> packers,
 			IList<ConfuserComponent> components, Assembly asm) {
-			foreach(var module in asm.GetLoadedModules())
+			foreach (var module in asm.GetLoadedModules())
 				foreach (var i in module.GetTypes()) {
 					if (i.IsAbstract || !HasAccessibleDefConstructor(i))
 						continue;
