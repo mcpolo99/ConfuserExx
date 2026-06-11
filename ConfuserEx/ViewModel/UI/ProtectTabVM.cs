@@ -62,7 +62,7 @@ namespace ConfuserEx.ViewModel {
 				builder.AddSerilog(serilogLogger, dispose: true));
 			var melLogger = loggerFactory.CreateLogger("ConfuserEx");
 
-			parameters.Logger = new MelLoggerAdapter(melLogger);
+			parameters.Logger = melLogger;
 			parameters.ProgressReporter = this;
 
 			cancelSrc = new CancellationTokenSource();

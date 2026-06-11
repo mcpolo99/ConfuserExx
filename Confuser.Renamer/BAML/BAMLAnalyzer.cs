@@ -9,6 +9,7 @@ using Confuser.Core;
 using Confuser.Renamer.Analyzers;
 using Confuser.Renamer.References;
 using dnlib.DotNet;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Renamer.BAML {
 	internal class BAMLAnalyzer {
@@ -338,7 +339,7 @@ namespace Confuser.Renamer.BAML {
 					if (attrInfo.Item1 is EventDef) {
 						MethodDef method = root.Type.FindMethod(propRec.Value);
 						if (method == null)
-							context.Logger.WarnFormat("Cannot resolve method '{0}' in '{1}'.", root.Type.FullName, propRec.Value);
+							context.Logger.LogWarning("Cannot resolve method '{0}' in '{1}'.", root.Type.FullName, propRec.Value);
 						else {
 							var reference = new BAMLAttributeReference(method, propRec);
 							service.AddReference(method, reference);
@@ -472,7 +473,7 @@ namespace Confuser.Renamer.BAML {
 								AddDefReference(field, reference);
 							}
 							if (property == null && field == null)
-								context.Logger.WarnFormat("Could not resolve command '{0}' in '{1}'.", cmd, CurrentBAMLName);
+								context.Logger.LogWarning("Could not resolve command '{0}' in '{1}'.", cmd, CurrentBAMLName);
 						}
 					}
 				}
@@ -540,7 +541,7 @@ namespace Confuser.Renamer.BAML {
 							src = match.Groups[2].Value;
 						}
 						else if (rec.Value.Contains("/"))
-							context.Logger.WarnFormat("Fail to extract XAML name from '{0}'.", rec.Value);
+							context.Logger.LogWarning("Fail to extract XAML name from '{0}'.", rec.Value);
 
 						if (!src.StartsWith(packScheme, StringComparison.OrdinalIgnoreCase)) {
 							var rel = new Uri(new Uri(packScheme + "application:,,,/" + CurrentBAMLName), src);

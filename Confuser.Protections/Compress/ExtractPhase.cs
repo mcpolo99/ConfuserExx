@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Confuser.Core;
 using dnlib.DotNet;
+using Microsoft.Extensions.Logging;
 using dnlib.DotNet.MD;
 using dnlib.DotNet.Writer;
 
@@ -29,7 +30,7 @@ namespace Confuser.Protections.Compress {
 
 			if (context.Annotations.Get<CompressorContext>(context, Compressor.ContextKey) != null) {
 				if (isExe) {
-					context.Logger.Error("Too many executable modules!");
+					context.Logger.LogError("Too many executable modules!");
 					throw new ConfuserException(null);
 				}
 				return;

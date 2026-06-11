@@ -222,7 +222,7 @@ namespace Confuser.CLI {
 			var melLogger = loggerFactory.CreateLogger("ConfuserEx");
 
 			var progressReporter = new ConsoleProgressReporter();
-			parameters.Logger = new MelLoggerAdapter(melLogger);
+			parameters.Logger = melLogger;
 			parameters.ProgressReporter = progressReporter;
 
 			if (OperatingSystem.IsWindows())

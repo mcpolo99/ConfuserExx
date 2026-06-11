@@ -10,6 +10,7 @@ using Confuser.Core;
 using Confuser.Core.Helpers;
 using Confuser.Core.Services;
 using Confuser.Protections.Compress;
+using Microsoft.Extensions.Logging;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.MD;
@@ -50,7 +51,7 @@ namespace Confuser.Protections {
 		protected override void Pack(ConfuserContext context, ProtectionParameters parameters) {
 			var ctx = context.Annotations.Get<CompressorContext>(context, ContextKey);
 			if (ctx == null) {
-				context.Logger.Error("No executable module!");
+				context.Logger.LogError("No executable module!");
 				throw new ConfuserException(null);
 			}
 
@@ -222,7 +223,7 @@ namespace Confuser.Protections {
 			}
 			compCtx.Deriver.Init(context, random);
 
-			context.Logger.Debug("Encrypting modules...");
+			context.Logger.LogDebug("Encrypting modules...");
 
 			// Main
 			MethodDef entryPoint = defs.OfType<MethodDef>().Single(method => method.Name == "Main");

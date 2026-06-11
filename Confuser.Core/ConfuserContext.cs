@@ -4,6 +4,7 @@ using System.Threading;
 using Confuser.Core.Project;
 using dnlib.DotNet;
 using dnlib.DotNet.Writer;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Core {
 	/// <summary>
@@ -18,7 +19,7 @@ namespace Confuser.Core {
 		///     Gets the logger used for logging events.
 		/// </summary>
 		/// <value>The logger.</value>
-		public ILogger Logger { get; internal set; }
+		public Microsoft.Extensions.Logging.ILogger Logger { get; internal set; }
 
 		/// <summary>
 		///     Gets the progress reporter used for reporting protection progress.

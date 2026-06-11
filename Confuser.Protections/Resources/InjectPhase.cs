@@ -7,6 +7,7 @@ using Confuser.Core;
 using Confuser.Core.Helpers;
 using Confuser.Core.Services;
 using Confuser.DynCipher;
+using Microsoft.Extensions.Logging;
 using Confuser.Renamer;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
@@ -27,7 +28,7 @@ namespace Confuser.Protections.Resources {
 		protected override void Execute(ConfuserContext context, ProtectionParameters parameters) {
 			if (parameters.Targets.Any()) {
 				if (!UTF8String.IsNullOrEmpty(context.CurrentModule.Assembly.Culture)) {
-					context.Logger.DebugFormat("Skipping resource encryption for satellite assembly '{0}'.",
+					context.Logger.LogDebug("Skipping resource encryption for satellite assembly '{0}'.",
 											   context.CurrentModule.Assembly.FullName);
 					return;
 				}

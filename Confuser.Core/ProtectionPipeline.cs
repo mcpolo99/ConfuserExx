@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using dnlib.DotNet;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Core {
 	/// <summary>
@@ -127,14 +128,14 @@ namespace Confuser.Core {
 		internal void ExecuteStage(PipelineStage stage, Action<ConfuserContext> func, Func<IList<IDnlibDef>> targets, ConfuserContext context) {
 			foreach (ProtectionPhase pre in preStage[stage]) {
 				context.CheckCancellation();
-				context.Logger.DebugFormat("Executing '{0}' phase...", pre.Name);
+				context.Logger.LogDebug("Executing '{0}' phase...", pre.Name);
 				pre.Execute(context, new ProtectionParameters(pre.Parent, Filter(context, targets(), pre)));
 			}
 			context.CheckCancellation();
 			func(context);
 			context.CheckCancellation();
 			foreach (ProtectionPhase post in postStage[stage]) {
-				context.Logger.DebugFormat("Executing '{0}' phase...", post.Name);
+				context.Logger.LogDebug("Executing '{0}' phase...", post.Name);
 				post.Execute(context, new ProtectionParameters(post.Parent, Filter(context, targets(), post)));
 				context.CheckCancellation();
 			}
@@ -170,7 +171,7 @@ namespace Confuser.Core {
 				ProtectionSettings parameters = ProtectionParameters.GetParameters(context, def);
 				Debug.Assert(parameters != null);
 				if (parameters == null) {
-					context.Logger.ErrorFormat("'{0}' not marked for obfuscation, possibly a bug.", def);
+					context.Logger.LogError("'{0}' not marked for obfuscation, possibly a bug.", def);
 					throw new ConfuserException(null);
 				}
 				return parameters.ContainsKey(phase.Parent);

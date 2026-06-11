@@ -4,6 +4,7 @@ using Confuser.Core;
 using Confuser.Core.Services;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Protections {
 	internal sealed class HardeningPhase : ProtectionPhase {
@@ -31,7 +32,7 @@ namespace Confuser.Protections {
 		private static void HardenMethod(ConfuserContext context, ModuleDef module) {
 			var cctor = module.GlobalType.FindStaticConstructor();
 			if (cctor == null) {
-				context.Logger.Debug("No .cctor containing protection code found. Nothing to do.");
+				context.Logger.LogDebug("No .cctor containing protection code found. Nothing to do.");
 				return;
 			}
 

@@ -27,7 +27,7 @@ namespace Confuser.MSBuild.Tasks {
 			var progressReporter = new MSBuildProgressReporter();
 			var parameters = new ConfuserParameters {
 				Project = project,
-				Logger = new MSBuildLogger(Log),
+				Logger = new MSBuildMelLogger(Log),
 				ProgressReporter = progressReporter
 			};
 

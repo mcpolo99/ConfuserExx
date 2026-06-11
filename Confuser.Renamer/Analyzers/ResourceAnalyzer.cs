@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Confuser.Core;
 using Confuser.Renamer.Properties;
+using Microsoft.Extensions.Logging;
 using Confuser.Renamer.References;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
@@ -23,7 +24,7 @@ namespace Confuser.Renamer.Analyzers {
 				string nameAsmName = asmName.Substring(0, asmName.Length - ".resources".Length);
 				ModuleDef mainModule = context.Modules.SingleOrDefault(mod => mod.Assembly.Name == nameAsmName);
 				if (mainModule == null) {
-					context.Logger.ErrorFormat("Could not find main assembly of satellite assembly '{0}'.", module.Assembly.FullName);
+					context.Logger.LogError("Could not find main assembly of satellite assembly '{0}'.", module.Assembly.FullName);
 					throw new ConfuserException(null);
 				}
 
@@ -35,7 +36,7 @@ namespace Confuser.Renamer.Analyzers {
 
 					TypeDef type = mainModule.FindReflection(typeName);
 					if (type == null) {
-						context.Logger.WarnFormat(Resources.ResourceAnalyzer_Analyze_CouldNotFindResourceType, typeName);
+						context.Logger.LogWarning(Resources.ResourceAnalyzer_Analyze_CouldNotFindResourceType, typeName);
 						continue;
 					}
 					string format = $"{{0}}.{culture}.resources";
@@ -68,7 +69,7 @@ namespace Confuser.Renamer.Analyzers {
 					}
 
 					if (type == null) {
-						context.Logger.WarnFormat(Resources.ResourceAnalyzer_Analyze_CouldNotFindResourceType, typeName);
+						context.Logger.LogWarning(Resources.ResourceAnalyzer_Analyze_CouldNotFindResourceType, typeName);
 						continue;
 					}
 					service.ReduceRenameMode(type, RenameMode.Reflection);

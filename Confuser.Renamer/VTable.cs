@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Confuser.Core;
 using dnlib.DotNet;
-using ILogger = Confuser.Core.ILogger;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Renamer {
 	public class VTableSignature {
@@ -314,31 +314,31 @@ namespace Confuser.Renamer {
 		[Conditional("DEBUG")]
 		static void CheckKeyExist<TKey, TValue>(VTableStorage storage, IDictionary<TKey, TValue> dictionary, TKey key, string name) {
 			if (!dictionary.ContainsKey(key)) {
-				storage.GetLogger().ErrorFormat("{0} not found: {1}", name, key);
+				storage.GetLogger().LogError("{0} not found: {1}", name, key);
 				foreach (var k in dictionary.Values)
-					storage.GetLogger().ErrorFormat("    {0}", k);
+					storage.GetLogger().LogError("    {0}", k);
 			}
 		}
 
 		[Conditional("DEBUG")]
 		static void CheckKeyExist<TKey, TValue>(VTableStorage storage, ILookup<TKey, TValue> lookup, TKey key, string name) {
 			if (!lookup.Contains(key)) {
-				storage.GetLogger().ErrorFormat("{0} not found: {1}", name, key);
+				storage.GetLogger().LogError("{0} not found: {1}", name, key);
 				foreach (var k in lookup.Select(g => g.Key))
-					storage.GetLogger().ErrorFormat("    {0}", k);
+					storage.GetLogger().LogError("    {0}", k);
 			}
 		}
 	}
 
 	public class VTableStorage {
 		Dictionary<TypeDef, VTable> storage = new Dictionary<TypeDef, VTable>();
-		ILogger logger;
+		Microsoft.Extensions.Logging.ILogger logger;
 
-		public VTableStorage(ILogger logger) {
+		public VTableStorage(Microsoft.Extensions.Logging.ILogger logger) {
 			this.logger = logger;
 		}
 
-		public ILogger GetLogger() {
+		public Microsoft.Extensions.Logging.ILogger GetLogger() {
 			return logger;
 		}
 

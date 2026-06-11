@@ -8,6 +8,7 @@ using Confuser.Core;
 using Confuser.Core.Helpers;
 using Confuser.Core.Services;
 using Confuser.Renamer;
+using Microsoft.Extensions.Logging;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.MD;
@@ -154,11 +155,11 @@ namespace Confuser.Protections.AntiTamper {
 		void OnWriterEvent(object sender, ModuleWriterEventArgs e) {
 			var writer = (ModuleWriterBase)sender;
 			if (e.Event == ModuleWriterEvent.MDBeginWriteMethodBodies) {
-				context.Logger.Debug("Extracting method bodies...");
+				context.Logger.LogDebug("Extracting method bodies...");
 				CreateSection(writer);
 			}
 			else if (e.Event == ModuleWriterEvent.BeginStrongNameSign) {
-				context.Logger.Debug("Encrypting method section...");
+				context.Logger.LogDebug("Encrypting method section...");
 				EncryptSection(writer);
 			}
 		}

@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using Confuser.Core.Project;
 using Confuser.Core.Project.Patterns;
 using dnlib.DotNet;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Core {
 	using Rules = Dictionary<Rule, PatternExpression>;
@@ -221,7 +222,7 @@ namespace Confuser.Core {
 			}
 
 			if (!ok) {
-				context.Logger.WarnFormat("Ignoring rule '{0}' in {1}.", info.Settings, attr.Owner);
+				context.Logger.LogWarning("Ignoring rule '{0}' in {1}.", info.Settings, attr.Owner);
 				return false;
 			}
 
@@ -299,7 +300,7 @@ namespace Confuser.Core {
 
 			if (proj.Packer != null) {
 				if (!packers.ContainsKey(proj.Packer.Id)) {
-					context.Logger.ErrorFormat("Cannot find packer with ID '{0}'.", proj.Packer.Id);
+					context.Logger.LogError("Cannot find packer with ID '{0}'.", proj.Packer.Id);
 					throw new ConfuserException(null);
 				}
 
@@ -325,20 +326,20 @@ namespace Confuser.Core {
 					modules.Add(Tuple.Create(module, modDef));
 				}
 				catch (BadImageFormatException ex) {
-					context.Logger.ErrorFormat("Failed to load \"{0}\" - Assembly does not appear to be a .NET assembly: \"{1}\".", module.Path, ex.Message);
+					context.Logger.LogError("Failed to load \"{0}\" - Assembly does not appear to be a .NET assembly: \"{1}\".", module.Path, ex.Message);
 					if (module.Path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) {
 						var dllPath = Path.ChangeExtension(module.Path, ".dll");
 						var fullDllPath = Path.Combine(proj.BaseDirectory, dllPath);
 						if (File.Exists(fullDllPath))
-							context.Logger.ErrorFormat("Hint: .NET 6+ apps use a native host .exe — try obfuscating \"{0}\" instead.", dllPath);
+							context.Logger.LogError("Hint: .NET 6+ apps use a native host .exe — try obfuscating \"{0}\" instead.", dllPath);
 						else
-							context.Logger.Error("Hint: For .NET 6+ apps, obfuscate the .dll file, not the .exe (which is a native host stub).");
+							context.Logger.LogError("Hint: For .NET 6+ apps, obfuscate the .dll file, not the .exe (which is a native host stub).");
 					}
 					throw new ConfuserException(ex);
 				}
 			}
 			foreach (var module in modules) {
-				context.Logger.InfoFormat("Loading '{0}'...", module.Item1.Path);
+				context.Logger.LogInformation("Loading '{0}'...", module.Item1.Path);
 
 				Rules rules = ParseRules(proj, module.Item1, context);
 				MarkModule(module.Item1, module.Item2, rules, module == modules[0]);
@@ -351,7 +352,7 @@ namespace Confuser.Core {
 			}
 
 			if (proj.Debug && proj.Packer != null)
-				context.Logger.Warn("Generated Debug symbols might not be usable with packers!");
+				context.Logger.LogWarning("Generated Debug symbols might not be usable with packers!");
 
 			return new MarkerResult(modules.Select(module => module.Item2).ToList(), packer, extModules);
 		}
@@ -384,7 +385,7 @@ namespace Confuser.Core {
 			}
 
 			if (!ok)
-				context.Logger.WarnFormat("Ignoring rule '{0}' in {1}.", info.Settings, attr.Owner);
+				context.Logger.LogWarning("Ignoring rule '{0}' in {1}.", info.Settings, attr.Owner);
 			else if (infos != null)
 				infos.Add(info);
 			return info;

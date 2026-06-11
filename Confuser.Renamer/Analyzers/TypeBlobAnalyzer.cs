@@ -5,6 +5,7 @@ using System.Linq;
 using Confuser.Core;
 using Confuser.Renamer.References;
 using dnlib.DotNet;
+using Microsoft.Extensions.Logging;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.MD;
 
@@ -16,7 +17,7 @@ namespace Confuser.Renamer.Analyzers {
 			Analyze(service, context.Modules, context.Logger, moduleDef);
 		}
 
-		public static void Analyze(INameService service, ICollection<ModuleDefMD> modules, Core.ILogger logger, ModuleDefMD module) {
+		public static void Analyze(INameService service, ICollection<ModuleDefMD> modules, Microsoft.Extensions.Logging.ILogger logger, ModuleDefMD module) {
 			// MemberRef
 			var table = module.TablesStream.Get(Table.Method);
 			var len = table.Rows;
@@ -75,7 +76,7 @@ namespace Confuser.Renamer.Analyzers {
 				foreach (var arg in attr.NamedArguments) {
 					var memberDef = FindArgumentMemberDef(arg, attrType);
 					if (memberDef == null)
-						logger.WarnFormat(
+						logger.LogWarning(
 							arg.IsField ? "Failed to resolve CA field '{0}::{1} : {2}'." : "Failed to resolve CA property '{0}::{1} : {2}'.",
 							attrType, arg.Name, arg.Type);
 					else

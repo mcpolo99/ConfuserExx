@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Core {
 	/// <summary>
@@ -13,7 +14,7 @@ namespace Confuser.Core {
 		///     Resolves runtime assembly paths for a given module by parsing its runtimeconfig.json
 		///     or probing standard dotnet installation directories.
 		/// </summary>
-		public static IEnumerable<string> ResolveRuntimePaths(string modulePath, ILogger logger) {
+		public static IEnumerable<string> ResolveRuntimePaths(string modulePath, Microsoft.Extensions.Logging.ILogger logger) {
 			// 1. Try runtimeconfig.json next to the module (target framework gets priority)
 			var runtimeConfigPaths = Enumerable.Empty<string>();
 			var runtimeConfig = FindRuntimeConfig(modulePath);
@@ -39,36 +40,36 @@ namespace Confuser.Core {
 			return File.Exists(configPath) ? configPath : null;
 		}
 
-		static IEnumerable<string> GetPathsFromRuntimeConfig(string configPath, ILogger logger) {
+		static IEnumerable<string> GetPathsFromRuntimeConfig(string configPath, Microsoft.Extensions.Logging.ILogger logger) {
 			string content;
 			try {
 				content = File.ReadAllText(configPath);
 			}
 			catch (IOException ex) {
-				logger.WarnFormat("Failed to read runtime config '{0}': {1}", configPath, ex.Message);
+				logger.LogWarning("Failed to read runtime config '{0}': {1}", configPath, ex.Message);
 				yield break;
 			}
 			catch (UnauthorizedAccessException ex) {
-				logger.WarnFormat("Access denied reading runtime config '{0}': {1}", configPath, ex.Message);
+				logger.LogWarning("Access denied reading runtime config '{0}': {1}", configPath, ex.Message);
 				yield break;
 			}
 
 			var frameworks = ParseFrameworks(content);
 			if (frameworks.Count == 0) {
-				logger.DebugFormat("No framework references found in '{0}'.", configPath);
+				logger.LogDebug("No framework references found in '{0}'.", configPath);
 				yield break;
 			}
 
 			var dotnetRoot = GetDotNetRoot();
 			if (dotnetRoot == null) {
-				logger.Warn("Could not locate .NET installation directory. Set DOTNET_ROOT environment variable if installed in a non-standard location.");
+				logger.LogWarning("Could not locate .NET installation directory. Set DOTNET_ROOT environment variable if installed in a non-standard location.");
 				yield break;
 			}
 
 			foreach (var fw in frameworks) {
 				var sharedDir = Path.Combine(dotnetRoot, "shared", fw.Name);
 				if (!Directory.Exists(sharedDir)) {
-					logger.DebugFormat("Framework directory not found: {0}", sharedDir);
+					logger.LogDebug("Framework directory not found: {0}", sharedDir);
 					continue;
 				}
 
@@ -88,7 +89,7 @@ namespace Confuser.Core {
 				if (best != null)
 					yield return best;
 				else
-					logger.WarnFormat("No installed runtime found matching {0} {1} in {2}", fw.Name, fw.Version, sharedDir);
+					logger.LogWarning("No installed runtime found matching {0} {1} in {2}", fw.Name, fw.Version, sharedDir);
 			}
 		}
 
@@ -137,16 +138,16 @@ namespace Confuser.Core {
 			return parts.Length >= 2 ? parts[0] + "." + parts[1] : version;
 		}
 
-		static IEnumerable<string> ProbeAllInstalledRuntimes(ILogger logger) {
+		static IEnumerable<string> ProbeAllInstalledRuntimes(Microsoft.Extensions.Logging.ILogger logger) {
 			var dotnetRoot = GetDotNetRoot();
 			if (dotnetRoot == null) {
-				logger.Warn("Could not locate .NET installation directory for runtime probing.");
+				logger.LogWarning("Could not locate .NET installation directory for runtime probing.");
 				yield break;
 			}
 
 			var sharedDir = Path.Combine(dotnetRoot, "shared");
 			if (!Directory.Exists(sharedDir)) {
-				logger.WarnFormat("Shared framework directory not found: {0}", sharedDir);
+				logger.LogWarning("Shared framework directory not found: {0}", sharedDir);
 				yield break;
 			}
 

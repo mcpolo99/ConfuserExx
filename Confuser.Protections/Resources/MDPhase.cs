@@ -7,6 +7,7 @@ using Confuser.Core;
 using Confuser.Core.Helpers;
 using Confuser.Core.Services;
 using Confuser.Renamer;
+using Microsoft.Extensions.Logging;
 using dnlib.DotNet;
 using dnlib.DotNet.MD;
 using dnlib.DotNet.Writer;
@@ -28,7 +29,7 @@ namespace Confuser.Protections.Resources {
 			var writer = (ModuleWriterBase)sender;
 			if (e.Event == ModuleWriterEvent.MDBeginAddResources) {
 				ctx.Context.CheckCancellation();
-				ctx.Context.Logger.Debug("Encrypting resources...");
+				ctx.Context.Logger.LogDebug("Encrypting resources...");
 				bool hasPacker = ctx.Context.Packer != null;
 
 				List<EmbeddedResource> resources = ctx.Module.Resources.OfType<EmbeddedResource>().ToList();

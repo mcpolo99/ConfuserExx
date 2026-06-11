@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Confuser.Core.Project;
 using dnlib.DotNet;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Core {
 	/// <summary>
@@ -82,7 +83,7 @@ namespace Confuser.Core {
 							}, context.token).Wait();
 				}
 				catch (AggregateException ex) {
-					context.Logger.Error("Failed to protect packer stub.");
+					context.Logger.LogError("Failed to protect packer stub.");
 					throw new ConfuserException(ex);
 				}
 
@@ -96,7 +97,7 @@ namespace Confuser.Core {
 					}
 				}
 				catch (IOException ex) {
-					context.Logger.WarnException("Failed to remove temporary files of packer.", ex);
+					context.Logger.LogWarning(ex, "Failed to remove temporary files of packer.");
 				}
 			}
 		}
@@ -104,9 +105,9 @@ namespace Confuser.Core {
 
 	internal class PackerProgressReporter : IProgressReporter {
 		readonly IProgressReporter baseReporter;
-		readonly ILogger baseLogger;
+		readonly Microsoft.Extensions.Logging.ILogger baseLogger;
 
-		public PackerProgressReporter(IProgressReporter baseReporter, ILogger baseLogger) {
+		public PackerProgressReporter(IProgressReporter baseReporter, Microsoft.Extensions.Logging.ILogger baseLogger) {
 			this.baseReporter = baseReporter;
 			this.baseLogger = baseLogger;
 		}
@@ -122,7 +123,7 @@ namespace Confuser.Core {
 		public void Finish(bool successful) {
 			if (!successful)
 				throw new ConfuserException(null);
-			baseLogger.Info("Finish protecting packer stub.");
+			baseLogger.LogInformation("Finish protecting packer stub.");
 		}
 	}
 

@@ -4,6 +4,7 @@ using System.Linq;
 using Confuser.Core;
 using Confuser.Core.Services;
 using Confuser.DynCipher;
+using Microsoft.Extensions.Logging;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.MD;
@@ -90,7 +91,7 @@ namespace Confuser.Protections.ControlFlow {
 		void ProcessMethod(CilBody body, CFContext ctx) {
 			uint maxStack;
 			if (!MaxStackCalculator.GetMaxStack(body.Instructions, body.ExceptionHandlers, out maxStack)) {
-				ctx.Context.Logger.Error("Failed to calcuate maxstack.");
+				ctx.Context.Logger.LogError("Failed to calcuate maxstack.");
 				throw new ConfuserException(null);
 			}
 			body.MaxStack = (ushort)maxStack;

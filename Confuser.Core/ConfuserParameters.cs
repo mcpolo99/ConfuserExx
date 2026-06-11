@@ -1,5 +1,6 @@
 ﻿using System;
 using Confuser.Core.Project;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Core {
 	/// <summary>
@@ -16,7 +17,7 @@ namespace Confuser.Core {
 		///     Gets or sets the logger that used to log the protection process.
 		/// </summary>
 		/// <value>The logger, or <c>null</c> if logging is not needed.</value>
-		public ILogger Logger { get; set; }
+		public Microsoft.Extensions.Logging.ILogger Logger { get; set; }
 
 		/// <summary>
 		///     Gets or sets the progress reporter used to report protection progress.
@@ -42,8 +43,8 @@ namespace Confuser.Core {
 		///     Gets the actual non-null logger.
 		/// </summary>
 		/// <returns>The logger.</returns>
-		internal ILogger GetLogger() {
-			return Logger ?? NullLogger.Instance;
+		internal Microsoft.Extensions.Logging.ILogger GetLogger() {
+			return Logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
 		}
 
 		/// <summary>

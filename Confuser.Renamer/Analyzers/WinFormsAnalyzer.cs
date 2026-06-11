@@ -6,6 +6,7 @@ using Confuser.Core;
 using Confuser.Core.Services;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Renamer.Analyzers {
 	public class WinFormsAnalyzer : IRenamer {
@@ -66,7 +67,7 @@ namespace Confuser.Renamer.Analyzers {
 				int[] args = trace.TraceArguments(instrInfo.Item2);
 				if (args == null) {
 					if (!erred)
-						context.Logger.WarnFormat("Failed to extract binding property name in '{0}'.", method.FullName);
+						context.Logger.LogWarning("Failed to extract binding property name in '{0}'.", method.FullName);
 					erred = true;
 					continue;
 				}
@@ -75,14 +76,14 @@ namespace Confuser.Renamer.Analyzers {
 				var propertyName = ResolveNameInstruction(method, args, ref argumentIndex);
 				if (propertyName.OpCode.Code != Code.Ldstr) {
 					if (!erred)
-						context.Logger.WarnFormat("Failed to extract binding property name in '{0}'.", method.FullName);
+						context.Logger.LogWarning("Failed to extract binding property name in '{0}'.", method.FullName);
 					erred = true;
 				}
 				else {
 					List<PropertyDef> props;
 					if (!properties.TryGetValue((string)propertyName.Operand, out props)) {
 						if (!erred)
-							context.Logger.WarnFormat("Failed to extract target property in '{0}'.", method.FullName);
+							context.Logger.LogWarning("Failed to extract target property in '{0}'.", method.FullName);
 						erred = true;
 					}
 					else {
@@ -95,14 +96,14 @@ namespace Confuser.Renamer.Analyzers {
 				var dataMember = ResolveNameInstruction(method, args, ref argumentIndex);
 				if (dataMember.OpCode.Code != Code.Ldstr) {
 					if (!erred)
-						context.Logger.WarnFormat("Failed to extract binding property name in '{0}'.", method.FullName);
+						context.Logger.LogWarning("Failed to extract binding property name in '{0}'.", method.FullName);
 					erred = true;
 				}
 				else {
 					List<PropertyDef> props;
 					if (!properties.TryGetValue((string)dataMember.Operand, out props)) {
 						if (!erred)
-							context.Logger.WarnFormat("Failed to extract target property in '{0}'.", method.FullName);
+							context.Logger.LogWarning("Failed to extract target property in '{0}'.", method.FullName);
 						erred = true;
 					}
 					else {
@@ -116,7 +117,7 @@ namespace Confuser.Renamer.Analyzers {
 				int[] args = trace.TraceArguments(instrInfo);
 				if (args == null) {
 					if (!erred)
-						context.Logger.WarnFormat("Failed to extract binding property name in '{0}'.", method.FullName);
+						context.Logger.LogWarning("Failed to extract binding property name in '{0}'.", method.FullName);
 					erred = true;
 					continue;
 				}
@@ -125,13 +126,13 @@ namespace Confuser.Renamer.Analyzers {
 				var propertyName = ResolveNameInstruction(method, args, ref argumentIndex);
 				if (propertyName.OpCode.Code != Code.Ldstr) {
 					if (!erred)
-						context.Logger.WarnFormat("Failed to extract binding property name in '{0}'.", method.FullName);
+						context.Logger.LogWarning("Failed to extract binding property name in '{0}'.", method.FullName);
 					erred = true;
 				}
 				else {
 					if (!properties.TryGetValue((string)propertyName.Operand, out var props)) {
 						if (!erred)
-							context.Logger.WarnFormat("Failed to extract target property in '{0}'.", method.FullName);
+							context.Logger.LogWarning("Failed to extract target property in '{0}'.", method.FullName);
 						erred = true;
 					}
 					else {
