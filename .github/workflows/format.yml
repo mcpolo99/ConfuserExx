@@ -2,7 +2,7 @@ name: format
 
 on:
   pull_request:
-    branches: [master, pre-release]
+    branches: [main, develop]
     paths: ['**.cs', '**.vb', '.editorconfig']
 
 jobs:

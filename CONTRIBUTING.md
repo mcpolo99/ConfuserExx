@@ -5,11 +5,36 @@ Contributions of any kind are welcome. For bugfixes and unit tests, you can subm
 ## Getting Started
 
 1. Fork the repository
-2. Create a feature branch from `pre-release`: `git checkout -b feat/my-feature pre-release`
+2. Create a branch from `develop` (see naming conventions below)
 3. Make your changes and ensure CI passes
-4. Open a PR targeting `pre-release`
+4. Open a PR targeting `develop`
 
 See [README.md](README.md#building-from-source) for build prerequisites.
+
+## Branch Naming Convention
+
+### With an issue (preferred)
+
+Use GitHub's built-in branch creation:
+
+```bash
+gh issue develop 42 --checkout
+# → creates branch: 42-fix-samba-timeout (auto-sanitized by GitHub)
+```
+
+### Without an issue
+
+| Scenario | Pattern | Example |
+|----------|---------|---------|
+| Feature | `feature/{description}` | `feature/add-symbol-server` |
+| Chore | `chore/{description}` | `chore/update-dependencies` |
+| Documentation | `docs/{description}` | `docs/add-plugin-guide` |
+| Hotfix (urgent) | `hotfix/{description}` | `hotfix/crash-on-startup` |
+| Experiment | `experiment/{description}` | `experiment/avalonia-port` |
+
+**Slug rules:** lowercase, words separated by `-`, no special characters, max ~50 chars.
+
+All branches target `develop` except `hotfix/` which branches from and merges to `main`.
 
 ## Testing Policy
 
@@ -121,7 +146,7 @@ Always reference the issue number: `fix(renamer): handle FnPtr types (#6)`
 
 ## Pull Request Process
 
-1. PRs target `pre-release`, not `master`
+1. PRs target `develop`, not `main`
 2. CI must pass (build + tests + coverage)
 3. Coverage must not decrease
 4. Only include files that are part of your change — no unrelated modifications
