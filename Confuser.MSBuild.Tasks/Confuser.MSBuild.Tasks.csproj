@@ -14,7 +14,7 @@
     <Product>ConfuserEx - MSBuild Integration</Product>
     <Description>This package contains the integration of ConfuserEx into the MSBuild build procedure. It allows automatically obfuscating the assemblies during the build.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/mkaring/ConfuserEx</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/mcpolo99/ConfuserExx</PackageProjectUrl>
     <PackageTags>Obfuscation Confuser ConfuserEx</PackageTags>
     <DevelopmentDependency>true</DevelopmentDependency>
     <IncludeBuildOutput>false</IncludeBuildOutput>

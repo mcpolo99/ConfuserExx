@@ -1,5 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: Question
-    url: https://github.com/mkaring/ConfuserEx/discussions/categories/q-a
-    about: Ask and answer questions about ConfuserEx
+    url: https://github.com/mcpolo99/ConfuserExx/discussions/categories/q-a
+    about: Ask and answer questions about ConfuserExx
+  - name: Ideas & Feature Requests
+    url: https://github.com/mcpolo99/ConfuserExx/discussions/categories/ideas
+    about: Suggest new features or improvements
+  - name: General Discussion
+    url: https://github.com/mcpolo99/ConfuserExx/discussions/categories/general
+    about: Chat about anything related to ConfuserExx
