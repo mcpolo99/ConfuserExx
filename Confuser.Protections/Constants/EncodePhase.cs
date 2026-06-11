@@ -38,12 +38,12 @@ namespace Confuser.Protections.Constants {
 			// Encode constants
 			moduleCtx.ReferenceRepl = new Dictionary<MethodDef, List<Tuple<Instruction, uint, IMethod>>>();
 			moduleCtx.EncodedBuffer = new List<uint>();
-			foreach (var entry in ldInit.WithProgress(context.Logger)) // Ensure the array length haven't been encoded yet
+			foreach (var entry in ldInit.WithProgress(context.ProgressReporter)) // Ensure the array length haven't been encoded yet
 			{
 				EncodeInitializer(moduleCtx, entry.Key, entry.Value);
 				context.CheckCancellation();
 			}
-			foreach (var entry in ldc.WithProgress(context.Logger)) {
+			foreach (var entry in ldc.WithProgress(context.ProgressReporter)) {
 				if (entry.Key is string) {
 					EncodeString(moduleCtx, (string)entry.Key, entry.Value);
 				}
@@ -234,7 +234,7 @@ namespace Confuser.Protections.Constants {
 			Dictionary<byte[], List<Tuple<MethodDef, Instruction>>> ldInit) {
 			var dataFields = new HashSet<FieldDef>();
 			var fieldRefs = new HashSet<Instruction>();
-			foreach (MethodDef method in parameters.Targets.OfType<MethodDef>().WithProgress(context.Logger)) {
+			foreach (MethodDef method in parameters.Targets.OfType<MethodDef>().WithProgress(context.ProgressReporter)) {
 				if (!method.HasBody)
 					continue;
 

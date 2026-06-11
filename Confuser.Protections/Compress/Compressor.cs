@@ -164,7 +164,7 @@ namespace Confuser.Protections {
 					state = state * 0x5e3f1f + chr;
 				byte[] encrypted = compCtx.Encrypt(comp, entry.Value, state, progress => {
 					progress = (progress + moduleIndex) / modules.Count;
-					context.Logger.Progress((int)(progress * 10000), 10000);
+					context.ProgressReporter.Progress((int)(progress * 10000), 10000);
 				});
 				context.CheckCancellation();
 
@@ -172,7 +172,7 @@ namespace Confuser.Protections {
 				stubModule.Resources.Add(resource);
 				moduleIndex++;
 			}
-			context.Logger.EndProgress();
+			context.ProgressReporter.EndProgress();
 		}
 
 		void InjectData(ConfuserContext context, ModuleDef stubModule, MethodDef method, byte[] data) {
@@ -245,8 +245,8 @@ namespace Confuser.Protections {
 			compCtx.OriginModule = context.OutputModules[compCtx.ModuleIndex];
 
 			byte[] encryptedModule = compCtx.Encrypt(comp, compCtx.OriginModule, seed,
-													 progress => context.Logger.Progress((int)(progress * 10000), 10000));
-			context.Logger.EndProgress();
+													 progress => context.ProgressReporter.Progress((int)(progress * 10000), 10000));
+			context.ProgressReporter.EndProgress();
 			context.CheckCancellation();
 
 			compCtx.EncryptedModule = encryptedModule;

@@ -210,7 +210,7 @@ namespace Confuser.Protections.AntiTamper {
 			newSection.Add(bodyIndex, 0x10);
 
 			// save methods
-			foreach (MethodDef method in methods.WithProgress(context.Logger)) {
+			foreach (MethodDef method in methods.WithProgress(context.ProgressReporter)) {
 				if (!method.HasBody)
 					continue;
 

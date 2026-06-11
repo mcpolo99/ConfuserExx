@@ -18,6 +18,12 @@ namespace Confuser.Core {
 		/// <value>The logger, or <c>null</c> if logging is not needed.</value>
 		public ILogger Logger { get; set; }
 
+		/// <summary>
+		///     Gets or sets the progress reporter used to report protection progress.
+		/// </summary>
+		/// <value>The progress reporter, or <c>null</c> if progress reporting is not needed.</value>
+		public IProgressReporter ProgressReporter { get; set; }
+
 		internal bool PackerInitiated { get; set; }
 
 		/// <summary>
@@ -38,6 +44,14 @@ namespace Confuser.Core {
 		/// <returns>The logger.</returns>
 		internal ILogger GetLogger() {
 			return Logger ?? NullLogger.Instance;
+		}
+
+		/// <summary>
+		///     Gets the actual non-null progress reporter.
+		/// </summary>
+		/// <returns>The progress reporter.</returns>
+		internal IProgressReporter GetProgressReporter() {
+			return ProgressReporter ?? NullProgressReporter.Instance;
 		}
 
 		/// <summary>

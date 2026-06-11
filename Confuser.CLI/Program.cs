@@ -193,13 +193,14 @@ namespace Confuser.CLI {
 		}
 
 		static int RunProject(ConfuserParameters parameters) {
-			var logger = new ConsoleLogger();
-			parameters.Logger = logger;
+			var progressReporter = new ConsoleProgressReporter();
+			parameters.Logger = new ConsoleLogger();
+			parameters.ProgressReporter = progressReporter;
 
 			Console.Title = "ConfuserEx - Running...";
 			ConfuserEngine.Run(parameters).GetAwaiter().GetResult();
 
-			return logger.ReturnValue;
+			return progressReporter.ReturnValue;
 		}
 
 		static bool NeedPause() {
@@ -235,14 +236,6 @@ namespace Confuser.CLI {
 		}
 
 		class ConsoleLogger : ILogger {
-			readonly DateTime begin;
-
-			public ConsoleLogger() {
-				begin = DateTime.Now;
-			}
-
-			public int ReturnValue { get; private set; }
-
 			public void Debug(string msg) {
 				WriteLineWithColor(ConsoleColor.Gray, "[DEBUG] " + msg);
 			}
@@ -284,6 +277,16 @@ namespace Confuser.CLI {
 				WriteLineWithColor(ConsoleColor.Red, "[ERROR] " + msg);
 				WriteLineWithColor(ConsoleColor.Red, "Exception: " + ex);
 			}
+		}
+
+		class ConsoleProgressReporter : IProgressReporter {
+			readonly DateTime begin;
+
+			public ConsoleProgressReporter() {
+				begin = DateTime.Now;
+			}
+
+			public int ReturnValue { get; private set; }
 
 			public void Progress(int progress, int overall) { }
 

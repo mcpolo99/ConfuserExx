@@ -73,7 +73,8 @@ namespace Confuser.Core {
 					ConfuserEngine
 						.Run(
 							new ConfuserParameters {
-								Logger = new PackerLogger(context.Logger),
+								Logger = context.Logger,
+								ProgressReporter = new PackerProgressReporter(context.ProgressReporter, context.Logger),
 								PluginDiscovery = discovery,
 								Marker = new PackerMarker(snKey, snPubKey, snDelaySig, snSigKey, snPubSigKey),
 								Project = proj,
@@ -101,59 +102,21 @@ namespace Confuser.Core {
 		}
 	}
 
-	internal class PackerLogger : ILogger {
+	internal class PackerProgressReporter : IProgressReporter {
+		readonly IProgressReporter baseReporter;
 		readonly ILogger baseLogger;
 
-		public PackerLogger(ILogger baseLogger) {
+		public PackerProgressReporter(IProgressReporter baseReporter, ILogger baseLogger) {
+			this.baseReporter = baseReporter;
 			this.baseLogger = baseLogger;
 		}
 
-		public void Debug(string msg) {
-			baseLogger.Debug(msg);
-		}
-
-		public void DebugFormat(string format, params object[] args) {
-			baseLogger.DebugFormat(format, args);
-		}
-
-		public void Info(string msg) {
-			baseLogger.Info(msg);
-		}
-
-		public void InfoFormat(string format, params object[] args) {
-			baseLogger.InfoFormat(format, args);
-		}
-
-		public void Warn(string msg) {
-			baseLogger.Warn(msg);
-		}
-
-		public void WarnFormat(string format, params object[] args) {
-			baseLogger.WarnFormat(format, args);
-		}
-
-		public void WarnException(string msg, Exception ex) {
-			baseLogger.WarnException(msg, ex);
-		}
-
-		public void Error(string msg) {
-			baseLogger.Error(msg);
-		}
-
-		public void ErrorFormat(string format, params object[] args) {
-			baseLogger.ErrorFormat(format, args);
-		}
-
-		public void ErrorException(string msg, Exception ex) {
-			baseLogger.ErrorException(msg, ex);
-		}
-
 		public void Progress(int progress, int overall) {
-			baseLogger.Progress(progress, overall);
+			baseReporter.Progress(progress, overall);
 		}
 
 		public void EndProgress() {
-			baseLogger.EndProgress();
+			baseReporter.EndProgress();
 		}
 
 		public void Finish(bool successful) {

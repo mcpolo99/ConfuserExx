@@ -80,6 +80,7 @@ namespace Confuser.Core {
 			// 1. Setup context
 			var context = new ConfuserContext();
 			context.Logger = parameters.GetLogger();
+			context.ProgressReporter = parameters.GetProgressReporter();
 			context.Project = parameters.Project.Clone();
 			context.PackerInitiated = parameters.PackerInitiated;
 			context.token = token;
@@ -218,7 +219,7 @@ namespace Confuser.Core {
 			finally {
 				if (context.Resolver != null)
 					context.InternalResolver.Clear();
-				context.Logger.Finish(ok);
+				context.ProgressReporter.Finish(ok);
 			}
 		}
 

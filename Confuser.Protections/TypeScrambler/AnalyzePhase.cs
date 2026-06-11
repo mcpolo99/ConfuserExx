@@ -19,7 +19,7 @@ namespace Confuser.Protections.TypeScrambler {
 			var typeService = context.Registry.GetService<TypeService>();
 			Debug.Assert(typeService != null, $"{nameof(typeService)} != null");
 
-			foreach (var target in parameters.Targets.WithProgress(context.Logger)) {
+			foreach (var target in parameters.Targets.WithProgress(context.ProgressReporter)) {
 				switch (target) {
 					case TypeDef typeDef:
 						typeService.AddScannedItem(new ScannedType(typeDef));

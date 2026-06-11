@@ -39,7 +39,7 @@ namespace Confuser.Renamer {
 			foreach (ModuleDef moduleDef in parameters.Targets.OfType<ModuleDef>())
 				moduleDef.EnableTypeDefFindCache = true;
 
-			foreach (IDnlibDef def in parameters.Targets.WithProgress(context.Logger)) {
+			foreach (IDnlibDef def in parameters.Targets.WithProgress(context.ProgressReporter)) {
 				ParseParameters(def, context, service, parameters);
 
 				if (def is ModuleDef module) {
@@ -59,7 +59,7 @@ namespace Confuser.Renamer {
 			context.Logger.Debug("Analyzing...");
 			RegisterRenamers(context, service);
 			IList<IRenamer> renamers = service.Renamers;
-			foreach (IDnlibDef def in parameters.Targets.WithProgress(context.Logger)) {
+			foreach (IDnlibDef def in parameters.Targets.WithProgress(context.ProgressReporter)) {
 				Analyze(service, context, parameters, def, true);
 				context.CheckCancellation();
 			}

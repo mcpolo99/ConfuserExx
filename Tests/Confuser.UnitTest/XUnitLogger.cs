@@ -3,7 +3,7 @@ using Confuser.Core;
 using Xunit.Abstractions;
 
 namespace Confuser.UnitTest {
-	public sealed class XunitLogger : ILogger {
+	public sealed class XunitLogger : ILogger, IProgressReporter {
 		private readonly ITestOutputHelper _outputHelper;
 		private readonly Action<string> _outputAction;
 
@@ -20,7 +20,7 @@ namespace Confuser.UnitTest {
 		void ILogger.DebugFormat(string format, params object[] args) =>
 			ProcessOutput("[DEBUG] " + format, args);
 
-		void ILogger.EndProgress() { }
+		void IProgressReporter.EndProgress() { }
 
 		void ILogger.Error(string msg) =>
 			throw new Exception(msg);
@@ -31,7 +31,7 @@ namespace Confuser.UnitTest {
 		void ILogger.ErrorFormat(string format, params object[] args) =>
 			throw new Exception(string.Format(format, args));
 
-		void ILogger.Finish(bool successful) =>
+		void IProgressReporter.Finish(bool successful) =>
 			ProcessOutput("[DONE]");
 
 		void ILogger.Info(string msg) =>
@@ -40,7 +40,7 @@ namespace Confuser.UnitTest {
 		void ILogger.InfoFormat(string format, params object[] args) =>
 			ProcessOutput("[INFO] " + format, args);
 
-		void ILogger.Progress(int progress, int overall) { }
+		void IProgressReporter.Progress(int progress, int overall) { }
 
 		void ILogger.Warn(string msg) =>
 			ProcessOutput("[WARN] " + msg);

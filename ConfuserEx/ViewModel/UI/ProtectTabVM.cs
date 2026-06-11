@@ -10,7 +10,7 @@ using Confuser.Core;
 using Confuser.Core.Project;
 
 namespace ConfuserEx.ViewModel {
-	internal class ProtectTabVM : TabViewModel, ILogger {
+	internal class ProtectTabVM : TabViewModel, ILogger, IProgressReporter {
 		readonly Paragraph documentContent;
 		CancellationTokenSource cancelSrc;
 		double? progress = 0;
@@ -49,6 +49,7 @@ namespace ConfuserEx.ViewModel {
 			if (File.Exists(App.FileName))
 				Environment.CurrentDirectory = Path.GetDirectoryName(App.FileName);
 			parameters.Logger = this;
+			parameters.ProgressReporter = this;
 
 			documentContent.Inlines.Clear();
 			cancelSrc = new CancellationTokenSource();
@@ -123,15 +124,15 @@ namespace ConfuserEx.ViewModel {
 			AppendLine("Exception: {0}", Brushes.Red, ex);
 		}
 
-		void ILogger.Progress(int progress, int overall) {
+		void IProgressReporter.Progress(int progress, int overall) {
 			Progress = (double)progress / overall;
 		}
 
-		void ILogger.EndProgress() {
+		void IProgressReporter.EndProgress() {
 			Progress = null;
 		}
 
-		void ILogger.Finish(bool successful) {
+		void IProgressReporter.Finish(bool successful) {
 			DateTime now = DateTime.Now;
 			string timeString = string.Format(
 				"at {0}, {1}:{2:d2} elapsed.",

@@ -21,6 +21,12 @@ namespace Confuser.Core {
 		public ILogger Logger { get; internal set; }
 
 		/// <summary>
+		///     Gets the progress reporter used for reporting protection progress.
+		/// </summary>
+		/// <value>The progress reporter.</value>
+		public IProgressReporter ProgressReporter { get; internal set; }
+
+		/// <summary>
 		///     Gets the project being processed.
 		/// </summary>
 		/// <value>The project.</value>

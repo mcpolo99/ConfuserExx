@@ -24,17 +24,18 @@ namespace Confuser.MSBuild.Tasks {
 			project.Load(xmlDoc);
 			project.OutputDirectory = Path.GetDirectoryName(Path.GetFullPath(OutputAssembly.ItemSpec));
 
-			var logger = new MSBuildLogger(Log);
+			var progressReporter = new MSBuildProgressReporter();
 			var parameters = new ConfuserParameters {
 				Project = project,
-				Logger = logger
+				Logger = new MSBuildLogger(Log),
+				ProgressReporter = progressReporter
 			};
 
 			ConfuserEngine.Run(parameters).Wait();
 
 			ConfusedFiles = project.Select(m => new TaskItem(Path.Combine(project.OutputDirectory, m.Path))).Cast<ITaskItem>().ToArray();
 
-			return !logger.HasError;
+			return !progressReporter.HasError;
 		}
 	}
 }

@@ -68,8 +68,8 @@ namespace Confuser.Protections.Resources {
 				// compress
 				moduleBuff = ctx.Context.Registry.GetService<ICompressionService>().Compress(
 					moduleBuff,
-					progress => ctx.Context.Logger.Progress((int)(progress * 10000), 10000));
-				ctx.Context.Logger.EndProgress();
+					progress => ctx.Context.ProgressReporter.Progress((int)(progress * 10000), 10000));
+				ctx.Context.ProgressReporter.EndProgress();
 				ctx.Context.CheckCancellation();
 
 				uint compressedLen = (uint)(moduleBuff.Length + 3) / 4;
