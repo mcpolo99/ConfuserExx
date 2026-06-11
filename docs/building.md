@@ -73,7 +73,6 @@ additional/             Example .crproj files
 | `codeql-analysis.yml` | Weekly + manual | Security analysis |
 
 Releases are created automatically by `ci.yml`:
-- Push to `pre-release` branch creates (or updates) a pre-release on GitHub
-- Push to `master` branch creates a stable versioned release with a git tag
+- Push to `main` branch creates a stable versioned release with a git tag
 
 Versioning is handled by [Nerdbank.GitVersioning](https://github.com/dotnet/Nerdbank.GitVersioning) from `version.json`.
