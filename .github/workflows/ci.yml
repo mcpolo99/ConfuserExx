@@ -3,8 +3,14 @@ name: ci
 on:
   push:
     branches: [master, pre-release, feature/**, fix/**]
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE*']
   pull_request:
     branches: [master, pre-release]
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE*']
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -73,7 +79,7 @@ jobs:
           Remove-Item $tmp -Recurse -Force
           Write-Host "Created $zip ($([math]::Round((Get-Item $zip).Length / 1MB, 1)) MB)"
 
-      - name: Upload artifacts
+      - name: Upload packages
         uses: actions/upload-artifact@v5
         with:
           name: confuserex-packages
@@ -82,6 +88,13 @@ jobs:
             ConfuserEx-GUI.zip
             ConfuserEx.zip
             Confuser.MSBuild.Tasks/bin/Release/*.nupkg
+
+      - name: Upload build output (for test workflow)
+        uses: actions/upload-artifact@v5
+        with:
+          name: build-output
+          path: '**/bin/Release/'
+          retention-days: 1
 
   # Pre-release: on push to pre-release branch
   pre-release:
