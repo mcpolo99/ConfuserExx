@@ -3,6 +3,7 @@ name: format
 on:
   pull_request:
     branches: [master, pre-release]
+    paths: ['**.cs', '**.vb', '.editorconfig']
 
 jobs:
   check-format:
