@@ -58,7 +58,10 @@ namespace ConfuserEx.ViewModel {
 				.WriteTo.Sink(new FlowDocumentSink(documentContent))
 				.CreateLogger();
 
-			using var loggerFactory = LoggerFactory.Create(builder =>
+			// The logger factory must outlive the async protection run — ConfuserEngine.Run
+			// executes on a background thread, so we dispose it in the continuation below
+			// rather than with a method-scoped 'using' (which would dispose it too early).
+			var loggerFactory = LoggerFactory.Create(builder =>
 				builder.AddSerilog(serilogLogger, dispose: true));
 			var melLogger = loggerFactory.CreateLogger("ConfuserEx");
 
@@ -72,12 +75,14 @@ namespace ConfuserEx.ViewModel {
 			App.NavigationDisabled = true;
 
 			ConfuserEngine.Run(parameters, cancelSrc.Token)
-						  .ContinueWith(_ =>
-										Application.Current.Dispatcher.BeginInvoke(new Action(() => {
-											Progress = 0;
-											App.NavigationDisabled = false;
-											CommandManager.InvalidateRequerySuggested();
-										})));
+						  .ContinueWith(_ => {
+							  loggerFactory.Dispose();
+							  Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+								  Progress = 0;
+								  App.NavigationDisabled = false;
+								  CommandManager.InvalidateRequerySuggested();
+							  }));
+						  });
 		}
 
 		void DoCancel() {
