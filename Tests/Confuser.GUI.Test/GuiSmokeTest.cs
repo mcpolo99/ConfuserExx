@@ -150,15 +150,28 @@ namespace Confuser.GUI.Test {
 				LaunchGui($"\"{crprojPath}\"");
 				var mainWindow = WaitForMainWindow(app);
 
-				// Navigate to the Protect! tab
+				// Navigate to the Protect! tab. Match by TabItem control type + name —
+				// NOT ByText, which ambiguously matches both the tab header and the
+				// Protect! button (they share the caption "Protect!").
 				var protectTab = Retry.WhileNull(
-					() => mainWindow.FindFirstDescendant(cf => cf.ByText("Protect!")),
-					TimeSpan.FromSeconds(5),
-					TimeSpan.FromMilliseconds(500)).Result;
+					() => mainWindow.FindFirstDescendant(cf =>
+						cf.ByControlType(FlaUI.Core.Definitions.ControlType.TabItem)
+						  .And(cf.ByName("Protect!"))),
+					TimeSpan.FromSeconds(10),
+					TimeSpan.FromMilliseconds(300)).Result;
 				Assert.NotNull(protectTab);
-				protectTab.Click();
 
-				// Find and click the Protect! button
+				// Select the tab and wait until it is actually selected. WPF virtualizes
+				// inactive tab content, so the Protect! button does not enter the UIA tree
+				// until the tab is selected and its content has rendered.
+				var tabItem = protectTab.AsTabItem();
+				tabItem.Select();
+				Retry.WhileFalse(
+					() => tabItem.IsSelected,
+					TimeSpan.FromSeconds(5),
+					TimeSpan.FromMilliseconds(200));
+
+				// Find and click the Protect! button (only present once the tab is rendered).
 				var protectButton = Retry.WhileNull(
 					() => {
 						var buttons = mainWindow.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button));
@@ -167,8 +180,8 @@ namespace Confuser.GUI.Test {
 						}
 						return null;
 					},
-					TimeSpan.FromSeconds(5),
-					TimeSpan.FromMilliseconds(500)).Result;
+					TimeSpan.FromSeconds(15),
+					TimeSpan.FromMilliseconds(300)).Result;
 
 				Assert.NotNull(protectButton);
 				output.WriteLine("Clicking Protect! button...");
