@@ -40,4 +40,12 @@ namespace CrossFramework.Library {
 			return new string(chars);
 		}
 	}
+
+	// Carries a C# 13+ 'allows ref struct' generic constraint, which the compiler emits as
+	// the GenericParamAttributes.AllowByRefLike flag. Used to verify obfuscation preserves it.
+	public static class RefStructConsumer {
+		public static void Consume<T>(T value) where T : allows ref struct {
+			// Intentionally empty — the 'allows ref struct' constraint is what this exercises.
+		}
+	}
 }

@@ -166,7 +166,9 @@ namespace Confuser.Core {
 		/// <param name="fullName">The full name of the type of custom attribute.</param>
 		/// <returns><c>true</c> if the specified object has custom attribute; otherwise, <c>false</c>.</returns>
 		public static bool HasAttribute(this IHasCustomAttribute obj, string fullName) {
-			return obj.CustomAttributes.Any(attr => attr.TypeFullName == fullName);
+			// dnlib's CustomAttributeCollection.IsDefined is the by-full-name lookup that dnlib
+			// 4.2 optimized — prefer it over a manual LINQ scan.
+			return obj.CustomAttributes.IsDefined(fullName);
 		}
 
 		/// <summary>
