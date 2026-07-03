@@ -183,10 +183,22 @@ do_test() {
   local total_skipped=0
   local any_failed=false
 
+  # Confuser.GUI.Test is a FlaUI smoke test — it launches the real ConfuserEx WPF window
+  # and drives it, so it pops UI on screen and takes ~35s. Skip it by default for quiet local
+  # runs; set RUN_GUI_TESTS=1 to include it. It always runs in CI (headless Windows runner).
+  if [ "${RUN_GUI_TESTS:-0}" != "1" ]; then
+    warn "Skipping Confuser.GUI.Test (UI-interactive). Set RUN_GUI_TESTS=1 to include it."
+  fi
+
   # Find all *.Test.csproj (same as CI: Get-ChildItem -Filter '*.Test.csproj' -Recurse)
   while IFS= read -r proj; do
     local name
     name=$(basename "$proj" .csproj)
+
+    if [ "$name" = "Confuser.GUI.Test" ] && [ "${RUN_GUI_TESTS:-0}" != "1" ]; then
+      continue
+    fi
+
     echo -e "\n  ${CYAN}Testing $name...${NC}"
 
     # NOTE: do NOT pass --collect:"XPlat Code Coverage" here. Coverage is driven by each
