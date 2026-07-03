@@ -61,8 +61,12 @@ jobs:
             $name = $proj.BaseName
             Write-Host "`nTesting $name..." -ForegroundColor Cyan
 
+            # Do NOT pass --collect:"XPlat Code Coverage" here. Coverage is driven by each
+            # project's RunSettingsFilePath (Tests/Directory.Build.targets), which enables it
+            # only for .NET (Core) test projects. A command-line --collect overrides that gate
+            # and forces Coverlet to instrument the signed Confuser.* assemblies on net4x,
+            # breaking their strong name so .NET Framework refuses to load them.
             dotnet test $proj.FullName -c Release --no-build --verbosity minimal `
-              --collect:"XPlat Code Coverage" `
               --logger "trx;LogFileName=$name.trx" `
               --results-directory "$resultsDir/$name"
 

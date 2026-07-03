@@ -189,9 +189,13 @@ do_test() {
     name=$(basename "$proj" .csproj)
     echo -e "\n  ${CYAN}Testing $name...${NC}"
 
+    # NOTE: do NOT pass --collect:"XPlat Code Coverage" here. Coverage is driven by each
+    # project's RunSettingsFilePath (set in Tests/Directory.Build.targets) which enables it
+    # only for .NET (Core) test projects. A command-line --collect overrides that gate and
+    # forces Coverlet to instrument the signed Confuser.* assemblies on net4x, breaking their
+    # strong name so .NET Framework refuses to load them and every net4x test fails.
     local output
     output=$(dotnet test "$proj" -c "$CONFIGURATION" --no-build --verbosity minimal \
-      --collect:"XPlat Code Coverage" \
       --logger "trx;LogFileName=$name.trx" \
       --results-directory "$RESULTS_DIR/$name" 2>&1) || true
 
