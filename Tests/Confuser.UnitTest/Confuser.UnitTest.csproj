@@ -6,10 +6,11 @@
     <TargetFrameworks>net462;net10.0</TargetFrameworks>
   </PropertyGroup>
 
+  <!-- Shared test-support library (TestBase, XunitLogger) — NOT a runnable test
+       project. Needs xunit for ITestOutputHelper/Assert, but not the test host
+       or runner (it contains no [Fact] tests). -->
   <ItemGroup Label="Nuget Dependencies">
     <PackageReference Include="xunit" Version="2.9.*" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.*" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.*" />
   </ItemGroup>
 
   <ItemGroup Label="Project Dependencies">

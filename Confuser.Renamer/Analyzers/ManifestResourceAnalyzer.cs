@@ -28,8 +28,11 @@ namespace Confuser.Renamer.Analyzers {
 					!UTF8String.Equals(targetMethodDefOrRef.Name, "GetManifestResourceStream") ||
 					!UTF8String.Equals(targetMethodDefOrRef.DeclaringType.FullName, "System.Reflection.Assembly")) continue;
 
-				var targetMethodDef = targetMethodDefOrRef.ResolveMethodDefThrow();
-				if (targetMethodDef.Parameters.Count != 3) continue;
+				// The two-argument overload GetManifestResourceStream(Type, String) has two
+				// signature parameters (the instance 'this' is separate). Check the signature
+				// directly so we don't depend on resolving the BCL method.
+				var targetSig = targetMethodDefOrRef.MethodSig;
+				if (targetSig == null || targetSig.Params.Count != 2) continue;
 
 				var argumentIdx = methodTrace.Value.TraceArguments(instruction);
 				if (argumentIdx.Length != 3) continue;
@@ -53,11 +56,23 @@ namespace Confuser.Renamer.Analyzers {
 
 				var resourceName = refTypeDefOrRef.Namespace + '.' + resName;
 
-				var getManifestMethodDef = targetMethodDefOrRef.ResolveMethodDefThrow();
-				var assemblyTypeDef = getManifestMethodDef.DeclaringType;
-				var expectedSig = MethodSig.CreateInstance(getManifestMethodDef.MethodSig.RetType, getManifestMethodDef.MethodSig.Params.Last());
-				var newMethodDef = assemblyTypeDef.FindMethod("GetManifestResourceStream", expectedSig);
-				var newMethodRef = currentModule.Import(newMethodDef);
+				// Build the reference to the single-argument overload:
+				// Stream System.Reflection.Assembly::GetManifestResourceStream(String).
+				// Prefer resolving the real overload (matches production exactly); if the BCL
+				// declaring type can't be resolved — e.g. in a minimal analysis context where the
+				// runtime assemblies aren't on the resolver's search path — construct the member
+				// reference directly from the original call's signature.
+				var expectedSig = MethodSig.CreateInstance(targetSig.RetType, targetSig.Params[1]);
+				var assemblyTypeDef = targetMethodDefOrRef.ResolveMethodDef()?.DeclaringType;
+				IMethod newMethodRef;
+				if (assemblyTypeDef != null) {
+					var newMethodDef = assemblyTypeDef.FindMethod("GetManifestResourceStream", expectedSig);
+					newMethodRef = currentModule.Import(newMethodDef);
+				}
+				else {
+					newMethodRef = currentModule.Import(
+						new MemberRefUser(currentModule, "GetManifestResourceStream", expectedSig, targetMethodDefOrRef.DeclaringType));
+				}
 
 				resNameInstruction.Operand = resourceName;
 				instruction.Operand = newMethodRef;

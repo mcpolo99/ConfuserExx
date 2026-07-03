@@ -69,8 +69,12 @@ namespace Confuser.Renamer.Analyzers {
 				foreach (CANamedArgument arg in attr.Properties)
 					AnalyzeCAArgument(modules, service, arg.Argument);
 
-				TypeDef attrType = attr.AttributeType.ResolveTypeDefThrow();
-				if (!modules.Contains((ModuleDefMD)attrType.Module))
+				// External attribute types (e.g. compiler-emitted BCL attributes like
+				// RefSafetyRulesAttribute) may not be resolvable, and are never renamed anyway
+				// since they aren't defined in the modules being obfuscated. Skip rather than
+				// throw so obfuscation doesn't fail on an unresolvable external attribute type.
+				TypeDef attrType = attr.AttributeType.ResolveTypeDef();
+				if (attrType == null || !modules.Contains((ModuleDefMD)attrType.Module))
 					continue;
 
 				foreach (var arg in attr.NamedArguments) {
@@ -131,8 +135,9 @@ namespace Confuser.Renamer.Analyzers {
 			if (arg.Type.DefinitionAssembly.IsCorLib() && arg.Type.FullName == "System.Type") {
 				var typeSig = (TypeSig)arg.Value;
 				foreach (ITypeDefOrRef typeRef in typeSig.FindTypeRefs()) {
-					TypeDef typeDef = typeRef.ResolveTypeDefThrow();
-					if (modules.Contains((ModuleDefMD)typeDef.Module)) {
+					// Skip external/unresolvable types — only types in the obfuscated modules are renamed.
+					TypeDef typeDef = typeRef.ResolveTypeDef();
+					if (typeDef != null && modules.Contains((ModuleDefMD)typeDef.Module)) {
 						if (typeRef is TypeRef)
 							service.AddReference(typeDef, new TypeRefReference((TypeRef)typeRef, typeDef));
 						service.ReduceRenameMode(typeDef, RenameMode.Reflection);
@@ -160,8 +165,9 @@ namespace Confuser.Renamer.Analyzers {
 			if (sig is GenericInstSig) {
 				var inst = (GenericInstSig)sig;
 				Debug.Assert(!(inst.GenericType.TypeDefOrRef is TypeSpec));
-				TypeDef openType = inst.GenericType.TypeDefOrRef.ResolveTypeDefThrow();
-				if (!modules.Contains((ModuleDefMD)openType.Module) ||
+				// Skip external/unresolvable generic types — only in-module members are tracked.
+				TypeDef openType = inst.GenericType.TypeDefOrRef.ResolveTypeDef();
+				if (openType == null || !modules.Contains((ModuleDefMD)openType.Module) ||
 					memberRef.IsArrayAccessors())
 					return;
 

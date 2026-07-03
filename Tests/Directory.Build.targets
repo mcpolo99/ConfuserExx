@@ -1,0 +1,22 @@
+<Project>
+
+  <!-- Enable Coverlet coverage collection ONLY for .NET (Core) test projects.
+
+       Coverlet's data collector instruments the signed Confuser.* assemblies in-place
+       to record hits. That rewrite invalidates their strong-name signature. .NET
+       Framework (net4x) enforces strong-name verification and refuses to load the
+       tampered assemblies (FileLoadException: "Strong name signature could not be
+       verified"), which fails every net4x test. .NET Core does not verify strong names,
+       so instrumentation is safe there.
+
+       net4x test projects therefore run WITHOUT coverage — they still execute and
+       validate behavior. Coverage is aggregated from the .NET (Core) test projects,
+       which exercise the same Confuser.* code paths.
+
+       This lives in Directory.Build.targets (not .props) because $(TargetFramework) is
+       not yet defined when Directory.Build.props is imported. -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Test')) and !$(TargetFramework.StartsWith('net4'))">
+    <RunSettingsFilePath>$(MSBuildThisFileDirectory)coverlet.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
+
+</Project>

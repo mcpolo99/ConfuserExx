@@ -3,18 +3,38 @@
   <!-- Inherit parent props (ConfuserEx.Common.props via solution root) -->
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" Condition="Exists('$([MSBuild]::GetPathOfFileAbove(`Directory.Build.props`, `$(MSBuildThisFileDirectory)..\`))')" />
 
-  <!-- Add coverlet to all test projects for code coverage collection -->
+  <!-- Test host + xunit runner + coverage for every *.Test project.
+       Without Microsoft.NET.Test.Sdk and xunit.runner.visualstudio, `dotnet test`
+       discovers zero tests and exits 0 — silently skipping the project (see #84).
+       These do not flow transitively (PrivateAssets), so each test project needs
+       them directly. Declaring them here keeps every *.Test project runnable. -->
   <ItemGroup Condition="$(MSBuildProjectName.EndsWith('.Test'))">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.*" />
+    <PackageReference Include="xunit" Version="2.9.*" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="coverlet.collector" Version="6.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
-  <!-- Use shared runsettings to exclude test subjects from Coverlet instrumentation.
-       Test subjects get obfuscated at test time — Coverlet's RecordHit breaks after renaming. -->
-  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Test'))">
-    <RunSettingsFilePath>$(MSBuildThisFileDirectory)coverlet.runsettings</RunSettingsFilePath>
-  </PropertyGroup>
+  <!-- Coverage collection is configured in Directory.Build.targets, which is imported
+       after the project's TargetFramework is known (props is too early to branch on it).
+       Coverlet must be disabled for .NET Framework test projects — see the targets file. -->
+
+  <!-- Copy the injected runtime (net20) next to every test binary. The protection
+       pipeline loads Confuser.Runtime.dll at obfuscation time, so tests that run a
+       real protection need it in their output directory. Path is rooted at the Tests
+       folder so it resolves regardless of the individual project's depth. -->
+  <Target Name="CopyConfuserRuntime" AfterTargets="Build"
+          Condition="$(MSBuildProjectName.EndsWith('.Test'))">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)..\Confuser.Runtime\bin\$(Configuration)\net20\Confuser.Runtime.dll"
+          DestinationFolder="$(OutputPath)"
+          SkipUnchangedFiles="true"
+          Condition="Exists('$(MSBuildThisFileDirectory)..\Confuser.Runtime\bin\$(Configuration)\net20\Confuser.Runtime.dll')" />
+  </Target>
 
 </Project>

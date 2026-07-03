@@ -6,12 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="xunit" Version="2.9.*" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.*" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.*" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Confuser.UnitTest\Confuser.UnitTest.csproj" />
     <!-- Console subjects -->
     <ProjectReference Include="..\CrossFramework.Console.Net20\CrossFramework.Console.Net20.csproj" />
@@ -42,13 +36,5 @@
     <ProjectReference Include="..\CrossFramework.Library.Net8\CrossFramework.Library.Net8.csproj" />
     <ProjectReference Include="..\CrossFramework.Library.Net10\CrossFramework.Library.Net10.csproj" />
   </ItemGroup>
-
-  <!-- Copy Confuser.Runtime.dll next to test output (needed by protection pipeline) -->
-  <Target Name="CopyRuntime" AfterTargets="Build">
-    <Copy SourceFiles="..\..\Confuser.Runtime\bin\$(Configuration)\net20\Confuser.Runtime.dll"
-          DestinationFolder="$(OutputPath)"
-          SkipUnchangedFiles="true"
-          Condition="Exists('..\..\Confuser.Runtime\bin\$(Configuration)\net20\Confuser.Runtime.dll')" />
-  </Target>
 
 </Project>
