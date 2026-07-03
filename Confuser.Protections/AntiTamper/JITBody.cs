@@ -47,6 +47,12 @@ namespace Confuser.Protections.AntiTamper {
 			return GetFileLength();
 		}
 
+		// dnlib 4.x added IChunk.CalculateAlignment. Return 0 for default/no alignment,
+		// matching the implicit behaviour before the method existed in 3.x.
+		public uint CalculateAlignment() {
+			return 0;
+		}
+
 		public void WriteTo(DataWriter writer) {
 			writer.WriteUInt32((uint)(Body.Length >> 2));
 			writer.WriteBytes(Body);
@@ -222,6 +228,12 @@ namespace Confuser.Protections.AntiTamper {
 
 		public uint GetVirtualSize() {
 			return GetFileLength();
+		}
+
+		// dnlib 4.x added IChunk.CalculateAlignment. Return 0 for default/no alignment,
+		// matching the implicit behaviour before the method existed in 3.x.
+		public uint CalculateAlignment() {
+			return 0;
 		}
 
 		public void WriteTo(DataWriter writer) {
