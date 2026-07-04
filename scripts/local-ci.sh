@@ -247,18 +247,41 @@ do_test() {
   echo -e "  ${BOLD}Total: Passed=$total_passed  Failed=$total_failed  Skipped=$total_skipped${NC}"
   echo "  ─────────────────────────────────────"
 
-  # Generate coverage report if reportgenerator is available
+  # Generate coverage report. reportgenerator is required for the coverage summary;
+  # install it on demand (mirroring the CI workflow) so local runs always produce a
+  # report — including the same markdown summary CI posts to the PR.
   local reports
   reports=$(find "$RESULTS_DIR" -name "coverage.cobertura.xml" 2>/dev/null | tr '\n' ';')
-  if [ -n "$reports" ] && command -v reportgenerator &>/dev/null; then
-    step "COVERAGE — generating report"
-    mkdir -p "$COVERAGE_DIR/report"
-    reportgenerator "-reports:$reports" \
-      "-targetdir:$COVERAGE_DIR/report" \
-      "-reporttypes:TextSummary" 2>/dev/null
-    cat "$COVERAGE_DIR/report/Summary.txt" 2>/dev/null || true
-  elif [ -n "$reports" ]; then
-    warn "Install reportgenerator for coverage reports: dotnet tool install -g dotnet-reportgenerator-globaltool"
+  if [ -n "$reports" ]; then
+    if ! command -v reportgenerator &>/dev/null; then
+      step "COVERAGE — installing reportgenerator (dotnet global tool)"
+      dotnet tool install -g dotnet-reportgenerator-globaltool 2>/dev/null \
+        || dotnet tool update -g dotnet-reportgenerator-globaltool 2>/dev/null || true
+      # Ensure the dotnet global-tools directory is on PATH for this session.
+      export PATH="$PATH:$HOME/.dotnet/tools"
+      if command -v cygpath &>/dev/null && [ -n "${USERPROFILE:-}" ]; then
+        export PATH="$PATH:$(cygpath -u "$USERPROFILE")/.dotnet/tools"
+      fi
+    fi
+
+    if command -v reportgenerator &>/dev/null; then
+      step "COVERAGE — generating report"
+      mkdir -p "$COVERAGE_DIR/report"
+      # Same report types as .github/workflows/test.yml so local output matches CI:
+      # HTML (openable offline), Cobertura, a text summary, and the GitHub markdown
+      # summary that CI posts as the sticky PR comment.
+      reportgenerator "-reports:$reports" \
+        "-targetdir:$COVERAGE_DIR/report" \
+        "-reporttypes:HtmlInline;Cobertura;TextSummary;MarkdownSummaryGithub" 2>/dev/null
+      cat "$COVERAGE_DIR/report/Summary.txt" 2>/dev/null || true
+      [ -f "$COVERAGE_DIR/report/SummaryGithub.md" ] \
+        && success "Markdown summary: $COVERAGE_DIR/report/SummaryGithub.md"
+      [ -f "$COVERAGE_DIR/report/index.html" ] \
+        && success "HTML report:      $COVERAGE_DIR/report/index.html"
+    else
+      warn "reportgenerator unavailable even after install attempt; skipping coverage report."
+      warn "Install manually: dotnet tool install -g dotnet-reportgenerator-globaltool"
+    fi
   fi
 
   if [ "$any_failed" = true ]; then
