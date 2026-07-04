@@ -65,15 +65,22 @@ additional/             Example .crproj files
 
 ## CI/CD
 
+GitHub Actions minutes are limited, so the cloud pipeline runs the full build only
+where it's actually required: the `develop → main` release path. Day-to-day
+validation on `develop` is done locally with [`scripts/local-ci.sh`](../scripts/local-ci.sh),
+which mirrors the same build, test and coverage steps offline.
+
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| `ci.yml` | Push to `master`, `pre-release`, `feature/**`, `fix/**` + PRs to `master`/`pre-release` | Build, package, create releases |
-| `test.yml` | Push to `master`, `pre-release`, `feature/**`, `fix/**` + PRs to `master`/`pre-release` | Build, test, coverage report |
-| `format.yml` | Every push | Code style and Roslyn analyzer checks |
+| `ci.yml` | PR into `main` + push to `main` (release). Manual: `run-ci` label on a `develop` PR, or `workflow_dispatch` | Build, package, create releases |
+| `test.yml` | PR into `main`. Manual: `run-ci` label on a `develop` PR, or `workflow_dispatch` | Build, test, coverage report |
+| `lint.yml` | PR into `main`. Manual: `run-ci` label on a `develop` PR, or `workflow_dispatch` | Whitespace, style, Roslyn analyzers |
 | `codeql-analysis.yml` | Weekly + manual | Security analysis |
 
-Releases are created automatically by `ci.yml`:
-- Push to `pre-release` branch creates (or updates) a pre-release on GitHub
-- Push to `master` branch creates a stable versioned release with a git tag
+**PRs into `develop` do not run the cloud pipeline automatically** — validate them
+with `scripts/local-ci.sh`. To run a workflow on a specific `develop` PR anyway, an
+admin adds the `run-ci` label (re-add it to trigger each subsequent run) or
+dispatches the workflow manually from the Actions tab.
 
-Versioning is handled by [Nerdbank.GitVersioning](https://github.com/dotnet/Nerdbank.GitVersioning) from `version.json`.
+Releases are created by `ci.yml` when `develop` is merged into `main`. Versioning is
+handled by [Nerdbank.GitVersioning](https://github.com/dotnet/Nerdbank.GitVersioning) from `version.json`.

@@ -1,9 +1,16 @@
 name: test
 
+# GitHub Actions minutes are limited. This full build+test+coverage run happens
+# automatically only for PRs into `main` (the release gate). For PRs into
+# `develop`, run tests locally with scripts/local-ci.sh; a run here happens only
+# when an admin adds the `run-ci` label (re-add to trigger each run) or dispatches
+# the workflow manually. See the `if:` on the test job below.
 on:
   pull_request:
     branches: [main, develop]
+    types: [opened, synchronize, reopened, labeled]
     paths-ignore: ['**.md', 'docs/**', 'LICENSE*']
+  workflow_dispatch:
 
 concurrency:
   group: test-${{ github.ref }}
@@ -11,6 +18,12 @@ concurrency:
 
 jobs:
   test:
+    # Auto for PRs into main and manual dispatch; for develop PRs only when an
+    # admin adds the `run-ci` label.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.base_ref == 'main' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'run-ci')
     runs-on: windows-2025
     timeout-minutes: 15
     permissions:

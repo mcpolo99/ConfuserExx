@@ -1,11 +1,17 @@
 name: lint
 
+# GitHub Actions minutes are limited. Linting is done locally with
+# scripts/local-ci.sh (dotnet format whitespace/style/analyzers). This workflow
+# runs automatically only for PRs into `main`; for PRs into `develop` it runs only
+# when an admin adds the `run-ci` label (re-add to trigger each run) or dispatches
+# it manually. The previous any-branch `push` trigger was removed to stop a lint
+# run firing on every push. See the `if:` on the lint job below.
 on:
-  push:
-    paths-ignore: ['**.md', 'docs/**', 'LICENSE*']
   pull_request:
     branches: [main, develop]
+    types: [opened, synchronize, reopened, labeled]
     paths-ignore: ['**.md', 'docs/**', 'LICENSE*']
+  workflow_dispatch:
 
 concurrency:
   group: lint-${{ github.ref }}
@@ -13,6 +19,12 @@ concurrency:
 
 jobs:
   lint:
+    # Auto for PRs into main and manual dispatch; for develop PRs only when an
+    # admin adds the `run-ci` label.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.base_ref == 'main' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'run-ci')
     runs-on: windows-2025
     timeout-minutes: 5
     permissions:

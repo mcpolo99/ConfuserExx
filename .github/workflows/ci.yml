@@ -1,12 +1,20 @@
 name: ci
 
+# GitHub Actions minutes are limited, so this build runs automatically only where
+# it matters: a PR into `main` (the develop -> main release gate) and pushes to
+# `main` (the release itself). For PRs into `develop`, day-to-day validation is
+# done with scripts/local-ci.sh; a run here happens only when an admin adds the
+# `run-ci` label (re-add it to trigger each run) or dispatches the workflow
+# manually. See the `if:` on the build job below.
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
     paths-ignore: ['**.md', 'docs/**', 'LICENSE*']
   pull_request:
     branches: [main, develop]
+    types: [opened, synchronize, reopened, labeled]
     paths-ignore: ['**.md', 'docs/**', 'LICENSE*']
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -14,6 +22,13 @@ concurrency:
 
 jobs:
   build:
+    # Auto for main (PRs into it + release pushes) and manual dispatch; for develop
+    # PRs only when an admin adds the `run-ci` label.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
+      github.base_ref == 'main' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'run-ci')
     runs-on: windows-2025
     timeout-minutes: 10
     env:
