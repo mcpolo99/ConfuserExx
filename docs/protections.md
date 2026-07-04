@@ -277,6 +277,31 @@ Compresses the entire output assembly and wraps it in a native stub that decompr
 </packer>
 ```
 
+---
+
+### Watermark
+
+**ID:** `watermark`
+
+Adds a small custom attribute to the assembly marking that it was protected. It is **opt-in** —
+obfuscated output carries no watermark unless this protection is explicitly enabled, so the
+default output has no identifiable ConfuserEx fingerprint.
+
+**Options:**
+
+| Name | Values | Default | Description |
+|------|--------|---------|-------------|
+| `text` | any string | ConfuserEx version | The value stored in the watermark attribute. |
+| `attributeName` | any identifier | `ConfusedByAttribute` | The name of the injected attribute type. |
+
+```xml
+<!-- Branded watermark -->
+<protection id="watermark">
+  <argument name="text" value="MyCompany Security" />
+  <argument name="attributeName" value="SecurityStampAttribute" />
+</protection>
+```
+
 ## Combining Protections
 
 Protections stack. You can start from a preset and add/remove individual protections:

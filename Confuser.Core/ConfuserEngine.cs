@@ -90,10 +90,9 @@ namespace Confuser.Core {
 
 			bool ok = false;
 			try {
-				// Enable watermarking by default
-				context.Project.Rules.Insert(0, new Rule {
-					new SettingItem<Protection>(WatermarkingProtection._Id)
-				});
+				// Watermarking is opt-in (issue #69): the "watermark" protection is no longer
+				// force-enabled, so obfuscated output carries no ConfuserEx fingerprint attribute
+				// unless a project explicitly requests it via <protection id="watermark" />.
 
 				var asmResolver = new ConfuserAssemblyResolver { EnableTypeDefCache = true };
 				asmResolver.DefaultModuleContext = new ModuleContext(asmResolver);

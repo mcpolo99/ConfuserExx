@@ -48,10 +48,17 @@ namespace Confuser.Core {
 
 				context.Logger.LogDebug("Watermarking...");
 				foreach (var module in parameters.Targets.OfType<ModuleDef>()) {
+					// Both are configurable so users can brand (or disguise) the watermark instead of
+					// carrying the identifiable default ConfuserEx fingerprint.
+					var attributeName = parameters.GetParameter(context, module, "attributeName", "ConfusedByAttribute");
+					if (string.IsNullOrEmpty(attributeName))
+						attributeName = "ConfusedByAttribute";
+					var text = parameters.GetParameter(context, module, "text", ConfuserEngine.Version);
+
 					var attrRef = module.CorLibTypes.GetTypeRef("System", "Attribute");
-					var attrType = module.FindNormal("ConfusedByAttribute");
+					var attrType = module.FindNormal(attributeName);
 					if (attrType == null) {
-						attrType = new TypeDefUser("", "ConfusedByAttribute", attrRef);
+						attrType = new TypeDefUser("", attributeName, attrRef);
 						module.Types.Add(attrType);
 						marker.Mark(attrType, Parent);
 					}
@@ -75,7 +82,7 @@ namespace Confuser.Core {
 					}
 
 					var attr = new CustomAttribute(ctor);
-					attr.ConstructorArguments.Add(new CAArgument(module.CorLibTypes.String, ConfuserEngine.Version));
+					attr.ConstructorArguments.Add(new CAArgument(module.CorLibTypes.String, text));
 
 					module.CustomAttributes.Add(attr);
 				}
