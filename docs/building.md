@@ -88,8 +88,10 @@ dispatches the workflow manually from the Actions tab.
 Releases are **not** cut automatically on push to `main`. `release.yml` handles them:
 
 - **Manual** — Actions tab → **release** → **Run workflow** (on `main`). Builds, tags
-  `v<version>`, and publishes a GitHub Release with the CLI/GUI/combined zips and the
-  MSBuild-tasks nupkg. Use the `force` input to release even with no new commits.
+  `v<version>`, publishes a GitHub Release with the CLI/GUI/combined zips and the
+  MSBuild-tasks nupkg, and pushes the `Confuser.MSBuild` package to
+  [GitHub Packages](https://github.com/mcpolo99/ConfuserExx/packages). Use the `force`
+  input to release even with no new commits.
 - **Monthly** — on the 1st of each month a cheap check compares `main` to the last
   `v*` tag and only runs the (expensive) build+publish when there are new commits.
 
