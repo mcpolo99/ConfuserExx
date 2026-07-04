@@ -15,6 +15,12 @@ namespace Confuser.Runtime {
 			if (here != null && here.ProcessName.IndexOf("dnspy", StringComparison.OrdinalIgnoreCase) >= 0)
 				Environment.FailFast("");
 
+			// Blocking startup check: fail before any user code runs if a debugger is already
+			// attached when the module loads (managed or native), instead of only catching it
+			// later on the async worker thread where the app has already started.
+			if (Debugger.IsAttached || Debugger.IsLogging() || IsDebuggerPresent())
+				Environment.FailFast("");
+
 			var thread = new Thread(Worker);
 			thread.IsBackground = true;
 			thread.Start(null);
@@ -97,7 +103,6 @@ namespace Confuser.Runtime {
 				th = new Thread(Worker);
 				th.IsBackground = true;
 				th.Start(Thread.CurrentThread);
-				Thread.Sleep(500);
 			}
 			while (true) {
 				// Managed
@@ -129,7 +134,7 @@ namespace Confuser.Runtime {
 				if (!th.IsAlive)
 					Environment.FailFast("");
 
-				Thread.Sleep(1000);
+				Thread.Sleep(200);
 			}
 		}
 	}

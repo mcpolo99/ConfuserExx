@@ -72,6 +72,7 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: write
+      packages: write
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
     steps:
@@ -132,6 +133,21 @@ jobs:
           Get-ChildItem $tmp | Compress-Archive -DestinationPath 'ConfuserEx.zip'
           Remove-Item $tmp -Recurse -Force
           Write-Host "Created ConfuserEx.zip"
+
+      - name: Publish NuGet package to GitHub Packages
+        shell: pwsh
+        run: |
+          $nupkg = Get-ChildItem 'Confuser.MSBuild.Tasks/bin/Release' -Filter '*.nupkg' -ErrorAction SilentlyContinue |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $nupkg) {
+            Write-Host "::warning::No .nupkg found under Confuser.MSBuild.Tasks/bin/Release — skipping package publish."
+            exit 0
+          }
+          Write-Host "Publishing $($nupkg.Name) to GitHub Packages..."
+          dotnet nuget push $nupkg.FullName `
+            --source "https://nuget.pkg.github.com/mcpolo99/index.json" `
+            --api-key "${{ secrets.GITHUB_TOKEN }}" `
+            --skip-duplicate
 
       - name: Configure git identity
         run: |
