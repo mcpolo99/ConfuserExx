@@ -11,8 +11,18 @@ namespace ConfuserEx {
 			var alc = new PluginLoadContext(pluginPath);
 			try {
 				Assembly assembly = alc.LoadFromAssemblyPath(pluginPath);
-				foreach (var module in assembly.GetLoadedModules())
-					foreach (var i in module.GetTypes()) {
+				foreach (var module in assembly.GetLoadedModules()) {
+					Type[] moduleTypes;
+					try {
+						moduleTypes = module.GetTypes();
+					}
+					catch (ReflectionTypeLoadException ex) {
+						// A plugin may reference dependencies that are not present; keep the types
+						// that did load instead of crashing component discovery.
+						moduleTypes = Array.FindAll(ex.Types, t => t != null);
+					}
+
+					foreach (var i in moduleTypes) {
 						if (i.IsAbstract || !PluginDiscovery.HasAccessibleDefConstructor(i))
 							continue;
 
@@ -25,6 +35,7 @@ namespace ConfuserEx {
 							AddPacker(packers, Info.FromComponent(packer, pluginPath));
 						}
 					}
+				}
 			}
 			finally {
 				alc.Unload();

@@ -7,5 +7,15 @@
     <PackageReference Include="Roslynator.Analyzers" Version="4.*" PrivateAssets="all"
 					  Condition="'$(EnableNETAnalyzers)' != 'false'" />
   </ItemGroup>
-  
+
+  <!-- Tier 3: ConfuserEx-specific analyzers (issue #49). Referenced as an analyzer, not a
+       runtime dependency. Excludes the analyzer project itself to avoid a self-reference. -->
+  <ItemGroup Condition="'$(EnableNETAnalyzers)' != 'false' and '$(MSBuildProjectName)' != 'Confuser.Analyzers'">
+    <!-- SkipGetTargetFrameworkProperties bypasses TFM-compatibility negotiation so the
+         netstandard2.0 analyzer can be attached to any target (including net20). -->
+    <ProjectReference Include="$(MSBuildThisFileDirectory)Confuser.Analyzers\Confuser.Analyzers.csproj"
+					  OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all"
+					  SkipGetTargetFrameworkProperties="true" UndefineProperties="TargetFramework" />
+  </ItemGroup>
+
 </Project>

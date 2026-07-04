@@ -55,8 +55,18 @@ namespace Confuser.Core {
 		protected static void AddPlugins(
 			ConfuserContext context, IList<Protection> protections, IList<Packer> packers,
 			IList<ConfuserComponent> components, Assembly asm) {
-			foreach (var module in asm.GetLoadedModules())
-				foreach (var i in module.GetTypes()) {
+			foreach (var module in asm.GetLoadedModules()) {
+				Type[] moduleTypes;
+				try {
+					moduleTypes = module.GetTypes();
+				}
+				catch (ReflectionTypeLoadException ex) {
+					// A plugin assembly may reference dependencies that are not present; keep the
+					// types that did load instead of crashing plugin discovery.
+					moduleTypes = Array.FindAll(ex.Types, t => t != null);
+				}
+
+				foreach (var i in moduleTypes) {
 					if (i.IsAbstract || !HasAccessibleDefConstructor(i))
 						continue;
 
@@ -85,6 +95,7 @@ namespace Confuser.Core {
 						}
 					}
 				}
+			}
 			context.CheckCancellation();
 		}
 
