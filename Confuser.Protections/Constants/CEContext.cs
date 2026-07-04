@@ -35,6 +35,7 @@ namespace Confuser.Protections.Constants {
 		public TypeDef CfgCtxType;
 		public MethodDef CfgCtxCtor;
 		public MethodDef CfgCtxNext;
+		public uint CfgCtxMultiplier;
 		public Dictionary<MethodDef, List<Tuple<Instruction, uint, IMethod>>> ReferenceRepl;
 	}
 

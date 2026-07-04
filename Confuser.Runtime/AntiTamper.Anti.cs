@@ -27,6 +27,7 @@ namespace Confuser.Runtime {
 			uint l = 0;
 			var r = (uint*)(p + 0x18 + o);
 			uint z = (uint)Mutation.KeyI1, x = (uint)Mutation.KeyI2, c = (uint)Mutation.KeyI3, v = (uint)Mutation.KeyI4;
+			uint fb = (uint)Mutation.KeyI5;
 
 			CheckRemoteDebuggerPresent(Process.GetCurrentProcess().Handle, ref isDebuggerPresent);
 			if (isDebuggerPresent) Environment.FailFast(null);
@@ -80,7 +81,7 @@ namespace Confuser.Runtime {
 			uint h = 0;
 			for (uint i = 0; i < l; i++) {
 				*e ^= y[h & 0xf];
-				y[h & 0xf] = (y[h & 0xf] ^ (*e++)) + 0x3dbb2819;
+				y[h & 0xf] = (y[h & 0xf] ^ (*e++)) + fb;
 
 				CheckRemoteDebuggerPresent(Process.GetCurrentProcess().Handle, ref isDebuggerPresent);
 				if (isDebuggerPresent) Environment.FailFast(null);

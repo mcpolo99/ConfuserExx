@@ -16,6 +16,7 @@ using MethodBody = dnlib.DotNet.Writer.MethodBody;
 namespace Confuser.Protections.AntiTamper {
 	internal class AntiMode : IModeHandler {
 		uint c;
+		uint feedback;
 		IKeyDeriver deriver;
 
 		List<MethodDef> methods;
@@ -31,6 +32,7 @@ namespace Confuser.Protections.AntiTamper {
 			x = random.NextUInt32();
 			c = random.NextUInt32();
 			v = random.NextUInt32();
+			feedback = random.NextUInt32();
 			name1 = random.NextUInt32() & 0x7f7f7f7f;
 			name2 = random.NextUInt32() & 0x7f7f7f7f;
 
@@ -77,8 +79,8 @@ namespace Confuser.Protections.AntiTamper {
 				initMethod.Body.Instructions.Add(instr);
 
 			MutationHelper.InjectKeys(initMethod,
-									  new[] { 0, 1, 2, 3, 4 },
-									  new[] { (int)(name1 * name2), (int)z, (int)x, (int)c, (int)v });
+									  new[] { 0, 1, 2, 3, 4, 5 },
+									  new[] { (int)(name1 * name2), (int)z, (int)x, (int)c, (int)v, (int)feedback });
 
 			var name = context.Registry.GetService<INameService>();
 			var marker = context.Registry.GetService<IMarkerService>();
@@ -219,7 +221,7 @@ namespace Confuser.Protections.AntiTamper {
 			for (uint i = 0; i < encSize; i++) {
 				uint data = reader.ReadUInt32();
 				result[i] = data ^ key[i & 0xf];
-				key[i & 0xf] = (key[i & 0xf] ^ data) + 0x3dbb2819;
+				key[i & 0xf] = (key[i & 0xf] ^ data) + feedback;
 			}
 			var byteResult = new byte[encSize << 2];
 			Buffer.BlockCopy(result, 0, byteResult, 0, byteResult.Length);

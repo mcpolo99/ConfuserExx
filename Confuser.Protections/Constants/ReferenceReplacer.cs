@@ -51,11 +51,11 @@ namespace Confuser.Protections.Constants {
 			public uint C;
 			public uint D;
 
-			public CFGState(uint seed) {
-				A = seed *= 0x21412321;
-				B = seed *= 0x21412321;
-				C = seed *= 0x21412321;
-				D = seed *= 0x21412321;
+			public CFGState(uint seed, uint mult) {
+				A = seed *= mult;
+				B = seed *= mult;
+				C = seed *= mult;
+				D = seed *= mult;
 			}
 
 			public void UpdateExplicit(int id, uint value) {
@@ -136,6 +136,15 @@ namespace Confuser.Protections.Constants {
 				ctx.CfgCtxCtor = ctx.CfgCtxType.FindMethod(".ctor");
 				ctx.CfgCtxNext = ctx.CfgCtxType.FindMethod("Next");
 
+				// Randomize the CFG state multiplier so the baked-in 0x21412321 literal
+				// no longer fingerprints the output. Must stay odd (invertible mod 2^32) and
+				// match the obfuscator-side CFGState computation (see CFGState.ctor).
+				ctx.CfgCtxMultiplier = ctx.Random.NextUInt32() | 1;
+				foreach (var instr in ctx.CfgCtxCtor.Body.Instructions) {
+					if (instr.OpCode == OpCodes.Ldc_I4 && (int)instr.Operand == 0x21412321)
+						instr.Operand = (int)ctx.CfgCtxMultiplier;
+				}
+
 				ctx.Name.MarkHelper(ctx.CfgCtxType, ctx.Marker, ctx.Protection);
 				foreach (var def in ctx.CfgCtxType.Fields)
 					ctx.Name.MarkHelper(def, ctx.Marker, ctx.Protection);
@@ -212,7 +221,7 @@ namespace Confuser.Protections.Constants {
 				if (!ctx.StatesMap.TryGetValue(key.ExitState, out exit)) {
 					// Create new exit state from random seed
 					var seed = ctx.Random.NextUInt32();
-					exit = new CFGState(seed);
+					exit = new CFGState(seed, ctx.Ctx.CfgCtxMultiplier);
 					body.Instructions.Insert(targetIndex++, first = Instruction.Create(OpCodes.Ldloca, ctx.StateVariable));
 					body.Instructions.Insert(targetIndex++, Instruction.Create(OpCodes.Ldc_I4, (int)seed));
 					body.Instructions.Insert(targetIndex++, Instruction.Create(OpCodes.Call, ctx.Ctx.CfgCtxCtor));
@@ -301,7 +310,7 @@ namespace Confuser.Protections.Constants {
 				if (targetState == null) {
 					// Create new exit state from random seed
 					var seed = ctx.Random.NextUInt32();
-					currentState = new CFGState(seed);
+					currentState = new CFGState(seed, ctx.Ctx.CfgCtxMultiplier);
 					body.Instructions.Insert(index++, Instruction.Create(OpCodes.Ldloca, ctx.StateVariable));
 					body.Instructions.Insert(index++, Instruction.Create(OpCodes.Dup));
 					body.Instructions.Insert(index++, Instruction.Create(OpCodes.Ldc_I4, (int)seed));
@@ -398,7 +407,7 @@ namespace Confuser.Protections.Constants {
 
 					// Create new entry state
 					uint blockSeed = ctx.Random.NextUInt32();
-					currentState = new CFGState(blockSeed);
+					currentState = new CFGState(blockSeed, ctx.CfgCtxMultiplier);
 					cfgCtx.StatesMap[key.EntryState] = currentState;
 
 					var index = graph.Body.Instructions.IndexOf(graph[blockRef.Key].Header);
