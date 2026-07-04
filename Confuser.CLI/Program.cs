@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using Confuser.Core;
+using Confuser.Core.Diagnostics;
 using Confuser.Core.Project;
 using Microsoft.Extensions.Logging;
 using NDesk.Options;
@@ -25,6 +26,8 @@ namespace Confuser.CLI {
 				bool noPause = false;
 				bool debug = false;
 				bool quiet = false;
+				bool dumpRequested = false;
+				string dumpPath = null;
 				int verbosity = 0;
 				string outDir = null;
 				string snKeyPath = null;
@@ -59,6 +62,9 @@ namespace Confuser.CLI {
 					}, {
 						"q|quiet", "only show warnings and errors.",
 						value => { quiet = (value != null); }
+					}, {
+						"dump:", "write a diagnostic report (optionally to the given file).",
+						value => { dumpRequested = true; if (!string.IsNullOrEmpty(value)) dumpPath = value; }
 					}
 				};
 
@@ -141,7 +147,7 @@ namespace Confuser.CLI {
 					parameters.Project = proj;
 				}
 
-				int retVal = RunProject(parameters, quiet, verbosity);
+				int retVal = RunProject(parameters, quiet, verbosity, dumpRequested, dumpPath);
 
 				if (NeedPause() && !noPause) {
 					Console.WriteLine("Press any key to continue...");
@@ -203,7 +209,7 @@ namespace Confuser.CLI {
 					templateModules.Add(templateModule);
 		}
 
-		static int RunProject(ConfuserParameters parameters, bool quiet, int verbosity) {
+		static int RunProject(ConfuserParameters parameters, bool quiet, int verbosity, bool dumpRequested, string dumpPath) {
 			var levelSwitch = quiet
 				? LogEventLevel.Warning
 				: verbosity >= 3 ? LogEventLevel.Verbose
@@ -222,15 +228,42 @@ namespace Confuser.CLI {
 			var melLogger = loggerFactory.CreateLogger("ConfuserEx");
 
 			var progressReporter = new ConsoleProgressReporter();
-			parameters.Logger = melLogger;
-			parameters.ProgressReporter = progressReporter;
+
+			// When a diagnostic report is requested, wrap both the logger and the progress reporter
+			// with a collector so the report captures the full transcript, timing and outcome even
+			// when the run fails.
+			DiagnosticCollector collector = null;
+			if (dumpRequested) {
+				collector = new DiagnosticCollector(melLogger, progressReporter) { Project = parameters.Project };
+				parameters.Logger = collector;
+				parameters.ProgressReporter = collector;
+			}
+			else {
+				parameters.Logger = melLogger;
+				parameters.ProgressReporter = progressReporter;
+			}
 
 			if (OperatingSystem.IsWindows())
 				Console.Title = "ConfuserEx - Running...";
 			ConfuserEngine.Run(parameters).GetAwaiter().GetResult();
 
 			Log.CloseAndFlush();
+
+			if (collector != null)
+				WriteDiagnosticReport(collector, dumpPath);
+
 			return progressReporter.ReturnValue;
+		}
+
+		static void WriteDiagnosticReport(DiagnosticCollector collector, string dumpPath) {
+			string path = string.IsNullOrEmpty(dumpPath) ? "confuser-diagnostic-report.md" : dumpPath;
+			try {
+				File.WriteAllText(path, collector.GenerateReport());
+				WriteLineWithColor(ConsoleColor.Cyan, "Diagnostic report written to: " + Path.GetFullPath(path));
+			}
+			catch (Exception ex) {
+				WriteLineWithColor(ConsoleColor.Red, "Failed to write diagnostic report: " + ex.Message);
+			}
 		}
 
 		static bool NeedPause() {
@@ -250,6 +283,7 @@ namespace Confuser.CLI {
 			WriteLine("    -snkeypass : specifies strong name key password.");
 			WriteLine("    -v|verbose : increase verbosity (-v debug, -vv trace).");
 			WriteLine("    -q|quiet   : only show warnings and errors.");
+			WriteLine("    -dump      : write a diagnostic report (-dump=<file> for a custom path).");
 		}
 
 		static void WriteLineWithColor(ConsoleColor color, string txt) {

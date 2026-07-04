@@ -71,6 +71,55 @@ namespace Confuser.CLI.Test {
 		}
 
 		[Fact]
+		public void Cli_DumpFlag_WritesDiagnosticReport() {
+			var sampleAppExe = Path.Combine(AppContext.BaseDirectory, "Fixtures", "SampleApp", "bin", "SampleApp.exe");
+			Assert.True(File.Exists(sampleAppExe), $"Pre-built SampleApp.exe not found at {sampleAppExe}");
+
+			var cliDll = Path.Combine(AppContext.BaseDirectory, "Confuser.CLI.dll");
+			Assert.True(File.Exists(cliDll), $"Confuser.CLI.dll not found at {cliDll}");
+
+			var testDir = Path.Combine(Path.GetTempPath(), "confuserex-cli-dump-" + Guid.NewGuid().ToString("N")[..8]);
+			Directory.CreateDirectory(testDir);
+
+			try {
+				File.Copy(sampleAppExe, Path.Combine(testDir, "SampleApp.exe"));
+
+				var crproj = Path.Combine(testDir, "SampleApp.crproj");
+				File.WriteAllText(crproj,
+@"<project outputDir="".\obfuscated"" baseDir=""."" xmlns=""http://confuser.codeplex.com"">
+  <rule pattern=""true"" preset=""none"" inherit=""false"">
+    <protection id=""rename"" />
+  </rule>
+  <module path=""SampleApp.exe"" />
+</project>");
+
+				var reportPath = Path.Combine(testDir, "report.md");
+
+				// Act — run Confuser.CLI with the --dump flag pointing at an explicit path
+				var cliResult = RunProcess("dotnet", $"\"{cliDll}\" -n --dump=\"{reportPath}\" \"{crproj}\"");
+				output.WriteLine("=== Confuser.CLI Output ===");
+				output.WriteLine(cliResult.stdout);
+				if (!string.IsNullOrEmpty(cliResult.stderr))
+					output.WriteLine(cliResult.stderr);
+				Assert.Equal(0, cliResult.exitCode);
+
+				// Assert — the report was written and announced
+				Assert.True(File.Exists(reportPath), $"Diagnostic report should exist at {reportPath}");
+				Assert.Contains("Diagnostic report written to:", cliResult.stdout);
+
+				var report = File.ReadAllText(reportPath);
+				Assert.Contains("## System", report);
+				Assert.Contains("## Project Configuration", report);
+				Assert.Contains("## Result: SUCCESS", report);
+				Assert.Contains("## Log Output", report);
+				Assert.Contains("SampleApp.exe", report);
+			}
+			finally {
+				try { Directory.Delete(testDir, true); } catch { }
+			}
+		}
+
+		[Fact]
 		public void Cli_NoArgs_ReturnsNonZeroAndShowsUsage() {
 			var cliDll = Path.Combine(AppContext.BaseDirectory, "Confuser.CLI.dll");
 			var result = RunProcess("dotnet", $"\"{cliDll}\" -n");
