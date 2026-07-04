@@ -15,6 +15,12 @@ namespace Confuser.Runtime {
 				"1".Equals(method.Invoke(null, new object[] { x + "_ENABLE_PROFILING" })))
 				Environment.FailFast(null);
 
+			// Blocking startup check: if a debugger is already attached when the module loads
+			// (e.g. the assembly was launched under a debugger / dnSpy's F5), fail immediately —
+			// before any user code runs — rather than only detecting it later on the async worker.
+			if (Debugger.IsAttached || Debugger.IsLogging())
+				Environment.FailFast(null);
+
 			var thread = new Thread(Worker);
 			thread.IsBackground = true;
 			thread.Start(null);
@@ -25,7 +31,6 @@ namespace Confuser.Runtime {
 				th = new Thread(Worker);
 				th.IsBackground = true;
 				th.Start(Thread.CurrentThread);
-				Thread.Sleep(500);
 			}
 			while (true) {
 				if (Debugger.IsAttached || Debugger.IsLogging())
@@ -34,7 +39,7 @@ namespace Confuser.Runtime {
 				if (!th.IsAlive)
 					Environment.FailFast(null);
 
-				Thread.Sleep(1000);
+				Thread.Sleep(200);
 			}
 		}
 	}
