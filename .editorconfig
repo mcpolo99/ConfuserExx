@@ -19,6 +19,7 @@ indent_size = 4
 indent_style = space
 
 [*.{cs,vb}]
+end_of_line = lf
 dotnet_separate_import_directive_groups = false
 dotnet_sort_system_directives_first = true
 dotnet_style_coalesce_expression = true:suggestion
