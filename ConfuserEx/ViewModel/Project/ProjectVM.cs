@@ -57,6 +57,11 @@ namespace ConfuserEx.ViewModel {
 			set { SetProperty(proj.Debug != value, val => proj.Debug = val, value, "Debug"); }
 		}
 
+		public string InputSymbolMap {
+			get { return proj.InputSymbolMap; }
+			set { SetProperty(proj.InputSymbolMap != value, val => proj.InputSymbolMap = val, value, "InputSymbolMap"); }
+		}
+
 		public string BaseDirectory {
 			get { return proj.BaseDirectory; }
 			set { SetProperty(proj.BaseDirectory != value, val => proj.BaseDirectory = val, value, "BaseDirectory"); }
