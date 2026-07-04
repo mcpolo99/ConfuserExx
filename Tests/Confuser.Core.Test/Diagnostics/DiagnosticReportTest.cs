@@ -1,3 +1,4 @@
+using System.IO;
 using Confuser.Core;
 using Confuser.Core.Diagnostics;
 using Confuser.Core.Project;
@@ -92,6 +93,40 @@ namespace Confuser.Core.Test.Diagnostics {
 		[Fact]
 		public void Redact_LeavesTextWithoutProfileUntouched() {
 			Assert.Equal("no paths here", DiagnosticRedactor.Redact("no paths here", @"C:\Users\alice"));
+		}
+
+		[Fact]
+		public void TryReadTargetFramework_ReadsMoniker_FromRealAssembly() {
+			var path = typeof(DiagnosticCollector).Assembly.Location;
+			var tfm = DiagnosticReport.TryReadTargetFramework(path);
+			Assert.NotNull(tfm);
+			Assert.Contains("Version=v", tfm);
+		}
+
+		[Fact]
+		public void TryReadTargetFramework_ReturnsNull_ForMissingFile() {
+			Assert.Null(DiagnosticReport.TryReadTargetFramework(@"C:\does\not\exist.dll"));
+		}
+
+		[Fact]
+		public void TryReadTargetFramework_ReturnsNull_ForNonAssemblyFile() {
+			var tmp = Path.GetTempFileName();
+			File.WriteAllText(tmp, "definitely not a PE file");
+			try {
+				Assert.Null(DiagnosticReport.TryReadTargetFramework(tmp));
+			}
+			finally {
+				File.Delete(tmp);
+			}
+		}
+
+		[Fact]
+		public void Generate_IncludesTargetFramework_WhenModuleResolves() {
+			var coreDll = typeof(DiagnosticCollector).Assembly.Location;
+			var project = new ConfuserProject { BaseDirectory = Path.GetDirectoryName(coreDll) };
+			project.Add(new ProjectModule { Path = Path.GetFileName(coreDll) });
+
+			Assert.Contains("Target Framework:", CollectorFor(project).GenerateReport());
 		}
 	}
 }

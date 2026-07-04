@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Confuser.Core.Project;
+using dnlib.DotNet;
 using Microsoft.Extensions.Logging;
 
 namespace Confuser.Core.Diagnostics {
@@ -68,6 +70,14 @@ namespace Confuser.Core.Diagnostics {
 			var modules = project.Where(m => !m.IsExternal).Select(m => m.Path)
 				.Where(p => !string.IsNullOrEmpty(p)).ToList();
 			sb.AppendLine("- Modules: " + (modules.Count > 0 ? string.Join(", ", modules) : "(none)"));
+
+			var targetFrameworks = modules
+				.Select(m => TryReadTargetFramework(ResolveModulePath(project, m)))
+				.Where(tfm => !string.IsNullOrEmpty(tfm))
+				.Distinct()
+				.ToList();
+			if (targetFrameworks.Count > 0)
+				sb.AppendLine("- Target Framework: " + string.Join(", ", targetFrameworks));
 
 			var externals = project.Where(m => m.IsExternal).Select(m => m.Path)
 				.Where(p => !string.IsNullOrEmpty(p)).ToList();
@@ -173,6 +183,53 @@ namespace Confuser.Core.Diagnostics {
 		}
 
 		static string Show(string value) => string.IsNullOrEmpty(value) ? "(not set)" : value;
+
+		static string ResolveModulePath(ConfuserProject project, string modulePath) {
+			try {
+				if (!string.IsNullOrEmpty(project.BaseDirectory))
+					return Path.Combine(project.BaseDirectory, modulePath);
+			}
+			catch {
+				// Fall through to the bare module path.
+			}
+
+			return modulePath;
+		}
+
+		/// <summary>
+		///     Best-effort read of an assembly's target-framework moniker (e.g.
+		///     <c>.NETCoreApp,Version=v8.0</c>) from its <c>TargetFrameworkAttribute</c>. Returns
+		///     <c>null</c> if the file is missing, is not a valid assembly, or carries no such
+		///     attribute. The file is read into memory so it is never locked.
+		/// </summary>
+		public static string TryReadTargetFramework(string assemblyPath) {
+			try {
+				if (string.IsNullOrEmpty(assemblyPath) || !File.Exists(assemblyPath))
+					return null;
+
+				using (var module = ModuleDefMD.Load(File.ReadAllBytes(assemblyPath))) {
+					var assembly = module.Assembly;
+					if (assembly == null)
+						return null;
+
+					foreach (var attr in assembly.CustomAttributes) {
+						if (attr.TypeFullName != "System.Runtime.Versioning.TargetFrameworkAttribute")
+							continue;
+						if (attr.ConstructorArguments.Count == 0)
+							continue;
+
+						var moniker = attr.ConstructorArguments[0].Value?.ToString();
+						if (!string.IsNullOrEmpty(moniker))
+							return moniker;
+					}
+				}
+			}
+			catch {
+				// Diagnostic best-effort: any failure to read the framework is non-fatal.
+			}
+
+			return null;
+		}
 
 		static string SafeOsDescription() {
 			try {
