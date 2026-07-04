@@ -19,6 +19,9 @@ namespace Confuser.Protections.Compress {
 		public byte[] OriginModule;
 		public ModuleDef OriginModuleDef;
 		public bool CompatMode;
+		public uint Feedback;
+		public uint LcgInit;
+		public uint LcgMultiplier;
 
 		public byte[] Encrypt(ICompressionService compress, byte[] data, uint seed, Action<double> progressFunc) {
 			data = (byte[])data.Clone();
@@ -46,7 +49,7 @@ namespace Confuser.Protections.Compress {
 			for (int i = 0; i < data.Length; i += 4) {
 				var datum = (uint)(data[i + 0] | (data[i + 1] << 8) | (data[i + 2] << 16) | (data[i + 3] << 24));
 				uint encrypted = datum ^ key[keyIndex & 0xf];
-				key[keyIndex & 0xf] = (key[keyIndex & 0xf] ^ datum) + 0x3ddb2819;
+				key[keyIndex & 0xf] = (key[keyIndex & 0xf] ^ datum) + Feedback;
 				encryptedData[i + 0] = (byte)(encrypted >> 0);
 				encryptedData[i + 1] = (byte)(encrypted >> 8);
 				encryptedData[i + 2] = (byte)(encrypted >> 16);

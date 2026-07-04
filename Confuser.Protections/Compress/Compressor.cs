@@ -160,9 +160,9 @@ namespace Confuser.Protections {
 				for (int i = 0; i < name.Length; i++)
 					name[i] *= key[i + 4];
 
-				uint state = 0x6fff61;
+				uint state = compCtx.LcgInit;
 				foreach (byte chr in name)
-					state = state * 0x5e3f1f + chr;
+					state = state * compCtx.LcgMultiplier + chr;
 				byte[] encrypted = compCtx.Encrypt(comp, entry.Value, state, progress => {
 					progress = (progress + moduleIndex) / modules.Count;
 					context.ProgressReporter.Progress((int)(progress * 10000), 10000);
@@ -242,6 +242,17 @@ namespace Confuser.Protections {
 					new MemberRefUser(stubModule, ".ctor", ctorSig, attrType)));
 			}
 
+			// Randomize the encryption feedback constant (baked-in 0x3ddb2819 fingerprints the
+			// stub). Any value works since it is purely additive; the same value is injected into
+			// the runtime Decrypt method below so encrypt/decrypt stay in sync.
+			compCtx.Feedback = random.NextUInt32();
+
+			// Randomize the rolling-hash used to derive each library's seed from its name
+			// (baked-in 0x6fff61 / 0x5e3f1f). The multiplier is kept odd for good distribution.
+			// The same values are injected into the runtime Resolve method below.
+			compCtx.LcgInit = random.NextUInt32();
+			compCtx.LcgMultiplier = random.NextUInt32() | 1;
+
 			uint seed = random.NextUInt32();
 			compCtx.OriginModule = context.OutputModules[compCtx.ModuleIndex];
 
@@ -263,7 +274,11 @@ namespace Confuser.Protections {
 			List<Instruction> instrs = decrypter.Body.Instructions.ToList();
 			for (int i = 0; i < instrs.Count; i++) {
 				Instruction instr = instrs[i];
-				if (instr.OpCode == OpCodes.Call) {
+				if (instr.OpCode == OpCodes.Ldc_I4 && (int)instr.Operand == 0x3ddb2819) {
+					// Sync the runtime feedback constant with the value used during encryption.
+					instr.Operand = (int)compCtx.Feedback;
+				}
+				else if (instr.OpCode == OpCodes.Call) {
 					var method = (IMethod)instr.Operand;
 					if (method.DeclaringType.Name == "Mutation" &&
 						method.Name == "Crypt") {
@@ -285,6 +300,18 @@ namespace Confuser.Protections {
 			decrypter.Body.Instructions.Clear();
 			foreach (Instruction instr in instrs)
 				decrypter.Body.Instructions.Add(instr);
+
+			// Resolve — sync the runtime rolling-hash constants with the values used when
+			// deriving each library's seed from its name (see PackModules).
+			MethodDef resolver = defs.OfType<MethodDef>().Single(method => method.Name == "Resolve");
+			foreach (Instruction instr in resolver.Body.Instructions) {
+				if (instr.OpCode != OpCodes.Ldc_I4)
+					continue;
+				if ((int)instr.Operand == 0x6fff61)
+					instr.Operand = (int)compCtx.LcgInit;
+				else if ((int)instr.Operand == 0x5e3f1f)
+					instr.Operand = (int)compCtx.LcgMultiplier;
+			}
 
 			// Pack modules
 			PackModules(context, compCtx, stubModule, comp, random);
