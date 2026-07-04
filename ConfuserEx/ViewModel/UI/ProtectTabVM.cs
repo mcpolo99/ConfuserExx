@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.Input;
 using Confuser.Core;
+using Confuser.Core.Diagnostics;
 using Confuser.Core.Project;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -15,6 +16,7 @@ namespace ConfuserEx.ViewModel {
 	internal class ProtectTabVM : TabViewModel, IProgressReporter {
 		readonly Paragraph documentContent;
 		CancellationTokenSource cancelSrc;
+		DiagnosticCollector collector;
 		double? progress = 0;
 		bool? result;
 
@@ -31,6 +33,10 @@ namespace ConfuserEx.ViewModel {
 
 		public ICommand CancelCmd {
 			get { return new RelayCommand(DoCancel, () => App.NavigationDisabled); }
+		}
+
+		public ICommand CopyReportCmd {
+			get { return new RelayCommand(DoCopyReport, () => Result != null && collector != null); }
 		}
 
 		public double? Progress {
@@ -65,8 +71,12 @@ namespace ConfuserEx.ViewModel {
 				builder.AddSerilog(serilogLogger, dispose: true));
 			var melLogger = loggerFactory.CreateLogger("ConfuserEx");
 
-			parameters.Logger = melLogger;
-			parameters.ProgressReporter = this;
+			// The collector wraps the logger and this progress reporter so a diagnostic report —
+			// covering both successful and failed runs — can be copied afterwards. It captures the
+			// full transcript regardless of the display level and forwards everything through.
+			collector = new DiagnosticCollector(melLogger, this) { Project = parameters.Project };
+			parameters.Logger = collector;
+			parameters.ProgressReporter = collector;
 
 			cancelSrc = new CancellationTokenSource();
 			Result = null;
@@ -87,6 +97,19 @@ namespace ConfuserEx.ViewModel {
 
 		void DoCancel() {
 			cancelSrc.Cancel();
+		}
+
+		void DoCopyReport() {
+			if (collector == null)
+				return;
+
+			try {
+				Clipboard.SetText(collector.GenerateReport());
+			}
+			catch {
+				// The clipboard can be transiently locked by another process; a failed copy
+				// should never crash the app. The user can simply retry.
+			}
 		}
 
 		#region IProgressReporter
