@@ -242,6 +242,11 @@ namespace Confuser.Protections {
 					new MemberRefUser(stubModule, ".ctor", ctorSig, attrType)));
 			}
 
+			// Randomize the encryption feedback constant (baked-in 0x3ddb2819 fingerprints the
+			// stub). Any value works since it is purely additive; the same value is injected into
+			// the runtime Decrypt method below so encrypt/decrypt stay in sync.
+			compCtx.Feedback = random.NextUInt32();
+
 			uint seed = random.NextUInt32();
 			compCtx.OriginModule = context.OutputModules[compCtx.ModuleIndex];
 
@@ -263,7 +268,11 @@ namespace Confuser.Protections {
 			List<Instruction> instrs = decrypter.Body.Instructions.ToList();
 			for (int i = 0; i < instrs.Count; i++) {
 				Instruction instr = instrs[i];
-				if (instr.OpCode == OpCodes.Call) {
+				if (instr.OpCode == OpCodes.Ldc_I4 && (int)instr.Operand == 0x3ddb2819) {
+					// Sync the runtime feedback constant with the value used during encryption.
+					instr.Operand = (int)compCtx.Feedback;
+				}
+				else if (instr.OpCode == OpCodes.Call) {
 					var method = (IMethod)instr.Operand;
 					if (method.DeclaringType.Name == "Mutation" &&
 						method.Name == "Crypt") {
