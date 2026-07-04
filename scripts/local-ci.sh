@@ -11,6 +11,16 @@
 #   ./scripts/local-ci.sh test         # build + test only
 #   ./scripts/local-ci.sh package      # build + package only
 #   ./scripts/local-ci.sh all          # everything (default)
+#
+# GitHub Actions minutes are limited, so full test+coverage runs are expensive to
+# do on every push. This script produces the SAME coverage artifacts locally,
+# including SummaryGithub.md — the markdown that CI would post to the PR. To share
+# it without spending Actions minutes, opt in to posting it as a single sticky PR
+# comment (requires the 'gh' CLI, authenticated):
+#
+#   POST_COVERAGE_PR=88 ./scripts/local-ci.sh test   # post/update coverage on PR #88
+#
+# Posting is opt-in and never happens unless POST_COVERAGE_PR is set.
 # =============================================================================
 
 set -euo pipefail
@@ -37,6 +47,57 @@ step()    { echo -e "\n${CYAN}${BOLD}==> $1${NC}"; }
 success() { echo -e "${GREEN}✓ $1${NC}"; }
 warn()    { echo -e "${YELLOW}⚠ $1${NC}"; }
 fail()    { echo -e "${RED}✗ $1${NC}"; }
+
+# ---------------------------------------------------------------------------
+# Post a coverage summary as a single sticky PR comment (opt-in).
+# Finds a prior comment by a hidden marker and edits it, so repeated runs update
+# one comment instead of spamming — the same behaviour as the CI sticky comment.
+# Failures are warnings only; posting must never fail the pipeline.
+# ---------------------------------------------------------------------------
+post_coverage_comment() {
+  local pr="$1" file="$2"
+  local marker="<!-- local-ci-coverage -->"
+
+  if ! command -v gh &>/dev/null; then
+    warn "gh CLI not found; cannot post coverage comment. Install: https://cli.github.com"
+    return 0
+  fi
+  if [ ! -f "$file" ]; then
+    warn "No coverage summary at $file; nothing to post."
+    return 0
+  fi
+
+  local repo
+  repo=$(gh repo view --json nameWithOwner --jq .nameWithOwner 2>/dev/null || true)
+  if [ -z "$repo" ]; then
+    warn "Could not resolve the GitHub repository; skipping coverage comment."
+    return 0
+  fi
+
+  local body_file
+  body_file=$(mktemp)
+  { printf '%s\n\n' "$marker"; cat "$file"; } > "$body_file"
+
+  local existing_id
+  existing_id=$(gh api "repos/$repo/issues/$pr/comments" --paginate \
+    --jq "map(select(.body | contains(\"$marker\"))) | last | .id" 2>/dev/null || true)
+
+  if [ -n "$existing_id" ] && [ "$existing_id" != "null" ]; then
+    if gh api -X PATCH "repos/$repo/issues/comments/$existing_id" -F body=@"$body_file" >/dev/null 2>&1; then
+      success "Updated sticky coverage comment on PR #$pr"
+    else
+      warn "Failed to update coverage comment on PR #$pr."
+    fi
+  else
+    if gh api -X POST "repos/$repo/issues/$pr/comments" -F body=@"$body_file" >/dev/null 2>&1; then
+      success "Posted coverage comment on PR #$pr"
+    else
+      warn "Failed to post coverage comment on PR #$pr."
+    fi
+  fi
+
+  rm -f "$body_file"
+}
 
 # ---------------------------------------------------------------------------
 # Find MSBuild via vswhere (CI uses microsoft/setup-msbuild@v2)
@@ -278,6 +339,12 @@ do_test() {
         && success "Markdown summary: $COVERAGE_DIR/report/SummaryGithub.md"
       [ -f "$COVERAGE_DIR/report/index.html" ] \
         && success "HTML report:      $COVERAGE_DIR/report/index.html"
+
+      # Opt-in: post the markdown summary to a PR as a single sticky comment.
+      if [ -n "${POST_COVERAGE_PR:-}" ]; then
+        step "COVERAGE — posting summary to PR #$POST_COVERAGE_PR"
+        post_coverage_comment "$POST_COVERAGE_PR" "$COVERAGE_DIR/report/SummaryGithub.md"
+      fi
     else
       warn "reportgenerator unavailable even after install attempt; skipping coverage report."
       warn "Install manually: dotnet tool install -g dotnet-reportgenerator-globaltool"
