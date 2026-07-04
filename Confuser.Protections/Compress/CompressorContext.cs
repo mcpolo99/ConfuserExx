@@ -20,6 +20,8 @@ namespace Confuser.Protections.Compress {
 		public ModuleDef OriginModuleDef;
 		public bool CompatMode;
 		public uint Feedback;
+		public uint LcgInit;
+		public uint LcgMultiplier;
 
 		public byte[] Encrypt(ICompressionService compress, byte[] data, uint seed, Action<double> progressFunc) {
 			data = (byte[])data.Clone();
