@@ -18,6 +18,13 @@ namespace ConfuserEx.Views {
 		public override void OnApplyTemplate() {
 			base.OnApplyTemplate();
 
+			ChooseSymbolMap.Command = new RelayCommand(() => {
+				var ofd = new VistaOpenFileDialog();
+				ofd.Filter = "Symbol map (*.map)|*.map|All Files (*.*)|*.*";
+				if (ofd.ShowDialog() ?? false)
+					project.InputSymbolMap = ofd.FileName;
+			});
+
 			AddPlugin.Command = new RelayCommand(() => {
 				var ofd = new VistaOpenFileDialog();
 				ofd.Filter = ".NET assemblies (*.exe, *.dll)|*.exe;*.dll|All Files (*.*)|*.*";

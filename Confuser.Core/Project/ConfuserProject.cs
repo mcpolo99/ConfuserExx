@@ -529,6 +529,14 @@ namespace Confuser.Core.Project {
 		public bool Debug { get; set; }
 
 		/// <summary>
+		///     Gets or sets the path to a symbol map from a previous obfuscation run. When set, the
+		///     renamer reuses the obfuscated names recorded in that map, so re-obfuscation produces
+		///     consistent names across builds (e.g. to patch already-deployed obfuscated assemblies).
+		/// </summary>
+		/// <value>The path to the input symbol map, or <c>null</c> to generate fresh names.</value>
+		public string InputSymbolMap { get; set; }
+
+		/// <summary>
 		///     Gets or sets the output directory.
 		/// </summary>
 		/// <value>The output directory.</value>
@@ -594,6 +602,12 @@ namespace Confuser.Core.Project {
 				elem.Attributes.Append(debugAttr);
 			}
 
+			if (InputSymbolMap != null) {
+				XmlAttribute mapAttr = xmlDoc.CreateAttribute("inputSymbolMap");
+				mapAttr.Value = InputSymbolMap;
+				elem.Attributes.Append(mapAttr);
+			}
+
 			foreach (Rule i in Rules)
 				elem.AppendChild(i.Save(xmlDoc));
 
@@ -654,6 +668,11 @@ namespace Confuser.Core.Project {
 				Debug = bool.Parse(docElem.Attributes["debug"].Value);
 			else
 				Debug = false;
+
+			if (docElem.Attributes["inputSymbolMap"] != null)
+				InputSymbolMap = docElem.Attributes["inputSymbolMap"].Value.NullIfEmpty();
+			else
+				InputSymbolMap = null;
 
 			Packer = null;
 			Clear();
@@ -724,6 +743,7 @@ namespace Confuser.Core.Project {
 			var ret = new ConfuserProject();
 			ret.Seed = Seed;
 			ret.Debug = Debug;
+			ret.InputSymbolMap = InputSymbolMap;
 			ret.OutputDirectory = OutputDirectory;
 			ret.BaseDirectory = BaseDirectory;
 			ret.Packer = Packer == null ? null : Packer.Clone();

@@ -28,6 +28,7 @@ namespace Confuser.CLI {
 				bool quiet = false;
 				bool dumpRequested = false;
 				string dumpPath = null;
+				string inputMap = null;
 				int verbosity = 0;
 				string outDir = null;
 				string snKeyPath = null;
@@ -65,6 +66,9 @@ namespace Confuser.CLI {
 					}, {
 						"dump:", "write a diagnostic report (optionally to the given file).",
 						value => { dumpRequested = true; if (!string.IsNullOrEmpty(value)) dumpPath = value; }
+					}, {
+						"map=", "reuse names from a previous symbol map for consistent re-obfuscation.",
+						value => { inputMap = value; }
 					}
 				};
 
@@ -146,6 +150,9 @@ namespace Confuser.CLI {
 					proj.Debug = debug;
 					parameters.Project = proj;
 				}
+
+				if (inputMap != null && parameters.Project != null)
+					parameters.Project.InputSymbolMap = inputMap;
 
 				int retVal = RunProject(parameters, quiet, verbosity, dumpRequested, dumpPath);
 
@@ -284,6 +291,7 @@ namespace Confuser.CLI {
 			WriteLine("    -v|verbose : increase verbosity (-v debug, -vv trace).");
 			WriteLine("    -q|quiet   : only show warnings and errors.");
 			WriteLine("    -dump      : write a diagnostic report (-dump=<file> for a custom path).");
+			WriteLine("    -map       : reuse names from a previous symbol map for consistent re-obfuscation.");
 		}
 
 		static void WriteLineWithColor(ConsoleColor color, string txt) {

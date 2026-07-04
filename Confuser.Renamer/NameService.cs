@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Confuser.Core;
@@ -8,6 +9,7 @@ using Confuser.Core.Services;
 using Confuser.Renamer.Analyzers;
 using Confuser.Renamer.Properties;
 using dnlib.DotNet;
+using Microsoft.Extensions.Logging;
 
 namespace Confuser.Renamer {
 	public interface INameService {
@@ -67,6 +69,7 @@ namespace Confuser.Renamer {
 		readonly Dictionary<string, string> _originalToObfuscatedNameMap = new Dictionary<string, string>();
 		readonly Dictionary<string, string> _obfuscatedToOriginalNameMap = new Dictionary<string, string>();
 		readonly Dictionary<string, string> _prefixesMap = new Dictionary<string, string>();
+		readonly bool hasInputMap;
 		internal ReversibleRenamer reversibleRenamer;
 
 		public NameService(ConfuserContext context) {
@@ -74,6 +77,7 @@ namespace Confuser.Renamer {
 			storage = new VTableStorage(context.Logger);
 			random = context.Registry.GetService<IRandomService>().GetRandomGenerator(NameProtection._FullId);
 			nameSeed = random.NextBytes(20);
+			hasInputMap = LoadInputSymbolMap();
 
 			Renamers = new List<IRenamer> {
 				new InterReferenceAnalyzer(),
@@ -88,6 +92,57 @@ namespace Confuser.Renamer {
 		}
 
 		public IList<IRenamer> Renamers { get; private set; }
+
+		/// <summary>
+		///     Loads the project's input symbol map (if any) so previously assigned obfuscated names
+		///     are reused, giving consistent names across re-obfuscation runs. The file uses the same
+		///     "{obfuscated}\t{original}" format as the exported <c>symbols.map</c>.
+		/// </summary>
+		/// <returns><c>true</c> if a non-empty map was loaded; otherwise <c>false</c>.</returns>
+		bool LoadInputSymbolMap() {
+			var mapPath = context.Project.InputSymbolMap;
+			if (string.IsNullOrEmpty(mapPath))
+				return false;
+
+			try {
+				if (!Path.IsPathRooted(mapPath))
+					mapPath = Path.Combine(context.BaseDirectory, mapPath);
+
+				if (!File.Exists(mapPath)) {
+					context.Logger.LogWarning("Input symbol map not found: '{0}'. Names will be generated fresh.", mapPath);
+					return false;
+				}
+
+				int count = 0;
+				foreach (var line in File.ReadAllLines(mapPath)) {
+					if (string.IsNullOrWhiteSpace(line))
+						continue;
+
+					int tab = line.IndexOf('\t');
+					if (tab <= 0)
+						continue;
+
+					var obfuscated = line.Substring(0, tab);
+					var original = line.Substring(tab + 1);
+
+					// The map is "{obfuscated}\t{original}"; reuse looks up original -> obfuscated.
+					if (!_obfuscatedToOriginalNameMap.ContainsKey(obfuscated))
+						_obfuscatedToOriginalNameMap[obfuscated] = original;
+					if (!_originalToObfuscatedNameMap.ContainsKey(original)) {
+						_originalToObfuscatedNameMap[original] = obfuscated;
+						count++;
+					}
+				}
+
+				context.Logger.LogInformation(
+					"Loaded {0} name mappings from input symbol map for consistent re-obfuscation.", count);
+				return count > 0;
+			}
+			catch (Exception ex) {
+				context.Logger.LogWarning(ex, "Failed to load input symbol map. Names will be generated fresh.");
+				return false;
+			}
+		}
 
 		public VTableStorage GetVTables() {
 			return storage;
@@ -255,7 +310,10 @@ namespace Confuser.Renamer {
 					hash = Utils.SHA1(hash);
 				}
 
-				if (mode == RenameMode.Decodable || mode == RenameMode.Sequential) {
+				// Decodable/Sequential always record the mapping (they need it to be reversible).
+				// When an input symbol map is in use, record every mode so newly-generated names are
+				// reused on the next run and the exported map stays complete and chainable.
+				if (mode == RenameMode.Decodable || mode == RenameMode.Sequential || hasInputMap) {
 					_obfuscatedToOriginalNameMap.Add(newName, name);
 					_originalToObfuscatedNameMap.Add(name, newName);
 				}
