@@ -72,9 +72,10 @@ which mirrors the same build, test and coverage steps offline.
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| `ci.yml` | PR into `main` + push to `main` (release). Manual: `run-ci` label on a `develop` PR, or `workflow_dispatch` | Build, package, create releases |
+| `ci.yml` | PR into `main`. Manual: `run-ci` label on a `develop` PR, or `workflow_dispatch` | Build + package (validation only) |
 | `test.yml` | PR into `main`. Manual: `run-ci` label on a `develop` PR, or `workflow_dispatch` | Build, test, coverage report |
 | `lint.yml` | PR into `main`. Manual: `run-ci` label on a `develop` PR, or `workflow_dispatch` | Whitespace, style, Roslyn analyzers |
+| `release.yml` | Manual (`workflow_dispatch`) + monthly (1st of month) | Build, tag and publish a GitHub Release from `main` |
 | `codeql-analysis.yml` | Weekly + manual | Security analysis |
 
 **PRs into `develop` do not run the cloud pipeline automatically** — validate them
@@ -82,5 +83,14 @@ with `scripts/local-ci.sh`. To run a workflow on a specific `develop` PR anyway,
 admin adds the `run-ci` label (re-add it to trigger each subsequent run) or
 dispatches the workflow manually from the Actions tab.
 
-Releases are created by `ci.yml` when `develop` is merged into `main`. Versioning is
-handled by [Nerdbank.GitVersioning](https://github.com/dotnet/Nerdbank.GitVersioning) from `version.json`.
+### Releases
+
+Releases are **not** cut automatically on push to `main`. `release.yml` handles them:
+
+- **Manual** — Actions tab → **release** → **Run workflow** (on `main`). Builds, tags
+  `v<version>`, and publishes a GitHub Release with the CLI/GUI/combined zips and the
+  MSBuild-tasks nupkg. Use the `force` input to release even with no new commits.
+- **Monthly** — on the 1st of each month a cheap check compares `main` to the last
+  `v*` tag and only runs the (expensive) build+publish when there are new commits.
+
+Versioning is handled by [Nerdbank.GitVersioning](https://github.com/dotnet/Nerdbank.GitVersioning) from `version.json`.
