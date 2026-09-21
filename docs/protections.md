@@ -84,12 +84,12 @@ Encrypts method bodies at build time and decrypts them at runtime via a JIT hook
 
 | Name | Values | Default | Description |
 |------|--------|---------|-------------|
-| `mode` | `jit`, `native` | `jit` | `jit` hooks the JIT compiler to decrypt methods on demand. `native` pre-compiles methods to native code. |
+| `mode` | `normal`, `anti` | `normal` | Tamper-detection method. `normal` decrypts the protected section at load. `anti` additionally runs anti-debugger checks. |
 | `key` | `normal`, `dynamic` | `normal` | Key derivation mode. `dynamic` derives the key from the assembly contents for stronger tamper detection. |
 
 ```xml
 <protection id="anti tamper">
-  <argument name="mode" value="jit" />
+  <argument name="mode" value="anti" />
   <argument name="key" value="dynamic" />
 </protection>
 ```
@@ -309,13 +309,13 @@ Protections stack. You can start from a preset and add/remove individual protect
 ```xml
 <rule preset="normal" pattern="true">
   <protection id="anti tamper">
-    <argument name="mode" value="jit" />
+    <argument name="mode" value="anti" />
   </protection>
   <protection id="rename" action="remove" />
 </rule>
 ```
 
-This applies the `normal` preset, adds anti-tamper with JIT mode, and removes renaming.
+This applies the `normal` preset, adds anti-tamper in `anti` mode, and removes renaming.
 
 ## Pattern Expressions
 
