@@ -74,6 +74,37 @@ namespace Confuser.Core.Helpers {
 		}
 
 		/// <summary>
+		///     Replaces the mutation key placeholders like <see cref="InjectKeys" />, but first
+		///     verifies that every requested key id actually has a placeholder in the method. Throws
+		///     if one is missing, so a runtime-source change that drops or renames a placeholder
+		///     fails loudly instead of silently emitting a stub whose injected values no longer
+		///     match the obfuscator side.
+		/// </summary>
+		/// <param name="method">The method to process.</param>
+		/// <param name="keyIds">The mutation key IDs.</param>
+		/// <param name="keys">The actual keys.</param>
+		public static void InjectKeysEnsured(MethodDef method, int[] keyIds, int[] keys) {
+			var found = new bool[keyIds.Length];
+			foreach (Instruction instr in method.Body.Instructions) {
+				if (instr.OpCode != OpCodes.Ldsfld || !(instr.Operand is IField field))
+					continue;
+				if (field.DeclaringType.FullName == mutationType &&
+					field2index.TryGetValue(field.Name, out int keyIndex)) {
+					int pos = Array.IndexOf(keyIds, keyIndex);
+					if (pos != -1)
+						found[pos] = true;
+				}
+			}
+			for (int i = 0; i < found.Length; i++)
+				if (!found[i])
+					throw new InvalidOperationException(
+						$"Mutation placeholder KeyI{keyIds[i]} not found in method '{method.Name}'; " +
+						"the injected runtime source and the injector are out of sync.");
+
+			InjectKeys(method, keyIds, keys);
+		}
+
+		/// <summary>
 		///     Replaces the placeholder call in method with actual instruction sequence.
 		/// </summary>
 		/// <param name="method">The methodto process.</param>
