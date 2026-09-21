@@ -74,5 +74,46 @@ namespace CrossFramework.Test {
 				new SettingItem<Protection>("rename"),
 				outputDirSuffix: "-wpf-net10",
 				checkOutput: false);
+
+		// --- Modern .NET: actually run the obfuscated WPF app (shows a real window off-screen,
+		//     pumps the dispatcher, self-closes after ~2s) and assert it starts without crashing. ---
+
+		[Fact]
+		[Trait("Category", "CrossFramework")]
+		[Trait("AppType", "WPF")]
+		[Trait("TFM", "net10.0-windows")]
+		[Trait("Issue", "https://github.com/mcpolo99/ConfuserExx/issues/103")]
+		public Task WPF_Net10_SelfTest_RunsWithoutCrashing() =>
+			Run("CrossFramework.WPF.Net10.dll",
+				null,
+				new SettingItem<Protection>("rename"),
+				outputDirSuffix: "-wpf-net10-selftest",
+				checkOutput: false,
+				postProcessAction: outputPath => {
+					var (exit, stdout, stderr) = RunDotnetApp(outputPath, "CrossFramework.WPF.Net10.dll", "--selftest");
+					Assert.Equal(42, exit);
+					Assert.Contains("SHOWN:", stdout);
+					Assert.DoesNotContain("CRASH", stdout);
+					Assert.Empty(stderr);
+					return Task.CompletedTask;
+				});
+
+		[Fact]
+		[Trait("Category", "CrossFramework")]
+		[Trait("AppType", "WPF")]
+		[Trait("TFM", "net10.0-windows")]
+		[Trait("Issue", "https://github.com/mcpolo99/ConfuserExx/issues/103")]
+		public Task WPF_Net10_SelfTest_ReportsCrash() =>
+			Run("CrossFramework.WPF.Net10.dll",
+				null,
+				new SettingItem<Protection>("rename"),
+				outputDirSuffix: "-wpf-net10-crash",
+				checkOutput: false,
+				postProcessAction: outputPath => {
+					var (exit, stdout, _) = RunDotnetApp(outputPath, "CrossFramework.WPF.Net10.dll", "--selftest-crash");
+					Assert.NotEqual(42, exit);
+					Assert.Contains("CRASH", stdout);
+					return Task.CompletedTask;
+				});
 	}
 }

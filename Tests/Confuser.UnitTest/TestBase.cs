@@ -186,5 +186,25 @@ namespace Confuser.UnitTest {
 			return extension.Equals(".dll", StringComparison.OrdinalIgnoreCase) ||
 				extension.Equals(".exe", StringComparison.OrdinalIgnoreCase);
 		}
+
+		/// <summary>
+		///     Runs an obfuscated .NET (Core) application via <c>dotnet &lt;dll&gt;</c> from its output
+		///     directory and returns the exit code together with the captured output streams.
+		/// </summary>
+		protected static (int ExitCode, string StdOut, string StdErr) RunDotnetApp(
+			string workingDirectory, string dllName, string arguments = null) {
+			var startInfo = new ProcessStartInfo("dotnet",
+				string.IsNullOrEmpty(arguments) ? dllName : dllName + " " + arguments) {
+				WorkingDirectory = workingDirectory,
+				RedirectStandardOutput = true,
+				RedirectStandardError = true,
+				UseShellExecute = false
+			};
+			using var process = Process.Start(startInfo);
+			string stdout = process.StandardOutput.ReadToEnd();
+			string stderr = process.StandardError.ReadToEnd();
+			process.WaitForExit();
+			return (process.ExitCode, stdout, stderr);
+		}
 	}
 }

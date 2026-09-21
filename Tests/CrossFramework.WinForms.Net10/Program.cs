@@ -1,5 +1,6 @@
 using System;
 using System.Windows.Forms;
+using CrossFramework.SelfTest;
 
 namespace CrossFramework.WinForms {
 	static class Program {
@@ -14,6 +15,9 @@ namespace CrossFramework.WinForms {
 				form.Dispose();
 				return 42;
 			}
+
+			if (args.Length > 0 && (args[0] == "--selftest" || args[0] == "--selftest-crash"))
+				return WinFormsSelfTestHost.Run(() => new MainForm(), induceCrash: args[0] == "--selftest-crash");
 
 			Application.SetHighDpiMode(HighDpiMode.SystemAware);
 			Application.EnableVisualStyles();
