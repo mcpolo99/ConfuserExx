@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Confuser.Core;
 using Confuser.Core.Project;
@@ -85,5 +87,35 @@ namespace CrossFramework.Test {
 				new SettingItem<Protection>("rename"),
 				outputDirSuffix: "-console-net10",
 				checkOutput: false);
+
+		[Fact]
+		[Trait("Category", "CrossFramework")]
+		[Trait("AppType", "Console")]
+		[Trait("TFM", "net10.0")]
+		[Trait("Protection", "resources")]
+		[Trait("Issue", "https://github.com/mcpolo99/ConfuserExx/issues/101")]
+		public Task Console_Net10_ResourceProtection() =>
+			Run(new[] { "CrossFramework.Console.Net10.dll", "external:CrossFramework.Console.Net10.runtimeconfig.json" },
+				null,
+				new SettingItem<Protection>("resources"),
+				outputDirSuffix: "-console-net10-resources",
+				checkOutput: false,
+				postProcessAction: outputPath => {
+					var startInfo = new ProcessStartInfo("dotnet", "CrossFramework.Console.Net10.dll") {
+						WorkingDirectory = outputPath,
+						RedirectStandardOutput = true,
+						RedirectStandardError = true,
+						UseShellExecute = false
+					};
+					using var process = Process.Start(startInfo);
+					var output = process.StandardOutput.ReadToEnd();
+					var error = process.StandardError.ReadToEnd();
+					process.WaitForExit();
+					Assert.Equal(42, process.ExitCode);
+					Assert.Empty(error);
+					Assert.Equal(new[] { "START", "Hello from net10.0", "Resource from net10.0", "END" },
+						output.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries));
+					return Task.CompletedTask;
+				});
 	}
 }
