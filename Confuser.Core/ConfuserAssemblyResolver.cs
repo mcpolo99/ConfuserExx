@@ -45,38 +45,57 @@ namespace Confuser.Core {
 			}
 
 			if (resolvedAssemblyDef?.Name == "netstandard" && 0 < resolvedAssemblyDef.ManifestModule.ExportedTypes.Count) {
-				//	Move types from AssemblyRef to here
+				// Classic netstandard facades forward to mscorlib, which actually defines the types.
+				// Moving those types in keeps the confused module referencing netstandard only.
+				// CoreCLR publish output is different: netstandard.dll only forwards to System.Runtime,
+				// and that assembly forwards again to System.Private.CoreLib. Clearing the forwards
+				// there hides System.Object and breaks later analysis.
 				var module = resolvedAssemblyDef.ManifestModule;
-				var newTypes = new List<TypeDef>();
-				var allAssemblyRefs = new List<AssemblyDef>();
-
-				module.ExportedTypes.Clear();
-
+				var referenced = new List<AssemblyDef>();
 				foreach (var assemblyRef in module.GetAssemblyRefs()) {
 					var subAss =
 						InternalExactResolver.Resolve(assemblyRef, module) ??
 						InternalFuzzyResolver.Resolve(assemblyRef, module);
-					allAssemblyRefs.Add(subAss);
-					foreach (var subModule in subAss?.Modules) {
-						foreach (var defType in subModule.Types) {
-							newTypes.Add(defType);
-						}
-						subModule.Types.Clear();
-						foreach (var defType in newTypes) {
-							module.Types.Add(defType);
-						}
-						newTypes.Clear();
-					}
+					if (subAss != null)
+						referenced.Add(subAss);
 				}
 
-				//	Remove them because their types has been removed.
-				foreach (var subAss in allAssemblyRefs) {
+				// Only rewrite when a referenced assembly actually defines System.Object
+				// (the mscorlib case). CoreCLR facades only forward it onward.
+				if (!referenced.Any(DefinesSystemObject))
+					return resolvedAssemblyDef;
+
+				var newTypes = new List<TypeDef>();
+				module.ExportedTypes.Clear();
+
+				foreach (var subAss in referenced) {
+					foreach (var subModule in subAss.Modules) {
+						foreach (var defType in subModule.Types)
+							newTypes.Add(defType);
+						subModule.Types.Clear();
+						foreach (var defType in newTypes)
+							module.Types.Add(defType);
+						newTypes.Clear();
+					}
+
+					// Their types now live on netstandard, so they must not stay cached.
 					InternalExactResolver.Remove(subAss);
 					InternalFuzzyResolver.Remove(subAss);
 				}
 			}
 
 			return resolvedAssemblyDef;
+		}
+
+		static bool DefinesSystemObject(AssemblyDef assembly) {
+			foreach (var module in assembly.Modules) {
+				foreach (var type in module.Types) {
+					if (type.Namespace == "System" && type.Name == "Object")
+						return true;
+				}
+			}
+
+			return false;
 		}
 
 		public void Clear() {
