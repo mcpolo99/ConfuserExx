@@ -104,12 +104,13 @@ namespace Confuser.UnitTest {
 					exists = File.Exists(outputName);
 				}
 
-				if (exists) {
-					// Check if output assemblies is obfuscated
+				if (exists && IsAssembly(inputFileNames[index])) {
+					// Check if output assemblies is obfuscated. Non-assembly support files
+					// (e.g. runtimeconfig.json copied next to the module) are verbatim copies.
 					Assert.NotEqual(FileUtilities.ComputeFileChecksum(Path.Combine(baseDir, name)),
 						FileUtilities.ComputeFileChecksum(outputName));
 				}
-				else if (IsExternal(inputFileNames[index])) {
+				else if (!exists && IsExternal(inputFileNames[index])) {
 					File.Copy(
 						Path.Combine(baseDir, GetFileName(inputFileNames[index])),
 						Path.Combine(outputDir, GetFileName(inputFileNames[index])));

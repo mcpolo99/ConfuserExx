@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using Confuser.Core;
 using Confuser.Core.Project;
@@ -115,6 +116,43 @@ namespace CrossFramework.Test {
 					Assert.Empty(error);
 					Assert.Equal(new[] { "START", "Hello from net10.0", "Resource from net10.0", "END" },
 						output.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries));
+					return Task.CompletedTask;
+				});
+
+		[Fact]
+		[Trait("Category", "CrossFramework")]
+		[Trait("AppType", "Console")]
+		[Trait("TFM", "net10.0")]
+		[Trait("Issue", "https://github.com/mcpolo99/ConfuserExx/issues/103")]
+		public Task Console_Net10_EmitsRunnableOutput() =>
+			Run("CrossFramework.Console.Net10.dll",
+				null,
+				new SettingItem<Protection>("rename"),
+				outputDirSuffix: "-console-net10-runnable",
+				checkOutput: false,
+				postProcessAction: outputPath => {
+					// The obfuscated output must be directly runnable: the copyRuntimeFiles feature
+					// copies the .NET runtime support files next to the obfuscated module.
+					Assert.True(File.Exists(Path.Combine(outputPath, "CrossFramework.Console.Net10.runtimeconfig.json")),
+						"runtimeconfig.json was not copied into the obfuscated output");
+					Assert.True(File.Exists(Path.Combine(outputPath, "CrossFramework.Console.Net10.deps.json")),
+						"deps.json was not copied into the obfuscated output");
+					Assert.True(File.Exists(Path.Combine(outputPath, "CrossFramework.Console.Net10.exe")),
+						"apphost .exe was not copied into the obfuscated output");
+
+					var startInfo = new ProcessStartInfo("dotnet", "CrossFramework.Console.Net10.dll") {
+						WorkingDirectory = outputPath,
+						RedirectStandardOutput = true,
+						RedirectStandardError = true,
+						UseShellExecute = false
+					};
+					using var process = Process.Start(startInfo);
+					var output = process.StandardOutput.ReadToEnd();
+					var error = process.StandardError.ReadToEnd();
+					process.WaitForExit();
+					Assert.Equal(42, process.ExitCode);
+					Assert.Empty(error);
+					Assert.Contains("Hello from net10.0", output);
 					return Task.CompletedTask;
 				});
 	}
