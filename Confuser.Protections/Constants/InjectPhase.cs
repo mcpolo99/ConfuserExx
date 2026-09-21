@@ -95,10 +95,10 @@ namespace Confuser.Protections.Constants {
 
 			var dataType = new TypeDefUser("", moduleCtx.Name.RandomName(), context.CurrentModule.CorLibTypes.GetTypeRef("System", "ValueType"));
 			dataType.Layout = TypeAttributes.ExplicitLayout;
-			dataType.Visibility = TypeAttributes.NestedPrivate;
+			dataType.Visibility = TypeAttributes.NotPublic;
 			dataType.IsSealed = true;
 			moduleCtx.DataType = dataType;
-			context.CurrentModule.GlobalType.NestedTypes.Add(dataType);
+			context.CurrentModule.Types.Add(dataType);
 			moduleCtx.Name.MarkHelper(dataType, moduleCtx.Marker, (Protection)Parent);
 
 			moduleCtx.DataField = new FieldDefUser(moduleCtx.Name.RandomName(), new FieldSig(dataType.ToTypeSig())) {
