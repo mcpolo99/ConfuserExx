@@ -155,5 +155,18 @@ namespace CrossFramework.Test {
 					Assert.Contains("Hello from net10.0", output);
 					return Task.CompletedTask;
 				});
+
+		// --- Run the obfuscated console apps that were previously obfuscated-but-never-executed,
+		//     with crash reporting via the unhandled-exception handler. ---
+
+		[Fact, Trait("Category", "CrossFramework"), Trait("AppType", "Console"), Trait("TFM", "net6.0"), Trait("Issue", "103")]
+		public Task Console_Net6_SelfTest_Runs() => SelfTestConsoleRuns("CrossFramework.Console.Net6.dll", "-console-net6-selftest");
+		[Fact, Trait("Category", "CrossFramework"), Trait("AppType", "Console"), Trait("TFM", "net6.0"), Trait("Issue", "103")]
+		public Task Console_Net6_SelfTest_Crash() => SelfTestReportsCrash("CrossFramework.Console.Net6.dll", "-console-net6-crash");
+
+		[Fact, Trait("Category", "CrossFramework"), Trait("AppType", "Console"), Trait("TFM", "net8.0"), Trait("Issue", "103")]
+		public Task Console_Net8_SelfTest_Runs() => SelfTestConsoleRuns("CrossFramework.Console.Net8.dll", "-console-net8-selftest");
+		[Fact, Trait("Category", "CrossFramework"), Trait("AppType", "Console"), Trait("TFM", "net8.0"), Trait("Issue", "103")]
+		public Task Console_Net8_SelfTest_Crash() => SelfTestReportsCrash("CrossFramework.Console.Net8.dll", "-console-net8-crash");
 	}
 }

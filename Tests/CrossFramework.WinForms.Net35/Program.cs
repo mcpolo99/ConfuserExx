@@ -15,6 +15,9 @@ namespace CrossFramework.WinForms {
 				return 42;
 			}
 
+			if (args.Length > 0 && (args[0] == "--selftest" || args[0] == "--selftest-crash"))
+				return CrossFramework.SelfTest.WinFormsSelfTestHost.Run(() => new MainForm(), induceCrash: args[0] == "--selftest-crash");
+
 			Application.EnableVisualStyles();
 			Application.Run(new MainForm());
 			return 0;

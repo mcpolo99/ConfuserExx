@@ -1,15 +1,14 @@
 using System;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace CrossFramework.SelfTest {
 	// Shared across the WPF subject apps (linked, not duplicated). Shows the real main window
-	// off-screen inside the already-running Application, lets it live briefly, then closes it.
-	// Any unhandled exception (dispatcher or background) makes the process report failure.
+	// (invisible + off-screen) inside the already-running Application, lets it live briefly, then
+	// ends the process. Any unhandled exception (dispatcher or background) makes it report failure.
 	//
 	// Contract: prints START / SHOWN / END and exits 42 on a clean run; on a crash prints
-	// "CRASH: ..." and exits 1. Call from Application.OnStartup; the app's own Run loop keeps
-	// pumping, and closing the window shuts the app down with exit code 42.
+	// "CRASH: ..." and exits 1. Termination is driven by a thread-pool watchdog rather than a UI
+	// timer, so it always ends even if the dispatcher never closes the window.
 	internal static class WpfSelfTestHost {
 		public static void Run(Application app, Window window, bool induceCrash = false) {
 			AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
@@ -20,6 +19,9 @@ namespace CrossFramework.SelfTest {
 			Console.WriteLine("START");
 
 			window.ShowInTaskbar = false;
+			window.ShowActivated = false;
+			window.WindowState = WindowState.Minimized;
+			window.Opacity = 0d;
 			window.WindowStartupLocation = WindowStartupLocation.Manual;
 			window.Left = -32000;
 			window.Top = -32000;
@@ -28,24 +30,22 @@ namespace CrossFramework.SelfTest {
 				Console.WriteLine("SHOWN: " + window.Title);
 				if (induceCrash)
 					throw new InvalidOperationException("Induced self-test crash");
-
-				var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
-				timer.Tick += (s, args) => {
-					timer.Stop();
-					window.Close();
-				};
-				timer.Start();
 			};
 
-			window.Closed += (sender, e) => {
-				Console.WriteLine("END");
-				// WPF's generated Main is void and ignores Run()'s return value, so set the
-				// process exit code explicitly rather than relying on Shutdown's argument.
-				Environment.ExitCode = 42;
-				app.Shutdown();
-			};
+			// Guaranteed terminator, independent of the dispatcher (see WinForms host). Rooted for
+			// the app's lifetime by the running Application, which holds this host on its stack.
+			_watchdog = new System.Threading.Timer(
+				_ => Succeed(), null, 2000, System.Threading.Timeout.Infinite);
 
 			window.Show();
+		}
+
+		static System.Threading.Timer _watchdog;
+
+		static void Succeed() {
+			Console.WriteLine("END");
+			Console.Out.Flush();
+			Environment.Exit(42);
 		}
 
 		static void Fail(string source, Exception ex) {

@@ -4,4 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\ConsoleSelfTestHost.cs" Link="ConsoleSelfTestHost.cs" />
+  </ItemGroup>
 </Project>

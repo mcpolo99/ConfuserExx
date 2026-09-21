@@ -10,5 +10,6 @@
     <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+    <Compile Include="..\Shared\WpfSelfTestHost.cs" Link="WpfSelfTestHost.cs" />
   </ItemGroup>
 </Project>

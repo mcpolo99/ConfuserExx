@@ -8,5 +8,6 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Drawing" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+    <Compile Include="..\Shared\WinFormsSelfTestHost.cs" Link="WinFormsSelfTestHost.cs" />
   </ItemGroup>
 </Project>

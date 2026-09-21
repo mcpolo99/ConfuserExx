@@ -38,6 +38,12 @@ namespace CrossFramework.WPF {
 				return 42;
 			}
 
+			if (args.Length > 0 && (args[0] == "--selftest" || args[0] == "--selftest-crash")) {
+				var selfTestApp = new Application();
+				CrossFramework.SelfTest.WpfSelfTestHost.Run(selfTestApp, new MainWindow(), induceCrash: args[0] == "--selftest-crash");
+				return selfTestApp.Run();
+			}
+
 			var app = new Application();
 			app.Run(new MainWindow());
 			return 0;

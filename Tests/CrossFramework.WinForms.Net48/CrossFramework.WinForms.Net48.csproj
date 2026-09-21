@@ -5,4 +5,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\WinFormsSelfTestHost.cs" Link="WinFormsSelfTestHost.cs" />
+  </ItemGroup>
 </Project>
