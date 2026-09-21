@@ -23,7 +23,7 @@ namespace Confuser.Runtime {
 			uint h = 0;
 			for (int i = 0; i < data.Length; i++) {
 				uint d = data[i] ^ w[i & 0xf];
-				w[i & 0xf] = (w[i & 0xf] ^ d) + 0x3ddb2819;
+				w[i & 0xf] = (w[i & 0xf] ^ d) + (uint)Mutation.KeyI0;
 				b[h + 0] = (byte)(d >> 0);
 				b[h + 1] = (byte)(d >> 8);
 				b[h + 2] = (byte)(d >> 16);
@@ -86,9 +86,9 @@ namespace Confuser.Runtime {
 					Buffer.BlockCopy(t, 0, d, o, r);
 					o += r;
 				}
-				uint s = 0x6fff61;
+				uint s = (uint)Mutation.KeyI0;
 				foreach (byte c in b)
-					s = s * 0x5e3f1f + c;
+					s = s * (uint)Mutation.KeyI1 + c;
 				byte[] f = Decrypt(d, s);
 				Assembly a = Assembly.Load(f);
 				Array.Clear(f, 0, f.Length);

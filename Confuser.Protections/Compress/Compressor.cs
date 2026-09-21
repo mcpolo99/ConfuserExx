@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -160,9 +161,9 @@ namespace Confuser.Protections {
 				for (int i = 0; i < name.Length; i++)
 					name[i] *= key[i + 4];
 
-				uint state = 0x6fff61;
+				uint state = compCtx.LcgInit;
 				foreach (byte chr in name)
-					state = state * 0x5e3f1f + chr;
+					state = state * compCtx.LcgMultiplier + chr;
 				byte[] encrypted = compCtx.Encrypt(comp, entry.Value, state, progress => {
 					progress = (progress + moduleIndex) / modules.Count;
 					context.ProgressReporter.Progress((int)(progress * 10000), 10000);
@@ -242,6 +243,17 @@ namespace Confuser.Protections {
 					new MemberRefUser(stubModule, ".ctor", ctorSig, attrType)));
 			}
 
+			// Randomize the encryption feedback constant (a fixed value in the stub is a
+			// fingerprint). Any value works since it is purely additive; the same value is injected
+			// into the runtime Decrypt method below (Mutation.KeyI0) so encrypt/decrypt stay in sync.
+			compCtx.Feedback = random.NextUInt32();
+
+			// Randomize the rolling-hash used to derive each library's seed from its name. The
+			// multiplier is kept odd for good distribution. The same values are injected into the
+			// runtime Resolve method below (Mutation.KeyI0 = init, Mutation.KeyI1 = multiplier).
+			compCtx.LcgInit = random.NextUInt32();
+			compCtx.LcgMultiplier = random.NextUInt32() | 1;
+
 			uint seed = random.NextUInt32();
 			compCtx.OriginModule = context.OutputModules[compCtx.ModuleIndex];
 
@@ -286,8 +298,43 @@ namespace Confuser.Protections {
 			foreach (Instruction instr in instrs)
 				decrypter.Body.Instructions.Add(instr);
 
+			// Sync the runtime feedback constant with the value used during encryption. The
+			// runtime Decrypt exposes it as the Mutation.KeyI0 placeholder; injection is verified
+			// so a runtime-source change that drops the placeholder fails the build loudly instead
+			// of silently shipping a stub that can no longer decrypt what we encrypted.
+			InjectStubKeys(context, decrypter, new[] { 0 }, new[] { (int)compCtx.Feedback });
+
+			// Sync the runtime rolling-hash constants (init + odd multiplier) used to derive each
+			// library's seed from its name (see PackModules) with the Mutation.KeyI0 / KeyI1
+			// placeholders the runtime Resolve exposes.
+			MethodDef resolver = defs.OfType<MethodDef>().Single(method => method.Name == "Resolve");
+			InjectStubKeys(context, resolver, new[] { 0, 1 },
+						   new[] { (int)compCtx.LcgInit, (int)compCtx.LcgMultiplier });
+
 			// Pack modules
 			PackModules(context, compCtx, stubModule, comp, random);
+		}
+
+		// Injects mutation key literals into an injected runtime stub method and first verifies
+		// every expected Mutation.KeyI* placeholder is actually present. If the runtime source is
+		// changed so a placeholder is removed or renamed, this throws instead of silently emitting
+		// a stub whose baked-in constants no longer match the obfuscator side.
+		static void InjectStubKeys(ConfuserContext context, MethodDef method, int[] keyIds, int[] values) {
+			var missing = new HashSet<string>(
+				keyIds.Select(id => "KeyI" + id.ToString(CultureInfo.InvariantCulture)));
+			foreach (Instruction instr in method.Body.Instructions) {
+				if (instr.OpCode == OpCodes.Ldsfld && instr.Operand is IField field &&
+					field.DeclaringType?.FullName == "Mutation")
+					missing.Remove(field.Name);
+			}
+			if (missing.Count != 0) {
+				context.Logger.LogError(
+					"Compressor stub is out of sync: runtime method '{Method}' is missing expected mutation placeholder(s) {Missing}. The runtime source and the injector must be updated together.",
+					method.Name, string.Join(", ", missing.OrderBy(name => name, StringComparer.Ordinal)));
+				throw new ConfuserException(null);
+			}
+
+			MutationHelper.InjectKeys(method, keyIds, values);
 		}
 
 		void ImportAssemblyTypeReferences(ModuleDef originModule, ModuleDef stubModule) {
