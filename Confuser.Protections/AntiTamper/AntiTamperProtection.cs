@@ -95,9 +95,6 @@ namespace Confuser.Protections {
 					case Mode.Anti:
 						modeHandler = new AntiMode();
 						break;
-					case Mode.JIT:
-						modeHandler = new JITMode();
-						break;
 					default:
 						throw new UnreachableException();
 				}
@@ -129,8 +126,7 @@ namespace Confuser.Protections {
 
 		enum Mode {
 			Normal,
-			Anti,
-			JIT
+			Anti
 		}
 	}
 }
