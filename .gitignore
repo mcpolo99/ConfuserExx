@@ -48,3 +48,6 @@ coverage/
 
 # Release packages (produced by the CI/local-ci package step)
 *.zip
+
+# Local todo intake/tracker (not shared)
+docs/todo/

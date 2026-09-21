@@ -39,10 +39,11 @@ namespace Confuser.Runtime {
 
 			c = Assembly.Load(Lzma.Decompress(o));
 			AppDomain.CurrentDomain.AssemblyResolve += Handler;
+			AppDomain.CurrentDomain.ResourceResolve += Handler;
 		}
 
 		static Assembly Handler(object sender, ResolveEventArgs args) {
-			if (c.FullName == args.Name)
+			if (c.FullName == args.Name || Array.IndexOf(c.GetManifestResourceNames(), args.Name) != -1)
 				return c;
 			return null;
 		}

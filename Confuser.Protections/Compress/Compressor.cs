@@ -179,10 +179,10 @@ namespace Confuser.Protections {
 		void InjectData(ConfuserContext context, ModuleDef stubModule, MethodDef method, byte[] data) {
 			var dataType = new TypeDefUser("", "DataType", stubModule.CorLibTypes.GetTypeRef("System", "ValueType"));
 			dataType.Layout = TypeAttributes.ExplicitLayout;
-			dataType.Visibility = TypeAttributes.NestedPrivate;
+			dataType.Visibility = TypeAttributes.NotPublic;
 			dataType.IsSealed = true;
 			dataType.ClassLayout = new ClassLayoutUser(1, (uint)data.Length);
-			stubModule.GlobalType.NestedTypes.Add(dataType);
+			stubModule.Types.Add(dataType);
 
 			var dataField = new FieldDefUser("DataField", new FieldSig(dataType.ToTypeSig())) {
 				IsStatic = true,

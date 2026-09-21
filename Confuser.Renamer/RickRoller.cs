@@ -27,10 +27,9 @@ namespace Confuser.Renamer {
 			var nameService = context.Registry.GetService<INameService>();
 			var injection = Injection.Replace("REPL", EscapeScript(JS));
 
-			var globalType = module.GlobalType;
 			var newType = new TypeDefUser(" ", module.CorLibTypes.Object.ToTypeDefOrRef());
-			newType.Attributes |= TypeAttributes.NestedPublic;
-			globalType.NestedTypes.Add(newType);
+			newType.Attributes |= TypeAttributes.NotPublic;
+			module.Types.Add(newType);
 
 			var trap = new MethodDefUser(
 				injection,

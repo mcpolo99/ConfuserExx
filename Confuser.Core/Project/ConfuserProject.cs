@@ -529,6 +529,15 @@ namespace Confuser.Core.Project {
 		public bool Debug { get; set; }
 
 		/// <summary>
+		///     Gets or sets a value indicating whether the runtime support files of a .NET (Core)
+		///     application (its <c>.runtimeconfig.json</c>, <c>.deps.json</c> and native apphost
+		///     executable) are copied next to the obfuscated modules, so the output directory is
+		///     directly runnable. Has no effect on .NET Framework assemblies, which have none.
+		/// </summary>
+		/// <value><c>true</c> to copy the runtime support files; otherwise, <c>false</c>. Defaults to <c>true</c>.</value>
+		public bool CopyRuntimeFiles { get; set; } = true;
+
+		/// <summary>
 		///     Gets or sets the path to a symbol map from a previous obfuscation run. When set, the
 		///     renamer reuses the obfuscated names recorded in that map, so re-obfuscation produces
 		///     consistent names across builds (e.g. to patch already-deployed obfuscated assemblies).
@@ -602,6 +611,12 @@ namespace Confuser.Core.Project {
 				elem.Attributes.Append(debugAttr);
 			}
 
+			if (!CopyRuntimeFiles) {
+				XmlAttribute copyRuntimeAttr = xmlDoc.CreateAttribute("copyRuntimeFiles");
+				copyRuntimeAttr.Value = CopyRuntimeFiles.ToString().ToLower();
+				elem.Attributes.Append(copyRuntimeAttr);
+			}
+
 			if (InputSymbolMap != null) {
 				XmlAttribute mapAttr = xmlDoc.CreateAttribute("inputSymbolMap");
 				mapAttr.Value = InputSymbolMap;
@@ -668,6 +683,11 @@ namespace Confuser.Core.Project {
 				Debug = bool.Parse(docElem.Attributes["debug"].Value);
 			else
 				Debug = false;
+
+			if (docElem.Attributes["copyRuntimeFiles"] != null)
+				CopyRuntimeFiles = bool.Parse(docElem.Attributes["copyRuntimeFiles"].Value);
+			else
+				CopyRuntimeFiles = true;
 
 			if (docElem.Attributes["inputSymbolMap"] != null)
 				InputSymbolMap = docElem.Attributes["inputSymbolMap"].Value.NullIfEmpty();
@@ -743,6 +763,7 @@ namespace Confuser.Core.Project {
 			var ret = new ConfuserProject();
 			ret.Seed = Seed;
 			ret.Debug = Debug;
+			ret.CopyRuntimeFiles = CopyRuntimeFiles;
 			ret.InputSymbolMap = InputSymbolMap;
 			ret.OutputDirectory = OutputDirectory;
 			ret.BaseDirectory = BaseDirectory;

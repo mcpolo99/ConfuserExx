@@ -45,38 +45,50 @@ namespace Confuser.Core {
 			}
 
 			if (resolvedAssemblyDef?.Name == "netstandard" && 0 < resolvedAssemblyDef.ManifestModule.ExportedTypes.Count) {
-				//	Move types from AssemblyRef to here
+				// https://github.com/mcpolo99/ConfuserExx/pull/102
 				var module = resolvedAssemblyDef.ManifestModule;
-				var newTypes = new List<TypeDef>();
-				var allAssemblyRefs = new List<AssemblyDef>();
-
-				module.ExportedTypes.Clear();
-
+				var referenced = new List<AssemblyDef>();
 				foreach (var assemblyRef in module.GetAssemblyRefs()) {
 					var subAss =
 						InternalExactResolver.Resolve(assemblyRef, module) ??
 						InternalFuzzyResolver.Resolve(assemblyRef, module);
-					allAssemblyRefs.Add(subAss);
-					foreach (var subModule in subAss?.Modules) {
-						foreach (var defType in subModule.Types) {
-							newTypes.Add(defType);
-						}
-						subModule.Types.Clear();
-						foreach (var defType in newTypes) {
-							module.Types.Add(defType);
-						}
-						newTypes.Clear();
-					}
+					if (subAss != null)
+						referenced.Add(subAss);
 				}
 
-				//	Remove them because their types has been removed.
-				foreach (var subAss in allAssemblyRefs) {
+				if (!referenced.Any(DefinesSystemObject))
+					return resolvedAssemblyDef;
+
+				var newTypes = new List<TypeDef>();
+				module.ExportedTypes.Clear();
+
+				foreach (var subAss in referenced) {
+					foreach (var subModule in subAss.Modules) {
+						foreach (var defType in subModule.Types)
+							newTypes.Add(defType);
+						subModule.Types.Clear();
+						foreach (var defType in newTypes)
+							module.Types.Add(defType);
+						newTypes.Clear();
+					}
+
 					InternalExactResolver.Remove(subAss);
 					InternalFuzzyResolver.Remove(subAss);
 				}
 			}
 
 			return resolvedAssemblyDef;
+		}
+
+		static bool DefinesSystemObject(AssemblyDef assembly) {
+			foreach (var module in assembly.Modules) {
+				foreach (var type in module.Types) {
+					if (type.Namespace == "System" && type.Name == "Object")
+						return true;
+				}
+			}
+
+			return false;
 		}
 
 		public void Clear() {
