@@ -254,6 +254,13 @@ namespace Confuser.Protections {
 			compCtx.LcgInit = random.NextUInt32();
 			compCtx.LcgMultiplier = random.NextUInt32() | 1;
 
+			// Randomize the key-derivation generator moduli (were the fixed 0x143fc089 / 0x444d56fb
+			// / 0x8a5cb7). Picked from curated sets that preserve key-stream quality; the same values
+			// are injected into the runtime Decrypt below (Mutation.KeyI1 / KeyI2 / KeyI3).
+			compCtx.StatePrime = CompressorPrimes.State[random.NextInt32(CompressorPrimes.State.Length)];
+			compCtx.KeyWordPrime = CompressorPrimes.KeyWord[random.NextInt32(CompressorPrimes.KeyWord.Length)];
+			compCtx.StreamPrime = CompressorPrimes.Stream[random.NextInt32(CompressorPrimes.Stream.Length)];
+
 			uint seed = random.NextUInt32();
 			compCtx.OriginModule = context.OutputModules[compCtx.ModuleIndex];
 
@@ -298,11 +305,16 @@ namespace Confuser.Protections {
 			foreach (Instruction instr in instrs)
 				decrypter.Body.Instructions.Add(instr);
 
-			// Sync the runtime feedback constant with the value used during encryption. The
-			// runtime Decrypt exposes it as the Mutation.KeyI0 placeholder; injection is verified
-			// so a runtime-source change that drops the placeholder fails the build loudly instead
-			// of silently shipping a stub that can no longer decrypt what we encrypted.
-			InjectStubKeys(context, decrypter, new[] { 0 }, new[] { (int)compCtx.Feedback });
+			// Sync the runtime Decrypt constants with the values used during encryption: the feedback
+			// constant (KeyI0) and the three key-derivation moduli (KeyI1/KeyI2/KeyI3). The runtime
+			// exposes them as Mutation.KeyI* placeholders; injection is verified so a runtime-source
+			// change that drops a placeholder fails the build loudly instead of silently shipping a
+			// stub that can no longer decrypt what we encrypted.
+			InjectStubKeys(context, decrypter, new[] { 0, 1, 2, 3 },
+						   new[] {
+							   (int)compCtx.Feedback, (int)compCtx.StatePrime,
+							   (int)compCtx.KeyWordPrime, (int)compCtx.StreamPrime
+						   });
 
 			// Sync the runtime rolling-hash constants (init + odd multiplier) used to derive each
 			// library's seed from its name (see PackModules) with the Mutation.KeyI0 / KeyI1

@@ -22,6 +22,9 @@ namespace Confuser.Protections.Compress {
 		public uint Feedback;
 		public uint LcgInit;
 		public uint LcgMultiplier;
+		public uint StatePrime;
+		public uint KeyWordPrime;
+		public uint StreamPrime;
 
 		public byte[] Encrypt(ICompressionService compress, byte[] data, uint seed, Action<double> progressFunc) {
 			data = (byte[])data.Clone();
@@ -29,17 +32,17 @@ namespace Confuser.Protections.Compress {
 			var src = new uint[0x10];
 			ulong state = seed;
 			for (int i = 0; i < 0x10; i++) {
-				state = (state * state) % 0x143fc089;
+				state = (state * state) % StatePrime;
 				src[i] = (uint)state;
-				dst[i] = (uint)((state * state) % 0x444d56fb);
+				dst[i] = (uint)((state * state) % KeyWordPrime);
 			}
 			uint[] key = Deriver.DeriveKey(dst, src);
 
-			var z = (uint)(state % 0x8a5cb7);
+			var z = (uint)(state % StreamPrime);
 			for (int i = 0; i < data.Length; i++) {
 				data[i] ^= (byte)state;
 				if ((i & 0xff) == 0)
-					state = (state * state) % 0x8a5cb7;
+					state = (state * state) % StreamPrime;
 			}
 			data = compress.Compress(data, progressFunc);
 			Array.Resize(ref data, (data.Length + 3) & ~3);

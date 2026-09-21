@@ -12,9 +12,9 @@ namespace Confuser.Runtime {
 			var k = new uint[0x10];
 			ulong s = seed;
 			for (int i = 0; i < 0x10; i++) {
-				s = (s * s) % 0x143fc089;
+				s = (s * s) % (uint)Mutation.KeyI1;
 				k[i] = (uint)s;
-				w[i] = (uint)((s * s) % 0x444d56fb);
+				w[i] = (uint)((s * s) % (uint)Mutation.KeyI2);
 			}
 			Mutation.Crypt(w, k);
 			Array.Clear(k, 0, 0x10);
@@ -34,11 +34,11 @@ namespace Confuser.Runtime {
 			byte[] j = Lzma.Decompress(b);
 			Array.Clear(b, 0, b.Length);
 
-			var z = (uint)(s % 0x8a5cb7);
+			var z = (uint)(s % (uint)Mutation.KeyI3);
 			for (int i = 0; i < j.Length; i++) {
 				j[i] ^= (byte)s;
 				if ((i & 0xff) == 0)
-					s = (s * s) % 0x8a5cb7;
+					s = (s * s) % (uint)Mutation.KeyI3;
 			}
 			return j;
 		}
