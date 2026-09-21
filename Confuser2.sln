@@ -155,55 +155,55 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Confuser.CLI.Test", "Tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Confuser.GUI.Test", "Tests\Confuser.GUI.Test\Confuser.GUI.Test.csproj", "{C3EA99B7-7B9F-4589-BCCC-5D3D61C082B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Console.Net10", "Tests\CrossFramework.Console.Net10\CrossFramework.Console.Net10.csproj", "{DA4385C6-BEEA-475F-947D-D06CC15AE36F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Console.Net10", "Tests\CrossFramework\Console\Net10\CrossFramework.Console.Net10.csproj", "{DA4385C6-BEEA-475F-947D-D06CC15AE36F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Console.Net20", "Tests\CrossFramework.Console.Net20\CrossFramework.Console.Net20.csproj", "{6D4C6502-8155-49DD-BBB1-7E99F5782738}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Console.Net20", "Tests\CrossFramework\Console\Net20\CrossFramework.Console.Net20.csproj", "{6D4C6502-8155-49DD-BBB1-7E99F5782738}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Console.Net35", "Tests\CrossFramework.Console.Net35\CrossFramework.Console.Net35.csproj", "{56A9138E-23D0-45AE-AA0C-EB27AC14064C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Console.Net35", "Tests\CrossFramework\Console\Net35\CrossFramework.Console.Net35.csproj", "{56A9138E-23D0-45AE-AA0C-EB27AC14064C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Console.Net40", "Tests\CrossFramework.Console.Net40\CrossFramework.Console.Net40.csproj", "{2B085FD5-3AC9-4E5E-A9B1-E8A7B0628FD7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Console.Net40", "Tests\CrossFramework\Console\Net40\CrossFramework.Console.Net40.csproj", "{2B085FD5-3AC9-4E5E-A9B1-E8A7B0628FD7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Console.Net48", "Tests\CrossFramework.Console.Net48\CrossFramework.Console.Net48.csproj", "{7DDCA8D5-BE85-4BD4-9B47-85B29D2FA3AF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Console.Net48", "Tests\CrossFramework\Console\Net48\CrossFramework.Console.Net48.csproj", "{7DDCA8D5-BE85-4BD4-9B47-85B29D2FA3AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Console.Net6", "Tests\CrossFramework.Console.Net6\CrossFramework.Console.Net6.csproj", "{FA75BDE0-9364-4A18-BF26-2110DA417797}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Console.Net6", "Tests\CrossFramework\Console\Net6\CrossFramework.Console.Net6.csproj", "{FA75BDE0-9364-4A18-BF26-2110DA417797}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Console.Net8", "Tests\CrossFramework.Console.Net8\CrossFramework.Console.Net8.csproj", "{9273835F-C47F-4705-87AE-0EF7BDBFC85A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Console.Net8", "Tests\CrossFramework\Console\Net8\CrossFramework.Console.Net8.csproj", "{9273835F-C47F-4705-87AE-0EF7BDBFC85A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Library.Net8", "Tests\CrossFramework.Library.Net8\CrossFramework.Library.Net8.csproj", "{3C326F28-33CE-44FC-89BE-2DAA0D087644}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Library.Net8", "Tests\CrossFramework\Library\Net8\CrossFramework.Library.Net8.csproj", "{3C326F28-33CE-44FC-89BE-2DAA0D087644}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Library.NetStd20", "Tests\CrossFramework.Library.NetStd20\CrossFramework.Library.NetStd20.csproj", "{61AC60A9-C462-44BB-B792-3D6EA1C1FFAA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Library.NetStd20", "Tests\CrossFramework\Library\NetStd20\CrossFramework.Library.NetStd20.csproj", "{61AC60A9-C462-44BB-B792-3D6EA1C1FFAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Test", "Tests\CrossFramework.Test\CrossFramework.Test.csproj", "{88CA9001-6138-4D0F-98D9-EC59A75FE1E8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Test", "Tests\CrossFramework\Test\CrossFramework.Test.csproj", "{88CA9001-6138-4D0F-98D9-EC59A75FE1E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WinForms.Net35", "Tests\CrossFramework.WinForms.Net35\CrossFramework.WinForms.Net35.csproj", "{EA611DF7-7FA6-4FA4-BE18-E6C569618FB0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WinForms.Net35", "Tests\CrossFramework\WinForms\Net35\CrossFramework.WinForms.Net35.csproj", "{EA611DF7-7FA6-4FA4-BE18-E6C569618FB0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WinForms.Net40", "Tests\CrossFramework.WinForms.Net40\CrossFramework.WinForms.Net40.csproj", "{1227C9C3-068C-4643-8E7C-8D90552243EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WinForms.Net40", "Tests\CrossFramework\WinForms\Net40\CrossFramework.WinForms.Net40.csproj", "{1227C9C3-068C-4643-8E7C-8D90552243EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WinForms.Net48", "Tests\CrossFramework.WinForms.Net48\CrossFramework.WinForms.Net48.csproj", "{8A95BAB0-ACFF-43B5-BA77-A78A3C24611B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WinForms.Net48", "Tests\CrossFramework\WinForms\Net48\CrossFramework.WinForms.Net48.csproj", "{8A95BAB0-ACFF-43B5-BA77-A78A3C24611B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WinForms.Net10", "Tests\CrossFramework.WinForms.Net10\CrossFramework.WinForms.Net10.csproj", "{0323A3B1-8607-4914-894F-08BBBD1D8618}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WinForms.Net10", "Tests\CrossFramework\WinForms\Net10\CrossFramework.WinForms.Net10.csproj", "{0323A3B1-8607-4914-894F-08BBBD1D8618}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WPF.Net35", "Tests\CrossFramework.WPF.Net35\CrossFramework.WPF.Net35.csproj", "{CB4835D2-06BC-472F-9B5A-D3844C5D8D81}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WPF.Net35", "Tests\CrossFramework\WPF\Net35\CrossFramework.WPF.Net35.csproj", "{CB4835D2-06BC-472F-9B5A-D3844C5D8D81}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WPF.Net40", "Tests\CrossFramework.WPF.Net40\CrossFramework.WPF.Net40.csproj", "{79A8C4D6-2199-4B0D-BCBE-E0FCA93A8BDC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WPF.Net40", "Tests\CrossFramework\WPF\Net40\CrossFramework.WPF.Net40.csproj", "{79A8C4D6-2199-4B0D-BCBE-E0FCA93A8BDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WPF.Net48", "Tests\CrossFramework.WPF.Net48\CrossFramework.WPF.Net48.csproj", "{EB8D610B-E413-4C6E-97A2-AA92EA2C1DA0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WPF.Net48", "Tests\CrossFramework\WPF\Net48\CrossFramework.WPF.Net48.csproj", "{EB8D610B-E413-4C6E-97A2-AA92EA2C1DA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WPF.Net10", "Tests\CrossFramework.WPF.Net10\CrossFramework.WPF.Net10.csproj", "{DE876679-5C28-45B3-BDFB-952C9C586CA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WPF.Net10", "Tests\CrossFramework\WPF\Net10\CrossFramework.WPF.Net10.csproj", "{DE876679-5C28-45B3-BDFB-952C9C586CA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WinForms.Net6", "Tests\CrossFramework.WinForms.Net6\CrossFramework.WinForms.Net6.csproj", "{3FB8F727-BD28-455C-A14A-09DCE7C42E90}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WinForms.Net6", "Tests\CrossFramework\WinForms\Net6\CrossFramework.WinForms.Net6.csproj", "{3FB8F727-BD28-455C-A14A-09DCE7C42E90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WinForms.Net8", "Tests\CrossFramework.WinForms.Net8\CrossFramework.WinForms.Net8.csproj", "{424E07DB-C32E-4AAE-BE50-D839AF541041}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WinForms.Net8", "Tests\CrossFramework\WinForms\Net8\CrossFramework.WinForms.Net8.csproj", "{424E07DB-C32E-4AAE-BE50-D839AF541041}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Library.Net48", "Tests\CrossFramework.Library.Net48\CrossFramework.Library.Net48.csproj", "{EF581C5C-5AAB-4A35-A2E4-1583CB4FDB9F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Library.Net48", "Tests\CrossFramework\Library\Net48\CrossFramework.Library.Net48.csproj", "{EF581C5C-5AAB-4A35-A2E4-1583CB4FDB9F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Library.Net6", "Tests\CrossFramework.Library.Net6\CrossFramework.Library.Net6.csproj", "{0E65E38D-3A0D-42DB-ACD1-38096CE56092}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Library.Net6", "Tests\CrossFramework\Library\Net6\CrossFramework.Library.Net6.csproj", "{0E65E38D-3A0D-42DB-ACD1-38096CE56092}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WPF.Net6", "Tests\CrossFramework.WPF.Net6\CrossFramework.WPF.Net6.csproj", "{3942E3FD-06BC-470C-A1ED-BB18F2332B94}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WPF.Net6", "Tests\CrossFramework\WPF\Net6\CrossFramework.WPF.Net6.csproj", "{3942E3FD-06BC-470C-A1ED-BB18F2332B94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WPF.Net8", "Tests\CrossFramework.WPF.Net8\CrossFramework.WPF.Net8.csproj", "{30DC9F52-E08A-4EF0-B041-04AED6135C3D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.WPF.Net8", "Tests\CrossFramework\WPF\Net8\CrossFramework.WPF.Net8.csproj", "{30DC9F52-E08A-4EF0-B041-04AED6135C3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Library.Net10", "Tests\CrossFramework.Library.Net10\CrossFramework.Library.Net10.csproj", "{4458415A-0F5E-4136-B723-7A67955D6047}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossFramework.Library.Net10", "Tests\CrossFramework\Library\Net10\CrossFramework.Library.Net10.csproj", "{4458415A-0F5E-4136-B723-7A67955D6047}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Confuser.Analyzers", "Confuser.Analyzers\Confuser.Analyzers.csproj", "{886E5FF3-DF94-4C6B-A5C3-E97038B5C275}"
 EndProject
