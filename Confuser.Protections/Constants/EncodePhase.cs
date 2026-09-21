@@ -90,12 +90,17 @@ namespace Confuser.Protections.Constants {
 
 			// encrypt
 			uint keySeed = moduleCtx.Random.NextUInt32();
+			// Randomize the xorshift triple (was the fixed 12/25/27, a de4dot/AV fingerprint) from a
+			// curated set of full-period triples; the same shifts are injected into the runtime
+			// Initialize below (Mutation.KeyI2/KeyI3/KeyI4) so both sides expand the same key stream.
+			byte[] shifts = ConstantXorshift.Triples[moduleCtx.Random.NextInt32(ConstantXorshift.Triples.Length)];
+			int shiftA = shifts[0], shiftB = shifts[1], shiftC = shifts[2];
 			var key = new uint[0x10];
 			uint state = keySeed;
 			for (int i = 0; i < 0x10; i++) {
-				state ^= state >> 12;
-				state ^= state << 25;
-				state ^= state >> 27;
+				state ^= state >> shiftA;
+				state ^= state << shiftB;
+				state ^= state >> shiftC;
 				key[i] = state;
 			}
 
@@ -113,9 +118,9 @@ namespace Confuser.Protections.Constants {
 			moduleCtx.DataField.InitialValue = encryptedBuffer;
 			moduleCtx.DataField.HasFieldRVA = true;
 			moduleCtx.DataType.ClassLayout = new ClassLayoutUser(0, (uint)encryptedBuffer.Length);
-			MutationHelper.InjectKeys(moduleCtx.InitMethod,
-									  new[] { 0, 1 },
-									  new[] { encryptedBuffer.Length / 4, (int)keySeed });
+			MutationHelper.InjectKeysEnsured(moduleCtx.InitMethod,
+									  new[] { 0, 1, 2, 3, 4 },
+									  new[] { encryptedBuffer.Length / 4, (int)keySeed, shiftA, shiftB, shiftC });
 			MutationHelper.ReplacePlaceholder(moduleCtx.InitMethod, arg => {
 				var repl = new List<Instruction>();
 				repl.AddRange(arg);
