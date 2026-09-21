@@ -5,4 +5,7 @@
     <UseWPF>true</UseWPF>
     <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\WpfSelfTestHost.cs" Link="WpfSelfTestHost.cs" />
+  </ItemGroup>
 </Project>

@@ -5,4 +5,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\WinFormsSelfTestHost.cs" Link="WinFormsSelfTestHost.cs" />
+  </ItemGroup>
 </Project>

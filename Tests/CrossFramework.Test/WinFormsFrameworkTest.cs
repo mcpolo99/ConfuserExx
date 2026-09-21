@@ -115,5 +115,45 @@ namespace CrossFramework.Test {
 					Assert.Contains("CRASH", stdout);
 					return Task.CompletedTask;
 				});
+
+		[Fact]
+		[Trait("Category", "CrossFramework")]
+		[Trait("AppType", "WinForms")]
+		[Trait("TFM", "net6.0")]
+		[Trait("Issue", "https://github.com/mcpolo99/ConfuserExx/issues/103")]
+		public Task WinForms_Net6_SelfTest_RunsWithoutCrashing() =>
+			Run("CrossFramework.WinForms.Net6.dll",
+				null,
+				new SettingItem<Protection>("rename"),
+				outputDirSuffix: "-winforms-net6-selftest",
+				checkOutput: false,
+				postProcessAction: outputPath => {
+					var (exit, stdout, stderr) = RunDotnetApp(outputPath, "CrossFramework.WinForms.Net6.dll", "--selftest");
+					Assert.Equal(42, exit);
+					Assert.Contains("SHOWN:", stdout);
+					Assert.DoesNotContain("CRASH", stdout);
+					Assert.Empty(stderr);
+					return Task.CompletedTask;
+				});
+
+		[Fact]
+		[Trait("Category", "CrossFramework")]
+		[Trait("AppType", "WinForms")]
+		[Trait("TFM", "net8.0")]
+		[Trait("Issue", "https://github.com/mcpolo99/ConfuserExx/issues/103")]
+		public Task WinForms_Net8_SelfTest_RunsWithoutCrashing() =>
+			Run("CrossFramework.WinForms.Net8.dll",
+				null,
+				new SettingItem<Protection>("rename"),
+				outputDirSuffix: "-winforms-net8-selftest",
+				checkOutput: false,
+				postProcessAction: outputPath => {
+					var (exit, stdout, stderr) = RunDotnetApp(outputPath, "CrossFramework.WinForms.Net8.dll", "--selftest");
+					Assert.Equal(42, exit);
+					Assert.Contains("SHOWN:", stdout);
+					Assert.DoesNotContain("CRASH", stdout);
+					Assert.Empty(stderr);
+					return Task.CompletedTask;
+				});
 	}
 }
