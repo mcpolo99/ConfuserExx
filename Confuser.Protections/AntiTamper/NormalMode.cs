@@ -22,6 +22,7 @@ namespace Confuser.Protections.AntiTamper {
 		List<MethodDef> methods;
 		uint name1, name2;
 		RandomGenerator random;
+		int[] rotShifts;
 		uint v;
 		uint x;
 		uint z;
@@ -35,6 +36,9 @@ namespace Confuser.Protections.AntiTamper {
 			feedback = random.NextUInt32();
 			name1 = random.NextUInt32() & 0x7f7f7f7f;
 			name2 = random.NextUInt32() & 0x7f7f7f7f;
+			// Randomize the key-derivation rotation amounts (were the fixed 5/3/7/11); the same
+			// amounts are injected into the runtime (Mutation.KeyI6..KeyI9) below.
+			rotShifts = RotationKey.PickShifts(random);
 
 			switch (parameters.GetParameter(context, context.CurrentModule, "key", Mode.Normal)) {
 				case Mode.Normal:
@@ -79,8 +83,11 @@ namespace Confuser.Protections.AntiTamper {
 				initMethod.Body.Instructions.Add(instr);
 
 			MutationHelper.InjectKeys(initMethod,
-									  new[] { 0, 1, 2, 3, 4, 5 },
-									  new[] { (int)(name1 * name2), (int)z, (int)x, (int)c, (int)v, (int)feedback });
+									  new[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
+									  new[] {
+										  (int)(name1 * name2), (int)z, (int)x, (int)c, (int)v, (int)feedback,
+										  rotShifts[0], rotShifts[1], rotShifts[2], rotShifts[3]
+									  });
 
 			var name = context.Registry.GetService<INameService>();
 			var marker = context.Registry.GetService<IMarkerService>();
@@ -250,10 +257,10 @@ namespace Confuser.Protections.AntiTamper {
 			for (int i = 0; i < 0x10; i++) {
 				dst[i] = v;
 				src[i] = x;
-				z = (x >> 5) | (x << 27);
-				x = (c >> 3) | (c << 29);
-				c = (v >> 7) | (v << 25);
-				v = (z >> 11) | (z << 21);
+				z = (x >> rotShifts[0]) | (x << (32 - rotShifts[0]));
+				x = (c >> rotShifts[1]) | (c << (32 - rotShifts[1]));
+				c = (v >> rotShifts[2]) | (v << (32 - rotShifts[2]));
+				v = (z >> rotShifts[3]) | (z << (32 - rotShifts[3]));
 			}
 			return deriver.DeriveKey(dst, src);
 		}
