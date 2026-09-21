@@ -238,6 +238,16 @@ namespace Confuser.Core.Helpers {
 			ctx.DefMap[typeDef] = newType;
 			PopulateContext(typeDef, ctx);
 			Copy(typeDef, ctx, false);
+
+			// https://github.com/mcpolo99/ConfuserExx/issues/101
+			if (newType.IsGlobalModuleType) {
+				foreach (TypeDef nested in newType.NestedTypes.ToList()) {
+					newType.NestedTypes.Remove(nested);
+					nested.Visibility = nested.IsNestedPublic ? TypeAttributes.Public : TypeAttributes.NotPublic;
+					target.Types.Add(nested);
+				}
+			}
+
 			return ctx.DefMap.Values.Except(new[] { newType }).OfType<IDnlibDef>();
 		}
 

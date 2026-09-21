@@ -67,6 +67,8 @@ namespace Confuser.UnitTest {
 			};
 
 			foreach (string name in inputFileNames) {
+				if (IsExternal(name) && !IsAssembly(name))
+					continue;
 				var projectModule = new ProjectModule {
 					Path = Path.Combine(baseDir, GetFileName(name)),
 					IsExternal = IsExternal(name)
@@ -177,5 +179,11 @@ namespace Confuser.UnitTest {
 		}
 
 		private static bool IsExternal(string name) => name.StartsWith(_externalPrefix, StringComparison.OrdinalIgnoreCase);
+
+		private static bool IsAssembly(string name) {
+			string extension = Path.GetExtension(GetFileName(name));
+			return extension.Equals(".dll", StringComparison.OrdinalIgnoreCase) ||
+				extension.Equals(".exe", StringComparison.OrdinalIgnoreCase);
+		}
 	}
 }

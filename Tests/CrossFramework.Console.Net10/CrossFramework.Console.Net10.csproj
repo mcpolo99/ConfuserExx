@@ -4,4 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource.txt" />
+  </ItemGroup>
 </Project>
