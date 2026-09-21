@@ -45,11 +45,7 @@ namespace Confuser.Core {
 			}
 
 			if (resolvedAssemblyDef?.Name == "netstandard" && 0 < resolvedAssemblyDef.ManifestModule.ExportedTypes.Count) {
-				// Classic netstandard facades forward to mscorlib, which actually defines the types.
-				// Moving those types in keeps the confused module referencing netstandard only.
-				// CoreCLR publish output is different: netstandard.dll only forwards to System.Runtime,
-				// and that assembly forwards again to System.Private.CoreLib. Clearing the forwards
-				// there hides System.Object and breaks later analysis.
+				// https://github.com/mcpolo99/ConfuserExx/pull/102
 				var module = resolvedAssemblyDef.ManifestModule;
 				var referenced = new List<AssemblyDef>();
 				foreach (var assemblyRef in module.GetAssemblyRefs()) {
@@ -60,8 +56,6 @@ namespace Confuser.Core {
 						referenced.Add(subAss);
 				}
 
-				// Only rewrite when a referenced assembly actually defines System.Object
-				// (the mscorlib case). CoreCLR facades only forward it onward.
 				if (!referenced.Any(DefinesSystemObject))
 					return resolvedAssemblyDef;
 
@@ -78,7 +72,6 @@ namespace Confuser.Core {
 						newTypes.Clear();
 					}
 
-					// Their types now live on netstandard, so they must not stay cached.
 					InternalExactResolver.Remove(subAss);
 					InternalFuzzyResolver.Remove(subAss);
 				}
